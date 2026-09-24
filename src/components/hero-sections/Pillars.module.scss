@@ -13,14 +13,41 @@
 .pillars__grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 24px;
+  gap: 16px;
 
+  // планшет: обычная 2-колоночная сетка
   @media (min-width: 640px) {
     grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
   }
 
-  @media (min-width: 1024px) {
+  // десктоп: бенто, но по рядам — сверху 01→02, снизу 03→04,
+  // чтобы нумерация читалась слева направо, сверху вниз
+  @media (min-width: 960px) {
     grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: minmax(150px, auto);
+    gap: 20px;
+
+    [data-step="01"] {
+      grid-column: 1 / 3;
+      grid-row: 1;
+    }
+
+    [data-step="02"] {
+      grid-column: 3 / 5;
+      grid-row: 1;
+    }
+
+    [data-step="03"] {
+      grid-column: 1 / 2;
+      grid-row: 2;
+    }
+
+    // 04 — крупнее и справа (финальный шаг)
+    [data-step="04"] {
+      grid-column: 2 / 5;
+      grid-row: 2;
+    }
   }
 }
 
@@ -35,17 +62,60 @@
   margin-right: auto;
 }
 
-.pillar {
+// селектор с родителем — выше по специфичности, чем глобальный
+// .magic-bento-card (нужен карточкам только чтобы их находил GlobalSpotlight)
+.pillars__grid .pillar {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  aspect-ratio: auto;
+  min-height: 0;
+  font-weight: 400;
+
   padding: 28px;
   border: 1px solid var(--color-border);
   border-radius: 16px;
+  overflow: hidden;
   background: var(--color-surface);
   transition:
     border-color 0.2s ease,
-    transform 0.2s ease;
+    background-color 0.2s ease;
 
   &:hover {
     border-color: rgba(56, 189, 248, 0.35);
+  }
+
+  // edge-glow, следующий за курсором — координаты пишет GlobalSpotlight
+  &::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    padding: 1px;
+
+    border-radius: inherit;
+
+    background: radial-gradient(
+      var(--glow-radius, 220px) circle at var(--glow-x, 50%) var(--glow-y, 50%),
+      rgba(86, 187, 255, calc(var(--glow-intensity, 0) * 0.9)) 0%,
+      rgba(86, 187, 255, calc(var(--glow-intensity, 0) * 0.35)) 35%,
+      transparent 65%
+    );
+
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+
+    pointer-events: none;
   }
 
   h3 {
@@ -60,6 +130,27 @@
     line-height: 1.6;
     color: var(--color-mist);
   }
+
+  &[data-step="04"] {
+    justify-content: flex-end;
+
+    padding: 32px;
+
+    background: linear-gradient(
+      160deg,
+      rgba(86, 187, 255, 0.1),
+      rgba(86, 187, 255, 0) 60%
+    );
+
+    h3 {
+      font-size: clamp(1.4rem, 2.2vw, 1.75rem);
+    }
+
+    p {
+      font-size: 15px;
+      max-width: 320px;
+    }
+  }
 }
 
 .pillar__index {
@@ -68,4 +159,22 @@
   font-weight: 500;
   color: var(--color-accent);
   letter-spacing: 0.05em;
+}
+
+@media (max-width: 639px) {
+  .pillars {
+    padding: 64px 0;
+  }
+
+  .pillars__heading {
+    margin-bottom: 28px;
+  }
+
+  .pillars__grid .pillar {
+    padding: 22px;
+
+    &[data-step="04"] {
+      padding: 24px;
+    }
+  }
 }

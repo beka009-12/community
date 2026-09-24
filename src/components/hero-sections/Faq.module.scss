@@ -71,6 +71,24 @@
   opacity: 0;
 }
 
+.item__answerWrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.25s ease;
+
+  &[data-open="true"] {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+}
+
+.item__answerInner {
+  overflow: hidden;
+}
+
 .item__answer {
   padding: 0 4px 20px;
   font-size: 14px;

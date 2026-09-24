@@ -31,9 +31,12 @@
 
 .button--ghost {
   background: transparent;
+  border: 1px solid var(--color-border);
   color: var(--color-paper);
 
   &:hover {
     color: var(--color-accent);
+    border-color: rgba(86, 187, 255, 0.4);
+    background: rgba(86, 187, 255, 0.08);
   }
 }

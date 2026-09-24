@@ -27,9 +27,6 @@ const Welcome: FC = () => {
               <br />
               <span className={scss.shine}>your next hire.</span>
             </h1>
-            <a href="#community" className={scss.cta}>
-              Смотреть community <span>→</span>
-            </a>
           </div>
 
           <div className={scss.logoZone}>

@@ -1,8 +1,6 @@
 "use client";
 
 import { FC, useState } from "react";
-import { motion } from "motion/react";
-import { motionTokens } from "@/src/lib/motion-tokens";
 import scss from "./Faq.module.scss";
 
 const QUESTIONS = [
@@ -43,17 +41,11 @@ const FaqItem: FC<FaqItemProps> = ({ question, answer, open, onToggle }) => {
         <span className={`${scss.item__icon} ${open ? scss["item__icon--open"] : ""}`} />
       </button>
 
-      <motion.div
-        initial={false}
-        animate={{ opacity: open ? 1 : 0, scaleY: open ? 1 : 0 }}
-        style={{ transformOrigin: "top", overflow: "hidden" }}
-        transition={{
-          duration: motionTokens.duration.normal,
-          ease: motionTokens.easing.smooth,
-        }}
-      >
-        <p className={scss.item__answer}>{answer}</p>
-      </motion.div>
+      <div className={scss.item__answerWrap} data-open={open}>
+        <div className={scss.item__answerInner}>
+          <p className={scss.item__answer}>{answer}</p>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,24 +1,13 @@
 "use client";
 
 import { FC } from "react";
-import { motion } from "motion/react";
-import { useSafeMotion } from "@/src/hooks/use-safe-motion";
-import { springs } from "@/src/lib/motion-tokens";
 import Button from "@/src/ui/Button";
 import scss from "./FinalCta.module.scss";
 
 const FinalCta: FC = () => {
-  const safeMotion = useSafeMotion(16);
-
   return (
     <section className={scss.finalCta}>
-      <motion.div
-        className={`container ${scss.finalCta__inner}`}
-        initial={safeMotion.initial}
-        whileInView={safeMotion.animate}
-        viewport={{ once: true, margin: "-10% 0px" }}
-        transition={springs.gentle}
-      >
+      <div className={`container ${scss.finalCta__inner}`}>
         <h2 className={scss.finalCta__heading}>
           Есть задача — обсудим, как её решить
         </h2>
@@ -35,7 +24,7 @@ const FinalCta: FC = () => {
             Присоединиться к комьюнити
           </Button>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 };

@@ -1,7 +1,12 @@
 "use client";
 
 import { FC, useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import {
+  motion,
+  AnimatePresence,
+  useReducedMotion,
+  type PanInfo,
+} from "motion/react";
 import { springs, motionTokens } from "@/src/lib/motion-tokens";
 import Button from "@/src/ui/Button";
 import scss from "./Portfolio.module.scss";
@@ -52,18 +57,90 @@ const PEEK = {
   scale: 0.965,
 };
 
+type Project = (typeof PROJECTS)[number];
+
+const ProjectFace: FC<{
+  project: Project;
+  index: number;
+  showCta?: boolean;
+}> = ({ project, index, showCta = false }) => (
+  <>
+    <div className={scss.card__chrome}>
+      <div className={scss.card__chromeDots}>
+        <span className={scss["card__chrome-dot"]} data-color="red" />
+        <span className={scss["card__chrome-dot"]} data-color="yellow" />
+        <span className={scss["card__chrome-dot"]} data-color="green" />
+      </div>
+
+      <span className={scss.card__chromeTitle}>{project.name}</span>
+    </div>
+
+    <div className={scss.card__art} data-variant={index % 3}>
+      <img
+        src={project.image}
+        alt={`${project.name} preview`}
+        className={scss.card__image}
+      />
+
+      <div className={scss.card__overlay} />
+
+      <div className={scss.card__content}>
+        <span className={scss.card__label}>Featured project</span>
+
+        <div className={scss.card__footer}>
+          <span className={scss.card__projectName}>{project.name}</span>
+
+          {showCta && (
+            <Button
+              href="/projects"
+              variant="primary"
+              className={scss.card__cta}
+            >
+              Подробнее
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  </>
+);
+
+const SWIPE_DISTANCE = 60;
+const SWIPE_VELOCITY = 500;
+
+const slideVariants = {
+  enter: (dir: number) => ({
+    x: dir > 0 ? 32 : -32,
+    opacity: 0,
+    scale: 0.97,
+  }),
+  center: { x: 0, opacity: 1, scale: 1 },
+  exit: (dir: number) => ({
+    x: dir > 0 ? -32 : 32,
+    opacity: 0,
+    scale: 0.97,
+  }),
+};
+
 const Portfolio: FC = () => {
   const reduce = useReducedMotion();
 
   const total = PROJECTS.length;
 
   const [order, setOrder] = useState(() => PROJECTS.map((_, i) => i));
+  const [direction, setDirection] = useState(1);
 
   const front = order[0];
   const project = PROJECTS[front];
 
   const advance = () => {
+    setDirection(1);
     setOrder((prev) => [...prev.slice(1), prev[0]]);
+  };
+
+  const retreat = () => {
+    setDirection(-1);
+    setOrder((prev) => [prev[prev.length - 1], ...prev.slice(0, -1)]);
   };
 
   const goTo = (target: number) => {
@@ -72,8 +149,24 @@ const Portfolio: FC = () => {
 
       if (pos === 0) return prev;
 
+      setDirection(pos <= prev.length - pos ? 1 : -1);
+
       return [...prev.slice(pos), ...prev.slice(0, pos)];
     });
+  };
+
+  const handleSwipe = (
+    _event: PointerEvent | MouseEvent | TouchEvent,
+    info: PanInfo,
+  ) => {
+    if (info.offset.x < -SWIPE_DISTANCE || info.velocity.x < -SWIPE_VELOCITY) {
+      advance();
+    } else if (
+      info.offset.x > SWIPE_DISTANCE ||
+      info.velocity.x > SWIPE_VELOCITY
+    ) {
+      retreat();
+    }
   };
 
   return (
@@ -94,6 +187,7 @@ const Portfolio: FC = () => {
           <AnimatePresence mode="wait">
             <motion.div
               key={project.name}
+              className={scss.portfolio__info}
               initial={{
                 opacity: 0,
                 y: motionTokens.distance.sm,
@@ -196,7 +290,7 @@ const Portfolio: FC = () => {
                 whileTap={
                   isFront
                     ? {
-                        scale: motionTokens.scale.press,
+                        scale: motionTokens.scale.subtle,
                       }
                     : undefined
                 }
@@ -211,43 +305,32 @@ const Portfolio: FC = () => {
                   />
                 )}
 
-                <div className={scss.card__chrome}>
-                  <div className={scss.card__chromeDots}>
-                    <span
-                      className={scss["card__chrome-dot"]}
-                      data-color="red"
-                    />
-                    <span
-                      className={scss["card__chrome-dot"]}
-                      data-color="yellow"
-                    />
-                    <span
-                      className={scss["card__chrome-dot"]}
-                      data-color="green"
-                    />
-                  </div>
-
-                  <span className={scss.card__chromeTitle}>{p.name}</span>
-                </div>
-
-                <div className={scss.card__art} data-variant={i % 3}>
-                  <img
-                    src={p.image}
-                    alt={`${p.name} preview`}
-                    className={scss.card__image}
-                  />
-
-                  <div className={scss.card__overlay} />
-
-                  <div className={scss.card__content}>
-                    <span className={scss.card__label}>Featured project</span>
-
-                    <span className={scss.card__projectName}>{p.name}</span>
-                  </div>
-                </div>
+                <ProjectFace project={p} index={i} />
               </motion.div>
             );
           })}
+        </div>
+
+        <div className={scss.mobileSlider}>
+          <AnimatePresence mode="wait" custom={direction} initial={false}>
+            <motion.div
+              key={project.name}
+              className={scss.mobileSlider__card}
+              custom={direction}
+              variants={reduce ? undefined : slideVariants}
+              initial={reduce ? undefined : "enter"}
+              animate={reduce ? undefined : "center"}
+              exit={reduce ? undefined : "exit"}
+              transition={springs.snappy}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.65}
+              onDragEnd={handleSwipe}
+              whileDrag={{ scale: 0.97 }}
+            >
+              <ProjectFace project={project} index={front} showCta />
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
 

@@ -283,6 +283,43 @@
   cursor: pointer;
 }
 
+// =========================================
+// MOBILE SLIDER — одна карточка, свайп рукой
+// =========================================
+
+.mobileSlider {
+  display: none;
+}
+
+.mobileSlider__card {
+  position: relative;
+
+  width: 100%;
+  height: 375px;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  border-radius: 16px;
+
+  border: 1px solid var(--color-border);
+
+  background: var(--color-surface);
+
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.4),
+    0 6px 18px rgba(0, 0, 0, 0.18);
+
+  touch-action: pan-y;
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
 .card__hit {
   position: absolute;
 
@@ -453,6 +490,33 @@
   color: #fff;
 }
 
+.card__footer {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  width: 100%;
+}
+
+.card__cta {
+  position: relative;
+
+  z-index: 1;
+
+  height: 36px;
+
+  padding: 0 16px;
+
+  font-size: 13px;
+
+  flex-shrink: 0;
+}
+
 .card__label {
   position: relative;
 
@@ -537,26 +601,31 @@
   }
 
   .portfolio__inner {
-    gap: 44px;
+    gap: 20px;
   }
 
+  // текст о проекте дублирует то, что уже написано на самой карточке —
+  // на телефоне убираем, оставляем только точки-навигацию
+  .portfolio__info {
+    display: none;
+  }
+
+  .dots {
+    margin-top: 0;
+    justify-content: center;
+  }
+
+  // на телефоне вместо стека — один слайд, листается свайпом
   .stack {
+    display: none;
+  }
+
+  .mobileSlider {
+    display: block;
+
     width: calc(100% + 10px);
 
-    height: 375px;
-
     margin-left: -5px;
-  }
-
-  .card {
-    top: 44px;
-    left: 44px;
-
-    width: calc(100% - 54px);
-
-    height: 305px;
-
-    border-radius: 16px;
   }
 
   .card__glyph {

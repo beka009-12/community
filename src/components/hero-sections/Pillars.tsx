@@ -1,10 +1,14 @@
 "use client";
 
-import { FC } from "react";
-import { motion } from "motion/react";
+import { FC, useRef } from "react";
 import { useSafeMotion } from "@/src/hooks/use-safe-motion";
-import { springs } from "@/src/lib/motion-tokens";
+import {
+  GlobalSpotlight,
+  useMobileDetection,
+} from "@/src/animation/MagicBento";
 import scss from "./Pillars.module.scss";
+
+const GLOW_COLOR = "86, 187, 255"; // var(--color-accent) в rgb
 
 const STEPS = [
   {
@@ -35,26 +39,32 @@ const STEPS = [
 
 const Pillars: FC = () => {
   const safeMotion = useSafeMotion(16);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const isMobile = useMobileDetection();
 
   return (
     <section id="pillars" className={scss.pillars}>
       <div className={`container ${scss.pillars__inner}`}>
         <h2 className={scss.pillars__heading}>Как мы работаем</h2>
 
-        <div className={scss.pillars__grid}>
-          {STEPS.map((step, i) => (
-            <motion.article
+        <GlobalSpotlight
+          gridRef={gridRef}
+          disableAnimations={isMobile || !!safeMotion.reduce}
+          spotlightRadius={220}
+          glowColor={GLOW_COLOR}
+        />
+
+        <div ref={gridRef} className={`${scss.pillars__grid} bento-section`}>
+          {STEPS.map((step) => (
+            <article
               key={step.index}
-              className={scss.pillar}
-              initial={safeMotion.initial}
-              whileInView={safeMotion.animate}
-              viewport={{ once: true, margin: "-10% 0px" }}
-              transition={{ ...springs.gentle, delay: i * 0.1 }}
+              className={`${scss.pillar} magic-bento-card`}
+              data-step={step.index}
             >
               <span className={scss.pillar__index}>{step.index}</span>
               <h3>{step.title}</h3>
               <p>{step.description}</p>
-            </motion.article>
+            </article>
           ))}
         </div>
 
