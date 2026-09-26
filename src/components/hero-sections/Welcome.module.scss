@@ -3,6 +3,10 @@
   overflow: hidden;
   background: #000;
   min-height: 690px;
+
+  @media (max-width: 1024px) {
+    min-height: 0;
+  }
 }
 
 .hero__content {
@@ -13,6 +17,18 @@
   flex-direction: column;
   padding-top: 64px;
   padding-bottom: 50px;
+
+  @media (max-width: 1024px) {
+    padding-top: 40px;
+    padding-bottom: 56px;
+    gap: 44px;
+  }
+
+  @media (max-width: 640px) {
+    padding-top: 28px;
+    padding-bottom: 44px;
+    gap: 32px;
+  }
 }
 
 .topcopy {
@@ -52,6 +68,38 @@
 
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
+    flex: none;
+  }
+}
+
+.copy {
+  position: relative;
+  isolation: isolate;
+}
+
+// ≤1024px stand-in for the particle canvas: a soft, blurred photo behind
+// the headline instead of running the animation. Negative z-index keeps
+// it under the (non-positioned) text without touching the text's own
+// stacking. Blur is load-bearing — the source photo is tiny (85×57, the
+// same bitmap the canvas samples for particle positions), so it's only
+// ever shown heavily softened, never sharp.
+.heroGlyph {
+  position: absolute;
+  z-index: -1;
+  top: -16%;
+  right: -14%;
+  width: 68vw;
+  max-width: 460px;
+  height: auto;
+  opacity: 0.26;
+  filter: blur(9px);
+  pointer-events: none;
+
+  @media (max-width: 640px) {
+    width: 74vw;
+    max-width: 380px;
+    opacity: 0.22;
+    filter: blur(5px);
   }
 }
 
@@ -103,26 +151,13 @@
   }
 }
 
+// Only mounted above 1024px — narrower screens get .heroGlyph instead.
 .logoZone {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 430px;
-
-  @media (max-width: 1024px) {
-    position: absolute;
-    right: 10px;
-    bottom: 24px;
-    min-height: 250px;
-    opacity: 0.85;
-  }
-
-  @media (max-width: 640px) {
-    right: -35px;
-    bottom: 28px;
-    opacity: 0.65;
-  }
 }
 
 .logoStage {
@@ -150,14 +185,6 @@
     filter: blur(28px);
     opacity: 0.8;
   }
-
-  @media (max-width: 1024px) {
-    width: 300px;
-  }
-
-  @media (max-width: 640px) {
-    width: 250px;
-  }
 }
 
 .logoStage__marks {
@@ -177,4 +204,22 @@
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.38);
+}
+
+// ≤1024px signature line, in normal flow so it can never overlap the
+// headline the way the absolutely-positioned canvas did on short viewports.
+.brandMark {
+  display: flex;
+  align-items: center;
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid var(--color-border);
+}
+
+.brandMark__caption {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
 }

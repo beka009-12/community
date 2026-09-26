@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import {
   motion,
   AnimatePresence,
@@ -62,8 +62,7 @@ type Project = (typeof PROJECTS)[number];
 const ProjectFace: FC<{
   project: Project;
   index: number;
-  showCta?: boolean;
-}> = ({ project, index, showCta = false }) => (
+}> = ({ project, index }) => (
   <>
     <div className={scss.card__chrome}>
       <div className={scss.card__chromeDots}>
@@ -89,17 +88,37 @@ const ProjectFace: FC<{
 
         <div className={scss.card__footer}>
           <span className={scss.card__projectName}>{project.name}</span>
-
-          {showCta && (
-            <Button
-              href="/projects"
-              variant="primary"
-              className={scss.card__cta}
-            >
-              Подробнее
-            </Button>
-          )}
         </div>
+      </div>
+    </div>
+  </>
+);
+
+// ≤1024px: just the photo, no browser-chrome framing. Name + a short
+// description sit directly on the image over a readable gradient scrim —
+// the fuller write-up (details, stack, CTA) stays desktop-only, where
+// it lives beside the card stack instead of crowding a phone screen.
+const ProjectPhoto: FC<{ project: Project }> = ({ project }) => (
+  <>
+    <img
+      src={project.image}
+      alt={`${project.name} preview`}
+      className={scss.photo__image}
+    />
+
+    <div className={scss.photo__overlay} />
+
+    <div className={scss.photo__caption}>
+      <h3 className={scss.photo__name}>{project.name}</h3>
+      <p className={scss.photo__description}>{project.description}</p>
+
+      {/* Stops the tap reaching the drag handle around it — otherwise the
+          swipe gesture claims the pointer and the link never gets a
+          click. */}
+      <div onPointerDown={(e) => e.stopPropagation()}>
+        <Button href="/projects" variant="primary" className={scss.photo__cta}>
+          Смотреть проект
+        </Button>
       </div>
     </div>
   </>
@@ -107,6 +126,7 @@ const ProjectFace: FC<{
 
 const SWIPE_DISTANCE = 60;
 const SWIPE_VELOCITY = 500;
+const AUTO_ROTATE_MS = 2400;
 
 const slideVariants = {
   enter: (dir: number) => ({
@@ -129,19 +149,30 @@ const Portfolio: FC = () => {
 
   const [order, setOrder] = useState(() => PROJECTS.map((_, i) => i));
   const [direction, setDirection] = useState(1);
+  const [paused, setPaused] = useState(false);
 
   const front = order[0];
   const project = PROJECTS[front];
 
-  const advance = () => {
+  const advance = useCallback(() => {
     setDirection(1);
     setOrder((prev) => [...prev.slice(1), prev[0]]);
-  };
+  }, []);
 
   const retreat = () => {
     setDirection(-1);
     setOrder((prev) => [prev[prev.length - 1], ...prev.slice(0, -1)]);
   };
+
+  // Auto-rotates the front card every 3.4s. Paused on hover/focus so a
+  // reader isn't fighting the carousel, skipped entirely under
+  // prefers-reduced-motion, and reset whenever the front card changes
+  // (auto or manual) so a click never gets overridden a moment later.
+  useEffect(() => {
+    if (reduce || paused) return;
+    const id = window.setInterval(advance, AUTO_ROTATE_MS);
+    return () => window.clearInterval(id);
+  }, [advance, front, reduce, paused]);
 
   const goTo = (target: number) => {
     setOrder((prev) => {
@@ -182,7 +213,17 @@ const Portfolio: FC = () => {
         </p>
       </div>
 
-      <div className={`container ${scss.portfolio__inner}`}>
+      <div
+        className={`container ${scss.portfolio__inner}`}
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+        onFocus={() => setPaused(true)}
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node)) {
+            setPaused(false);
+          }
+        }}
+      >
         <div className={scss.portfolio__intro}>
           <AnimatePresence mode="wait">
             <motion.div
@@ -328,7 +369,7 @@ const Portfolio: FC = () => {
               onDragEnd={handleSwipe}
               whileDrag={{ scale: 0.97 }}
             >
-              <ProjectFace project={project} index={front} showCta />
+              <ProjectPhoto project={project} />
             </motion.div>
           </AnimatePresence>
         </div>
