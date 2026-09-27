@@ -1,0 +1,240 @@
+.detail {
+  padding-top: 122px;
+  padding-bottom: 104px;
+}
+
+.detail__inner {
+  max-width: 760px;
+}
+
+.detail__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 32px;
+  font-size: 14px;
+  color: var(--color-mist);
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--color-paper);
+  }
+
+  // Geometric centering (align-items: center) leaves the icon looking
+  // slightly high next to Cyrillic text — descenders on letters like
+  // «р»/«д»/«у» pull the perceived text weight down. Small optical nudge.
+  svg {
+    transform: translateY(1px);
+  }
+}
+
+.detail__header {
+  margin-bottom: 32px;
+}
+
+.detail__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+
+  span {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-mist);
+    padding: 6px 11px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+  }
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  &::before {
+    content: "";
+    flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+}
+
+.status--positive {
+  color: var(--color-signal);
+}
+
+.status--accent {
+  color: var(--color-accent);
+}
+
+.status--neutral {
+  color: var(--color-mist);
+}
+
+.status--muted {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.detail__name {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+
+// Same signature gradient sweep as the homepage headline — a small
+// visual thread tying the case study back to the hero.
+.shine {
+  display: inline-block;
+  background: linear-gradient(
+    100deg,
+    #64cefb 0%,
+    #64cefb 38%,
+    #fff 50%,
+    #64cefb 62%,
+    #64cefb 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shine 3s linear infinite;
+}
+
+@keyframes shine {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -20% 0;
+  }
+}
+
+// Same size/line-height as .detail__details below — both are body-copy
+// paragraphs reading as one continuous case study, not two different
+// text scales.
+.detail__description {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--color-text);
+  max-width: 560px;
+}
+
+.detail__details {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--color-mist);
+  max-width: 560px;
+}
+
+// Обзор / Технологии / Команда — each a labeled block separated by a
+// hairline, same structural language as the rest of the site (Portfolio's
+// eyebrow, Header's eyebrow) rather than a one-off pattern for this page.
+.detail__section {
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid var(--color-border);
+}
+
+.detail__sectionLabel {
+  display: block;
+  margin-bottom: 16px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.detail__stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    color: var(--color-mist);
+  }
+}
+
+.detail__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 40px;
+}
+
+// Case-study footer — full container width (wider than the ~760px
+// reading column above), so it reads as a distinct closing block.
+.pager {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  margin-top: 72px;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-border);
+}
+
+.pager__link {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 32px;
+  background: var(--color-ink);
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: var(--color-surface);
+  }
+}
+
+.pager__link--next {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.pager__direction {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-mist);
+}
+
+.pager__name {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 700;
+  color: var(--color-paper);
+}
+
+@media (max-width: 639px) {
+  .detail {
+    padding-top: 120px;
+    padding-bottom: 72px;
+  }
+
+  .pager {
+    grid-template-columns: 1fr;
+  }
+
+  .pager__link--next {
+    align-items: flex-start;
+    text-align: left;
+  }
+}

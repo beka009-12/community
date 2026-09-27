@@ -1,0 +1,163 @@
+.gridWrap {
+  padding-top: 48px;
+  padding-bottom: 96px;
+
+  // ≥1024px switches to EditorialList.tsx instead — the cursor-follow
+  // preview it uses only makes sense with a mouse, and 1024px is where
+  // the header itself switches from the burger menu to full desktop
+  // nav, so the two stay visually in sync. Hiding the whole wrapper
+  // (not just .grid) avoids leaving its padding behind as a blank gap.
+  @media (min-width: 1024px) {
+    display: none;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+  }
+}
+
+.empty {
+  padding: 48px 0;
+  text-align: center;
+  font-size: 15px;
+  color: var(--color-mist);
+}
+
+.card {
+  height: 100%;
+}
+
+.card__link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--color-surface);
+  transition: border-color 0.2s ease;
+
+  &:hover {
+    border-color: rgba(56, 189, 248, 0.35);
+  }
+}
+
+.card__photo {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--color-surface-2);
+}
+
+.card__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.card__status {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px 5px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: rgba(9, 10, 16, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.85);
+
+  &::before {
+    content: "";
+    flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+}
+
+// Status color carries meaning, but the label text is what's actually
+// read — color alone never stands in for the word.
+.card__status--positive {
+  color: var(--color-signal);
+}
+
+.card__status--accent {
+  color: var(--color-accent);
+}
+
+.card__status--neutral {
+  color: var(--color-mist);
+}
+
+.card__status--muted {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.card__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-mist);
+}
+
+.card__name {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.card__description {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--color-mist);
+}
+
+.card__stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    color: var(--color-mist);
+  }
+}

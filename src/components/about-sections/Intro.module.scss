@@ -1,0 +1,65 @@
+// Sticky header floats over content (no solid bar), so the page needs
+// its own top clearance instead of relying on header height.
+.intro {
+  padding-top: 152px;
+  padding-bottom: 24px;
+  max-width: 800px;
+}
+
+.intro__eyebrow {
+  display: inline-block;
+  margin-bottom: 16px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.intro__title {
+  font-family: var(--font-display);
+  font-size: clamp(2.1rem, 5vw, 3.4rem);
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 20px;
+}
+
+.shine {
+  display: inline-block;
+  background: linear-gradient(
+    100deg,
+    #64cefb 0%,
+    #64cefb 38%,
+    #fff 50%,
+    #64cefb 62%,
+    #64cefb 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shine 3s linear infinite;
+}
+
+@keyframes shine {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -20% 0;
+  }
+}
+
+.intro__lead {
+  font-size: 17px;
+  line-height: 1.65;
+  color: var(--color-mist);
+  max-width: 620px;
+}
+
+@media (max-width: 639px) {
+  .intro {
+    padding-top: 120px;
+  }
+}

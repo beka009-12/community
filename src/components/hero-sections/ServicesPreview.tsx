@@ -11,27 +11,37 @@ import scss from "./ServicesPreview.module.scss";
 
 const GLOW_COLOR = "86, 187, 255"; // var(--color-accent) в rgb
 
+// `category` mirrors the ProjectCategory keys from src/data/projects.ts
+// (web/systems/bots/ai) — a stable machine id, separate from `tag`,
+// which is the English label actually shown on the card and which the
+// [data-tag="..."] CSS variants below key off. Other code (e.g.
+// about-sections/ServiceQuickNav) targets [data-category] instead of
+// depending on that display string.
 const SERVICES = [
   {
     tag: "Landing & Sites",
+    category: "web",
     title: "Лендинги и сайты",
     description:
       "Быстрые маркетинговые сайты и корпоративные страницы на React и Next.js.",
   },
   {
     tag: "Web-systems",
+    category: "systems",
     title: "Веб-системы",
     description:
       "CRM, LMS и панели управления — сложная бизнес-логика в понятном интерфейсе.",
   },
   {
     tag: "Telegram-bots",
+    category: "bots",
     title: "Telegram-боты",
     description:
       "Автоматизация процессов и коммуникации прямо в мессенджере клиента.",
   },
   {
     tag: "AI-integrations",
+    category: "ai",
     title: "AI-интеграции",
     description:
       "Чат-боты, компьютерное зрение и аналитика поверх готовых моделей.",
@@ -61,6 +71,7 @@ const ServicesPreview: FC = () => {
               key={service.tag}
               className={`${scss.service} magic-bento-card`}
               data-tag={service.tag}
+              data-category={service.category}
             >
               <div className={scss.service__content}>
                 <span className={scss.service__tag}>{service.tag}</span>

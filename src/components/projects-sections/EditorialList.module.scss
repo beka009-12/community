@@ -1,0 +1,151 @@
+// Desktop-only editorial view. Hidden below 1024px (matches the header's
+// burger→full-nav breakpoint) — Grid.tsx (the card grid) is the
+// mobile/tablet equivalent, toggled the opposite way.
+.listWrap {
+  display: none;
+
+  @media (min-width: 1024px) {
+    display: block;
+    padding-top: 48px;
+    padding-bottom: 96px;
+  }
+}
+
+.list {
+  position: relative;
+}
+
+.empty {
+  padding: 48px 0;
+  text-align: center;
+  font-size: 15px;
+  color: var(--color-mist);
+}
+
+.row {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 56px 1fr auto 28px;
+  align-items: center;
+  gap: 32px;
+  padding: 36px 0;
+  border-top: 1px solid var(--color-border);
+  transition: opacity 0.25s ease;
+
+  &:last-child {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  &[data-dimmed="true"] {
+    opacity: 0.35;
+  }
+}
+
+.row__index {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-mist);
+}
+
+.row__name {
+  // Grid tracks default to min-width: auto, so without this the 1fr
+  // column refuses to shrink below the name's own content width and
+  // blows out the row at narrower desktop widths (~960-1100px).
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3.6vw, 3rem);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-paper);
+  transition: color 0.2s ease;
+}
+
+.row__name--active {
+  color: var(--color-accent);
+}
+
+.row__meta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--color-mist);
+  white-space: nowrap;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  &::before {
+    content: "";
+    flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+}
+
+.status--positive {
+  color: var(--color-signal);
+}
+
+.status--accent {
+  color: var(--color-accent);
+}
+
+.status--neutral {
+  color: var(--color-mist);
+}
+
+.status--muted {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.row__arrow {
+  font-size: 20px;
+  color: var(--color-mist);
+  transform: translateX(0);
+  transition:
+    transform 0.25s ease,
+    color 0.25s ease;
+
+  .row:hover & {
+    transform: translateX(6px);
+    color: var(--color-accent);
+  }
+}
+
+// Cursor-follow preview — decorative only, so it never intercepts clicks
+// meant for the rows underneath it.
+.preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 320px;
+  height: 220px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  box-shadow:
+    0 30px 60px rgba(0, 0, 0, 0.5),
+    0 8px 24px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+.preview__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

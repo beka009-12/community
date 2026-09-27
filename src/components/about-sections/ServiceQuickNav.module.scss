@@ -1,0 +1,77 @@
+.nav {
+  margin-top: 28px;
+}
+
+.nav__label {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: var(--color-mist);
+}
+
+.nav__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-paper);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+
+  &:hover {
+    border-color: rgba(56, 189, 248, 0.4);
+    background: var(--color-surface-2);
+  }
+}
+
+.pill__icon {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  color: var(--color-accent);
+  flex-shrink: 0;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// Global (unscoped on purpose) — ServiceQuickNav sets this class straight
+// on the matching card inside ServicesPreview, a component that lives in
+// its own CSS module and isn't touched otherwise.
+:global(.service-quicknav-highlight) {
+  animation: service-quicknav-pulse 1.6s ease;
+}
+
+@keyframes service-quicknav-pulse {
+  0% {
+    border-color: var(--color-border);
+    box-shadow: none;
+  }
+  20% {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 4px rgba(86, 187, 255, 0.18);
+  }
+  100% {
+    border-color: var(--color-border);
+    box-shadow: none;
+  }
+}
+
+// No extra prefers-reduced-motion handling needed here — globals.scss
+// already forces every animation-duration to ~0 site-wide under that
+// media query.

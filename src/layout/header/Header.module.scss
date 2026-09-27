@@ -46,12 +46,15 @@
   height: 32px;
 }
 
-// Below 960px only the logo and the burger remain. The logo pill was
-// sized for sitting alongside a full nav bar — taller than the 44px
-// burger and padded much wider — so the pair read as mismatched chips.
-// Shrinking the logo to the same 44px height (chrome kept, for contrast
-// against whatever scrolls underneath) makes them read as a matched set.
-@media (max-width: 959px) {
+// Below 1024px only the logo and the burger remain (kept in sync with
+// the nav/burger breakpoint below — the full nav row doesn't fit until
+// 1024px; at 960-1023px it used to overflow the viewport). The logo
+// pill was sized for sitting alongside a full nav bar — taller than the
+// 44px burger and padded much wider — so the pair read as mismatched
+// chips. Shrinking the logo to the same 44px height (chrome kept, for
+// contrast against whatever scrolls underneath) makes them read as a
+// matched set.
+@media (max-width: 1023px) {
   .island__logo {
     padding: 9px 14px;
   }
@@ -67,7 +70,7 @@
   padding: 4px;
   gap: 2px;
 
-  @media (min-width: 960px) {
+  @media (min-width: 1024px) {
     display: flex;
   }
 }
@@ -121,7 +124,7 @@
   gap: 2px;
   font-family: var(--font-mono);
 
-  @media (min-width: 960px) {
+  @media (min-width: 1024px) {
     display: flex;
   }
 }
@@ -169,7 +172,7 @@
   padding: 3px;
   gap: 6px;
 
-  @media (min-width: 960px) {
+  @media (min-width: 1024px) {
     display: flex;
   }
 }
@@ -195,7 +198,7 @@
     transition: transform 0.25s ease;
   }
 
-  @media (min-width: 960px) {
+  @media (min-width: 1024px) {
     display: none;
   }
 }
@@ -216,7 +219,7 @@
   padding: 0 20px;
   z-index: 99;
 
-  @media (min-width: 960px) {
+  @media (min-width: 1024px) {
     display: none;
   }
 }

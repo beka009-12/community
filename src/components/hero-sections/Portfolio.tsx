@@ -9,45 +9,16 @@ import {
 } from "motion/react";
 import { springs, motionTokens } from "@/src/lib/motion-tokens";
 import Button from "@/src/ui/Button";
+import {
+  CATEGORY_LABELS,
+  getFeaturedProjects,
+  type Project,
+} from "@/src/data/projects";
 import scss from "./Portfolio.module.scss";
 
-const PROJECTS = [
-  {
-    name: "Amanat",
-    description:
-      "Платформа учёта и прозрачной отчётности для благотворительных сборов.",
-    details:
-      "Система помогает создавать сборы, отслеживать поступления и формировать понятные отчёты для пользователей и администраторов.",
-    stack: ["React", "FastAPI", "PostgreSQL"],
-    type: "Web Platform",
-    year: "2026",
-    image:
-      "https://media.licdn.com/dms/image/v2/D5612AQFXy7QydmMrhA/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1685812646776?e=2147483647&v=beta&t=YyZLphSZuSvI9YR3nT_pnQyC32MibQBOiHzkXgLm2PA",
-  },
-  {
-    name: "IBO",
-    description:
-      "Информационная система для управления школьным документооборотом.",
-    details:
-      "Централизованная система для работы с документами, пользователями и внутренними процессами образовательной организации.",
-    stack: ["React", "NestJS", "PostgreSQL"],
-    type: "Management System",
-    year: "2026",
-    image:
-      "https://media.licdn.com/dms/image/v2/D5612AQFXy7QydmMrhA/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1685812646776?e=2147483647&v=beta&t=YyZLphSZuSvI9YR3nT_pnQyC32MibQBOiHzkXgLm2PA",
-  },
-  {
-    name: "Tabel",
-    description: "Сервис учёта рабочего времени и посещаемости для команд.",
-    details:
-      "Автоматизирует регистрацию посещаемости, хранение истории и формирование статистики по сотрудникам и рабочему времени.",
-    stack: ["React", "FastAPI", "OpenCV"],
-    type: "Automation",
-    year: "2026",
-    image:
-      "https://media.licdn.com/dms/image/v2/D5612AQFXy7QydmMrhA/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1685812646776?e=2147483647&v=beta&t=YyZLphSZuSvI9YR3nT_pnQyC32MibQBOiHzkXgLm2PA",
-  },
-] as const;
+// Same 3 projects shown here also live on /projects, in the full list —
+// this preview is just the featured subset of one shared dataset.
+const PROJECTS = getFeaturedProjects();
 
 // Намного меньше смещение.
 // Задние карточки будут показывать только угол.
@@ -56,8 +27,6 @@ const PEEK = {
   y: -22,
   scale: 0.965,
 };
-
-type Project = (typeof PROJECTS)[number];
 
 const ProjectFace: FC<{
   project: Project;
@@ -116,7 +85,11 @@ const ProjectPhoto: FC<{ project: Project }> = ({ project }) => (
           swipe gesture claims the pointer and the link never gets a
           click. */}
       <div onPointerDown={(e) => e.stopPropagation()}>
-        <Button href="/projects" variant="primary" className={scss.photo__cta}>
+        <Button
+          href={`/projects/${project.slug}`}
+          variant="primary"
+          className={scss.photo__cta}
+        >
           Смотреть проект
         </Button>
       </div>
@@ -244,7 +217,7 @@ const Portfolio: FC = () => {
               transition={springs.instant}
             >
               <div className={scss.portfolio__meta}>
-                <span>{project.type}</span>
+                <span>{CATEGORY_LABELS[project.category]}</span>
                 <span>{project.year}</span>
               </div>
 
@@ -263,7 +236,7 @@ const Portfolio: FC = () => {
               </ul>
 
               <Button
-                href="/projects"
+                href={`/projects/${project.slug}`}
                 variant="ghost"
                 className={scss.portfolio__cta}
               >
