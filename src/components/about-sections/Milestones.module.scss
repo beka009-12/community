@@ -1,0 +1,102 @@
+.milestones {
+  padding: 64px 0;
+}
+
+.milestones__inner {
+  position: relative;
+}
+
+.milestones__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.milestones__index {
+  color: var(--color-mist);
+}
+
+.milestones__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+  font-weight: 700;
+}
+
+.rail {
+  position: relative;
+  margin-top: 40px;
+  padding-left: 28px;
+}
+
+.rail__track {
+  position: absolute;
+  left: 3px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--color-border);
+  overflow: hidden;
+}
+
+.rail__fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: top;
+  background: var(--color-accent);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  list-style: none;
+}
+
+.item {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(64px, auto) 1fr;
+  gap: 4px 24px;
+}
+
+.item__dot {
+  position: absolute;
+  left: -25px;
+  top: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 4px var(--color-ink);
+}
+
+.item__year {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+  color: var(--color-accent);
+}
+
+.item__body {
+  min-width: 0;
+}
+
+.item__title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.item__description {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-mist);
+}

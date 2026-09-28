@@ -1,13 +1,42 @@
 // Sticky header floats over content (no solid bar), so the page needs
 // its own top clearance instead of relying on header height.
 .intro {
-  padding-top: 152px;
-  padding-bottom: 24px;
-  max-width: 800px;
+  padding-top: 72px;
+  padding-bottom: 48px;
+}
+
+.intro__path {
+  margin-bottom: 28px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--color-mist);
+
+  @media (max-width: 639px) {
+    display: none;
+  }
+}
+
+.intro__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  gap: 34px;
+
+  @media (min-width: 960px) {
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 40px;
+  }
+}
+
+.intro__copy {
+  max-width: 620px;
 }
 
 .intro__eyebrow {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 16px;
   font-family: var(--font-mono);
   font-size: 11px;
@@ -17,11 +46,15 @@
   color: var(--color-accent);
 }
 
+.intro__index {
+  color: var(--color-mist);
+}
+
 .intro__title {
   font-family: var(--font-display);
-  font-size: clamp(2.1rem, 5vw, 3.4rem);
+  font-size: clamp(2.4rem, 5.4vw, 4.1rem);
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1.05;
   margin-bottom: 20px;
 }
 
@@ -55,7 +88,10 @@
   font-size: 17px;
   line-height: 1.65;
   color: var(--color-mist);
-  max-width: 620px;
+}
+
+.intro__cta {
+  margin-top: 24px;
 }
 
 @media (max-width: 639px) {

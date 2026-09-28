@@ -1,5 +1,24 @@
-import { FC, ReactNode } from "react";
+"use client";
+
+import { FC, ReactNode, useRef } from "react";
+import { motion, useReducedMotion } from "motion/react";
+import { springs } from "@/src/lib/motion-tokens";
+import { GlobalSpotlight, useMobileDetection } from "@/src/animation/MagicBento";
 import scss from "./Advantages.module.scss";
+
+// Same cursor-spotlight hover glow "How we work" already uses on the
+// homepage (Pillars) — reused here instead of a one-off hover style.
+const GLOW_COLOR = "86, 187, 255"; // var(--color-accent) in rgb
+
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: springs.gentle },
+};
 
 const ICON_PROPS = {
   viewBox: "0 0 24 24",
@@ -50,22 +69,50 @@ const ADVANTAGES: { title: string; description: string; icon: ReactNode }[] = [
   },
 ];
 
-const Advantages: FC = () => (
-  <section className={scss.advantages}>
-    <div className={`container ${scss.advantages__inner}`}>
-      <h2 className={scss.advantages__title}>Почему мы</h2>
+const Advantages: FC = () => {
+  const reduce = useReducedMotion();
+  const gridRef = useRef<HTMLDivElement>(null);
+  const isMobile = useMobileDetection();
 
-      <div className={scss.advantages__grid}>
-        {ADVANTAGES.map((item) => (
-          <div key={item.title} className={scss.advantage}>
-            <span className={scss.advantage__icon}>{item.icon}</span>
-            <h3 className={scss.advantage__title}>{item.title}</h3>
-            <p className={scss.advantage__description}>{item.description}</p>
-          </div>
-        ))}
+  return (
+    <section className={scss.advantages}>
+      <div className={`container ${scss.advantages__inner}`}>
+        <span className={scss.advantages__eyebrow}>
+          <span className={scss.advantages__index}>§ 04</span>
+          Почему мы
+        </span>
+        <h2 className={scss.advantages__title}>Что нас отличает</h2>
+
+        <GlobalSpotlight
+          gridRef={gridRef}
+          disableAnimations={isMobile || !!reduce}
+          spotlightRadius={220}
+          glowColor={GLOW_COLOR}
+        />
+
+        <motion.div
+          ref={gridRef}
+          className={`${scss.advantages__grid} bento-section`}
+          variants={reduce ? undefined : containerVariants}
+          initial={reduce ? undefined : "hidden"}
+          whileInView={reduce ? undefined : "visible"}
+          viewport={{ once: true, margin: "-60px" }}
+        >
+          {ADVANTAGES.map((item) => (
+            <motion.div
+              key={item.title}
+              className={`${scss.advantage} magic-bento-card`}
+              variants={reduce ? undefined : itemVariants}
+            >
+              <span className={scss.advantage__icon}>{item.icon}</span>
+              <h3 className={scss.advantage__title}>{item.title}</h3>
+              <p className={scss.advantage__description}>{item.description}</p>
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 export default Advantages;

@@ -1,47 +1,47 @@
-.advantages {
-  padding: 56px 0;
+.specializations {
+  padding: 56px 0 96px;
 }
 
-.advantages__eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-accent);
+.specializations__inner {
+  position: relative;
 }
 
-.advantages__index {
-  color: var(--color-mist);
-}
-
-.advantages__title {
+.specializations__title {
   font-family: var(--font-display);
   font-size: clamp(1.8rem, 3.4vw, 2.6rem);
   font-weight: 700;
-  margin-bottom: 28px;
+  margin-bottom: 10px;
 }
 
-.advantages__grid {
+.specializations__lead {
+  max-width: 560px;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--color-mist);
+  margin-bottom: 32px;
+}
+
+.grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
 
   @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+
+  @media (min-width: 1024px) {
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
   }
 }
 
-.advantage {
+.card {
   position: relative;
   aspect-ratio: auto;
   min-height: 0;
-  padding: 20px;
+  padding: 22px;
   border: 1px solid var(--color-border);
   border-radius: 16px;
   overflow: hidden;
@@ -53,7 +53,7 @@
   }
 
   // Edge-glow that follows the cursor — coordinates written by
-  // GlobalSpotlight (src/animation/MagicBento.tsx), same as Pillars.
+  // GlobalSpotlight (src/animation/MagicBento.tsx), same as Advantages.
   &::after {
     content: "";
     position: absolute;
@@ -80,19 +80,19 @@
 
 // MagicBento.css ships global, unscoped nth-child(3)/(4)/(6) grid-span
 // rules for its own 6-card demo layout — they leak onto any
-// .magic-bento-card, including ours. Neutralize them at higher
-// specificity than its `.magic-bento-card:nth-child()` (2 classes) so
-// this stays a plain 3-column grid regardless of stylesheet load order.
-.advantages .advantages__grid .advantage {
+// .magic-bento-card. Neutralize them at higher specificity than its
+// `.magic-bento-card:nth-child()` (2 classes) up front, same fix as
+// about-sections/Academy and Advantages.
+.specializations .grid .card {
   grid-column: auto;
   grid-row: auto;
 }
 
-.advantage__icon {
+.card__icon {
   display: inline-flex;
   width: 28px;
   height: 28px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   color: var(--color-accent);
 
   svg {
@@ -101,15 +101,25 @@
   }
 }
 
-.advantage__title {
+.card__title {
   font-family: var(--font-display);
   font-size: 1.05rem;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
-.advantage__description {
-  font-size: 14px;
-  line-height: 1.6;
+.card__description {
+  font-size: 13.5px;
+  line-height: 1.55;
   color: var(--color-mist);
+  margin-bottom: 14px;
 }
+
+.card__stack {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-accent);
+  opacity: 0.85;
+}
+

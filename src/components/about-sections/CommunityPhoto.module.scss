@@ -1,0 +1,88 @@
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+  aspect-ratio: 4 / 3;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  box-shadow:
+    0 30px 70px rgba(0, 0, 0, 0.42),
+    0 8px 24px rgba(0, 0, 0, 0.2);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow:
+      0 36px 80px rgba(0, 0, 0, 0.46),
+      0 10px 28px rgba(0, 0, 0, 0.22);
+  }
+
+  @media (min-width: 960px) {
+    margin: 0;
+  }
+}
+
+.card__chrome {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  background: var(--color-surface-2);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.card__chromeDots {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.card__chrome-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &[data-color="red"] {
+    background: #ff5f57;
+  }
+
+  &[data-color="yellow"] {
+    background: #febc2e;
+  }
+
+  &[data-color="green"] {
+    background: #28c840;
+  }
+}
+
+.card__chromeTitle {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-mist);
+  opacity: 0.7;
+}
+
+.card__art {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  background: var(--color-surface-2);
+}
+
+.card__image {
+  object-fit: cover;
+  object-position: center;
+}

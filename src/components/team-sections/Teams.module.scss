@@ -1,0 +1,140 @@
+.teams {
+  padding: 24px 0 96px;
+}
+
+.teams__inner {
+  position: relative;
+}
+
+.teams__title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.teams__lead {
+  max-width: 520px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-mist);
+  margin-bottom: 32px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+// One coordinated hover: card lifts + avatars spread apart. Transform
+// and box-shadow only (no width/height), respects prefers-reduced-motion
+// site-wide via globals.scss's transition-duration override.
+.card {
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+
+  &:hover,
+  &:focus-within {
+    transform: translateY(-4px);
+    border-color: rgba(86, 187, 255, 0.4);
+    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.35);
+  }
+}
+
+.avatars {
+  display: flex;
+  height: 44px;
+  margin-bottom: 16px;
+}
+
+.avatar {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid var(--color-surface);
+  background: var(--color-surface-2);
+
+  &:not(:first-child) {
+    margin-left: -16px;
+  }
+}
+
+.avatar__img {
+  object-fit: cover;
+  object-position: center;
+}
+
+// Overflow badge ("+N") reuses the same circle — same size and overlap
+// as a real avatar, just a count instead of a photo.
+.avatar--overflow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-mist);
+  background: var(--color-surface-2);
+}
+
+.card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-paper);
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--color-accent);
+  }
+}
+
+.card__arrow {
+  font-size: 0.9em;
+  transition: transform 0.2s ease;
+
+  .card__link:hover & {
+    transform: translateX(2px);
+  }
+}
+
+.lead {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lead__role {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-paper);
+}
+
+.lead__stack {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-mist);
+}

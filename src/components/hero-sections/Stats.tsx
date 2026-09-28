@@ -2,15 +2,8 @@
 
 import { FC, ReactNode } from "react";
 import { useCountUp } from "@/src/hooks/use-count-up";
+import { STATS, type StatId } from "@/src/data/stats";
 import scss from "./Stats.module.scss";
-
-const STATS = [
-  { id: "members", target: 120, suffix: "+", label: "участников" },
-  { id: "projects", target: 15, suffix: "", label: "проектов" },
-  { id: "hires", target: 8, suffix: "", label: "наймов" },
-] as const;
-
-type StatId = (typeof STATS)[number]["id"];
 
 const ICON_PROPS = {
   viewBox: "0 0 24 24",

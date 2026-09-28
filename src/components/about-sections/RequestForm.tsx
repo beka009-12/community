@@ -24,7 +24,10 @@ const RequestForm: FC = () => {
     <section className={scss.request} id="request">
       <div className="container">
         <div className={scss.request__header}>
-          <span className={scss.request__eyebrow}>Начать проект</span>
+          <span className={scss.request__eyebrow}>
+            <span className={scss.request__index}>§ 06</span>
+            Начать проект
+          </span>
           <h2 className={scss.request__title}>Расскажите о задаче</h2>
           <p className={scss.request__lead}>
             Опишите проект — подберём команду и ответим с деталями.
@@ -55,7 +58,9 @@ const RequestForm: FC = () => {
               transition={springs.snappy}
             >
               <div className={scss.field}>
-                <label htmlFor="request-name">Имя</label>
+                <label htmlFor="request-name">
+                  Имя <span className={scss.required}>*</span>
+                </label>
                 <input id="request-name" name="name" type="text" autoComplete="name" required />
               </div>
 
@@ -70,7 +75,9 @@ const RequestForm: FC = () => {
               </div>
 
               <div className={scss.field}>
-                <label htmlFor="request-email">Email</label>
+                <label htmlFor="request-email">
+                  Email <span className={scss.required}>*</span>
+                </label>
                 <input id="request-email" name="email" type="email" autoComplete="email" required />
               </div>
 
@@ -80,7 +87,9 @@ const RequestForm: FC = () => {
               </div>
 
               <div className={scss.field}>
-                <label htmlFor="request-title">Название проекта</label>
+                <label htmlFor="request-title">
+                  Название проекта <span className={scss.required}>*</span>
+                </label>
                 <input id="request-title" name="title" type="text" required />
               </div>
 
@@ -109,7 +118,9 @@ const RequestForm: FC = () => {
               </div>
 
               <div className={`${scss.field} ${scss["field--full"]}`}>
-                <label htmlFor="request-description">Описание проекта</label>
+                <label htmlFor="request-description">
+                  Описание проекта <span className={scss.required}>*</span>
+                </label>
                 <textarea id="request-description" name="description" rows={5} required />
               </div>
 

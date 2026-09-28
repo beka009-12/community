@@ -14,9 +14,7 @@ const GLOW_COLOR = "86, 187, 255"; // var(--color-accent) в rgb
 // `category` mirrors the ProjectCategory keys from src/data/projects.ts
 // (web/systems/bots/ai) — a stable machine id, separate from `tag`,
 // which is the English label actually shown on the card and which the
-// [data-tag="..."] CSS variants below key off. Other code (e.g.
-// about-sections/ServiceQuickNav) targets [data-category] instead of
-// depending on that display string.
+// [data-tag="..."] CSS variants below key off.
 const SERVICES = [
   {
     tag: "Landing & Sites",

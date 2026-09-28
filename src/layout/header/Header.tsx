@@ -14,7 +14,6 @@ const NAV_LINKS = [
   { href: "/projects", label: "Проекты" },
   { href: "/about", label: "О нас" },
   { href: "/team", label: "Команда" },
-  { href: "/services", label: "Услуги" },
   { href: "/contact", label: "Контакты" },
 ];
 
