@@ -1,5 +1,6 @@
 "use client";
 
+import Select from "@/src/ui/Select";
 import { FC, useActionState } from "react";
 import Field from "@/src/components/admin/ui/Field";
 import FormActions from "@/src/components/admin/ui/FormActions";
@@ -19,19 +20,18 @@ const StatusForm: FC<StatusFormProps> = ({ action, status }) => {
   return (
     <form action={formAction}>
       <Field label="Статус заявки" htmlFor="request-status" error={error}>
-        <select
+        <Select
           id="request-status"
           name="status"
           defaultValue={status}
-          aria-invalid={Boolean(error)}
-          aria-describedby={error ? "request-status-error" : undefined}
-        >
-          {Object.entries(REQUEST_STATUS_LABELS).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
+          invalid={Boolean(error)}
+          describedBy={error ? "request-status-error" : undefined}
+          block
+          options={Object.entries(REQUEST_STATUS_LABELS).map(([value, label]) => ({
+            value,
+            label,
+          }))}
+        />
       </Field>
       <FormActions submitLabel="Сохранить статус" pending={pending} error={state.error} saved={state.ok} />
     </form>

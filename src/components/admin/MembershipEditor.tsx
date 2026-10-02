@@ -1,5 +1,6 @@
 "use client";
 
+import Select from "@/src/ui/Select";
 import { FC, useActionState } from "react";
 import Link from "next/link";
 import ConfirmButton from "@/src/components/admin/ui/ConfirmButton";
@@ -28,7 +29,9 @@ interface MembershipEditorProps {
   removeAction: (userId: string) => Promise<ActionResult>;
 }
 
-const ROLES = Object.entries(MEMBERSHIP_LABELS) as [MembershipRole, string][];
+const ROLE_OPTIONS = (Object.entries(MEMBERSHIP_LABELS) as [MembershipRole, string][]).map(
+  ([value, label]) => ({ value, label }),
+);
 
 // One row per person: changing the role select saves immediately (same
 // upsert action as "Добавить"), removal asks for confirmation.
@@ -43,21 +46,15 @@ const RoleCell: FC<{
       <input type="hidden" name="userId" value={row.userId} />
       {/* Remount after every response: on failure the select snaps back to
           the saved role instead of showing an unsaved one. */}
-      <select
+      <Select
         key={JSON.stringify(state)}
         name="role"
         defaultValue={row.membershipRole}
-        aria-label={`Роль: ${row.name}`}
+        ariaLabel={`Роль: ${row.name}`}
         disabled={pending}
-        className={scss.inlineSelect}
-        onChange={(event) => event.currentTarget.form?.requestSubmit()}
-      >
-        {ROLES.map(([value, label]) => (
-          <option key={value} value={value}>
-            {label}
-          </option>
-        ))}
-      </select>
+        submitOnChange
+        options={ROLE_OPTIONS}
+      />
       {error && (
         <span role="alert" className={scss.field__error}>
           {error}
@@ -108,20 +105,20 @@ const MembershipEditor: FC<MembershipEditorProps> = ({
       <form action={addAction} className={scss.membership__add} noValidate>
         <div className={scss.field}>
           <label htmlFor="membership-user">Участник</label>
-          <select
+          {/* Keyed by the last result so a successful add clears the choice. */}
+          <Select
+            key={JSON.stringify(state)}
             id="membership-user"
             name="userId"
             defaultValue=""
-            aria-invalid={Boolean(errors.userId)}
-            aria-describedby={errors.userId ? "membership-user-error" : undefined}
-          >
-            <option value="">Выберите…</option>
-            {candidates.map((candidate) => (
-              <option key={candidate.userId} value={candidate.userId}>
-                {candidate.name}
-              </option>
-            ))}
-          </select>
+            invalid={Boolean(errors.userId)}
+            describedBy={errors.userId ? "membership-user-error" : undefined}
+            block
+            options={candidates.map((candidate) => ({
+              value: candidate.userId,
+              label: candidate.name,
+            }))}
+          />
           {errors.userId && (
             <p id="membership-user-error" className={scss.field__error}>
               {errors.userId}
@@ -130,13 +127,7 @@ const MembershipEditor: FC<MembershipEditorProps> = ({
         </div>
         <div className={scss.field}>
           <label htmlFor="membership-role">Роль</label>
-          <select id="membership-role" name="role" defaultValue="DEVELOPER">
-            {ROLES.map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+          <Select id="membership-role" name="role" defaultValue="DEVELOPER" block options={ROLE_OPTIONS} />
         </div>
         <button type="submit" className={`${scss.smallButton} ${scss["smallButton--solid"]}`} disabled={pending}>
           {pending ? "Добавляем…" : "Добавить"}

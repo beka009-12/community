@@ -1,5 +1,6 @@
 "use client";
 
+import Select from "@/src/ui/Select";
 import { FC, useActionState, useState, useTransition } from "react";
 import Link from "next/link";
 import ConfirmButton from "@/src/components/admin/ui/ConfirmButton";
@@ -45,16 +46,19 @@ const RoleForm: FC<{ role: MembershipRole; action: MemberSidebarProps["roleActio
       <label htmlFor="member-role-select" className={scss.visuallyHidden}>
         Роль
       </label>
-      <select
-        id="member-role-select"
-        name="role"
-        defaultValue={role}
-        key={JSON.stringify(state)}
-        className={scss.inlineSelect}
-      >
-        <option value="DEVELOPER">Разработчик</option>
-        <option value="TEAM_LEAD">Тимлид</option>
-      </select>
+      <div className={scss.roleForm__select}>
+        <Select
+          id="member-role-select"
+          name="role"
+          defaultValue={role}
+          key={JSON.stringify(state)}
+          block
+          options={[
+            { value: "DEVELOPER", label: "Разработчик" },
+            { value: "TEAM_LEAD", label: "Тимлид" },
+          ]}
+        />
+      </div>
       <button type="submit" className={scss.smallButton} disabled={pending}>
         {pending ? "…" : "Сохранить"}
       </button>

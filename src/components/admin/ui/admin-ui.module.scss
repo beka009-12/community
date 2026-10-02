@@ -626,3 +626,12 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+.roleForm__select {
+  flex: 1;
+  min-width: 160px;
+}
+
+.membership__row > form {
+  min-width: 170px;
+}

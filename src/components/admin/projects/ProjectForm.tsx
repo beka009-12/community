@@ -1,5 +1,6 @@
 "use client";
 
+import Select from "@/src/ui/Select";
 import { FC, useActionState } from "react";
 import Field from "@/src/components/admin/ui/Field";
 import FormActions from "@/src/components/admin/ui/FormActions";
@@ -43,6 +44,16 @@ const ProjectForm: FC<ProjectFormProps> = ({ action, initial, isNew, submitLabel
     "aria-invalid": Boolean(errors[name]),
     "aria-describedby": errors[name] ? `project-${name}-error` : undefined,
   });
+  const selectProps = (name: TextField) => ({
+    id: `project-${name}`,
+    name,
+    defaultValue: state.values?.[name] ?? initial[name],
+    invalid: Boolean(errors[name]),
+    describedBy: errors[name] ? `project-${name}-error` : undefined,
+    block: true,
+  });
+  const toOptions = (labels: Record<string, string>) =>
+    Object.entries(labels).map(([value, label]) => ({ value, label }));
   const featured = state.values ? state.values.featured === "on" : initial.featured;
 
   return (
@@ -66,29 +77,20 @@ const ProjectForm: FC<ProjectFormProps> = ({ action, initial, isNew, submitLabel
 
       <FormSection title="Публикация" hint="Статус и категория видны в портфолио на сайте." />
       <Field label="Статус" htmlFor="project-status" required error={errors.status}>
-        <select {...control("status")}>
-          {Object.entries(STATUS_LABELS).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
+        <Select {...selectProps("status")} options={toOptions(STATUS_LABELS)} />
       </Field>
       <Field label="Категория" htmlFor="project-category" required error={errors.category}>
-        <select {...control("category")}>
-          {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
+        <Select {...selectProps("category")} options={toOptions(CATEGORY_LABELS)} />
       </Field>
 
       <Field label="Источник" htmlFor="project-origin" required error={errors.origin}>
-        <select {...control("origin")}>
-          <option value="community">Проект сообщества</option>
-          <option value="client">Проект на заказ</option>
-        </select>
+        <Select
+          {...selectProps("origin")}
+          options={[
+            { value: "community", label: "Проект сообщества" },
+            { value: "client", label: "Проект на заказ" },
+          ]}
+        />
       </Field>
       <Field label="Год" htmlFor="project-year" required error={errors.year}>
         <input {...control("year")} inputMode="numeric" />

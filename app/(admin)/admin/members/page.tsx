@@ -1,3 +1,4 @@
+import Select from "@/src/ui/Select";
 import Link from "next/link";
 import Button from "@/src/ui/Button";
 import DataTable from "@/src/components/admin/ui/DataTable";
@@ -54,19 +55,31 @@ const Page = async ({ searchParams }: PageProps<"/admin/members">) => {
         </div>
         <div className={scss.field}>
           <label htmlFor="filter-role">Роль</label>
-          <select id="filter-role" name="role" defaultValue={role}>
-            <option value="">Все</option>
-            <option value="TEAM_LEAD">Тимлид</option>
-            <option value="DEVELOPER">Разработчик</option>
-          </select>
+          <Select
+            id="filter-role"
+            name="role"
+            defaultValue={role}
+            block
+            options={[
+              { value: "", label: "Все роли" },
+              { value: "TEAM_LEAD", label: "Тимлид" },
+              { value: "DEVELOPER", label: "Разработчик" },
+            ]}
+          />
         </div>
         <div className={scss.field}>
           <label htmlFor="filter-status">Статус</label>
-          <select id="filter-status" name="status" defaultValue={status}>
-            <option value="">Все</option>
-            <option value="ACTIVE">Активен</option>
-            <option value="INACTIVE">Неактивен</option>
-          </select>
+          <Select
+            id="filter-status"
+            name="status"
+            defaultValue={status}
+            block
+            options={[
+              { value: "", label: "Все статусы" },
+              { value: "ACTIVE", label: "Активен" },
+              { value: "INACTIVE", label: "Неактивен" },
+            ]}
+          />
         </div>
         <button type="submit" className={scss.smallButton}>
           Применить

@@ -1,5 +1,6 @@
 "use client";
 
+import Select from "@/src/ui/Select";
 import { FC, useActionState, useEffect, useRef } from "react";
 import Field from "@/src/components/admin/ui/Field";
 import FormActions from "@/src/components/admin/ui/FormActions";
@@ -57,6 +58,15 @@ const MemberForm: FC<MemberFormProps> = ({
     if (state.ok) onSaved?.();
   }, [state, onSaved]);
 
+  const selectProps = (name: keyof MemberFormValues) => ({
+    id: `member-${name}`,
+    name,
+    defaultValue: String(value(name)),
+    invalid: Boolean(errors[name]),
+    describedBy: errors[name] ? `member-${name}-error` : undefined,
+    block: true,
+  });
+
   const fillPassword = async () => {
     const password = await generatePasswordAction();
     if (passwordRef.current) {
@@ -93,10 +103,13 @@ const MemberForm: FC<MemberFormProps> = ({
             required
             error={errors.role}
           >
-            <select {...control("role")}>
-              <option value="DEVELOPER">Разработчик</option>
-              <option value="TEAM_LEAD">Тимлид</option>
-            </select>
+            <Select
+              {...selectProps("role")}
+              options={[
+                { value: "DEVELOPER", label: "Разработчик" },
+                { value: "TEAM_LEAD", label: "Тимлид" },
+              ]}
+            />
           </Field>
 
           <Field
@@ -153,13 +166,10 @@ const MemberForm: FC<MemberFormProps> = ({
         required
         error={errors.specializationId}
       >
-        <select {...control("specializationId")}>
-          {SPECIALIZATIONS.map((spec) => (
-            <option key={spec.id} value={spec.id}>
-              {spec.title}
-            </option>
-          ))}
-        </select>
+        <Select
+          {...selectProps("specializationId")}
+          options={SPECIALIZATIONS.map((spec) => ({ value: spec.id, label: spec.title }))}
+        />
       </Field>
       <Field
         label="Должность"
