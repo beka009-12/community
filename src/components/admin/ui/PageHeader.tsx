@@ -7,9 +7,11 @@ interface PageHeaderProps {
   description?: string;
   back?: { href: string; label: string };
   action?: ReactNode;
+  // Inline next to the title: a status badge, usually.
+  meta?: ReactNode;
 }
 
-const PageHeader: FC<PageHeaderProps> = ({ title, description, back, action }) => (
+const PageHeader: FC<PageHeaderProps> = ({ title, description, back, action, meta }) => (
   <header className={scss.pageHeader}>
     <div>
       {back && (
@@ -17,7 +19,10 @@ const PageHeader: FC<PageHeaderProps> = ({ title, description, back, action }) =
           ← {back.label}
         </Link>
       )}
-      <h1 className={scss.pageHeader__title}>{title}</h1>
+      <div className={scss.pageHeader__row}>
+        <h1 className={scss.pageHeader__title}>{title}</h1>
+        {meta}
+      </div>
       {description && <p className={scss.pageHeader__description}>{description}</p>}
     </div>
     {action}

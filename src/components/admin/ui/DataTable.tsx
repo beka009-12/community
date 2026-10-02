@@ -15,9 +15,17 @@ interface DataTableProps<T> {
   // The first column becomes a link to the row's detail page.
   rowHref?: (row: T) => string;
   empty: string;
+  rowClassName?: (row: T) => string | undefined;
 }
 
-function DataTable<T>({ rows, columns, rowKey, rowHref, empty }: DataTableProps<T>) {
+function DataTable<T>({
+  rows,
+  columns,
+  rowKey,
+  rowHref,
+  empty,
+  rowClassName,
+}: DataTableProps<T>) {
   if (rows.length === 0) return <p className={scss.empty}>{empty}</p>;
 
   return (
@@ -34,7 +42,7 @@ function DataTable<T>({ rows, columns, rowKey, rowHref, empty }: DataTableProps<
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={rowKey(row)}>
+            <tr key={rowKey(row)} className={rowClassName?.(row)}>
               {columns.map((column, index) => (
                 <td key={column.key} data-label={column.label}>
                   {index === 0 && rowHref ? (

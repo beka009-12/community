@@ -4,6 +4,7 @@ import DataTable from "@/src/components/admin/ui/DataTable";
 import PageHeader from "@/src/components/admin/ui/PageHeader";
 import StatusBadge from "@/src/components/admin/ui/StatusBadge";
 import scss from "@/src/components/admin/ui/admin-ui.module.scss";
+import PersonCell from "@/src/components/admin/PersonCell";
 import {
   ROLE_LABELS,
   USER_STATUS_LABELS,
@@ -12,6 +13,7 @@ import {
 import { SPECIALIZATIONS } from "@/src/data/specializations";
 import { requireAdmin } from "@/src/server/auth/dal";
 import { listMembers, type AdminMember } from "@/src/server/repositories/members";
+import { countProjectsByMember } from "@/src/server/repositories/projects";
 
 const one = (value: string | string[] | undefined) =>
   (Array.isArray(value) ? value[0] : value) ?? "";
@@ -23,6 +25,7 @@ const Page = async ({ searchParams }: PageProps<"/admin/members">) => {
   const role = one(params.role);
   const status = one(params.status);
 
+  const projectCounts = await countProjectsByMember();
   const members = (await listMembers()).filter(({ user, profile }) => {
     const haystack = `${profile.firstName} ${profile.lastName} ${user.login}`.toLowerCase();
     return (
@@ -80,19 +83,30 @@ const Page = async ({ searchParams }: PageProps<"/admin/members">) => {
         rowKey={(row) => row.user.id}
         rowHref={(row) => `/admin/members/${row.user.id}`}
         empty="Никого не нашли — измените фильтры."
+        rowClassName={(row) => (row.user.status === "INACTIVE" ? scss.row__muted : undefined)}
         columns={[
           {
             key: "name",
-            label: "Имя",
-            render: ({ profile }) => `${profile.firstName} ${profile.lastName}`,
+            label: "Участник",
+            render: ({ profile, user }) => (
+              <PersonCell
+                photo={profile.photo}
+                name={`${profile.firstName} ${profile.lastName}`}
+                caption={user.login}
+              />
+            ),
           },
-          { key: "login", label: "Логин", render: ({ user }) => user.login },
           { key: "role", label: "Роль", render: ({ user }) => ROLE_LABELS[user.role] },
           {
             key: "spec",
             label: "Направление",
             render: ({ profile }) =>
               SPECIALIZATIONS.find((spec) => spec.id === profile.specializationId)?.title ?? "—",
+          },
+          {
+            key: "projects",
+            label: "Проектов",
+            render: ({ user }) => projectCounts[user.id] ?? 0,
           },
           {
             key: "status",

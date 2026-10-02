@@ -1,47 +1,34 @@
 import Button from "@/src/ui/Button";
-import DataTable from "@/src/components/admin/ui/DataTable";
 import PageHeader from "@/src/components/admin/ui/PageHeader";
-import StatusBadge, { type BadgeTone } from "@/src/components/admin/ui/StatusBadge";
-import { CATEGORY_LABELS, STATUS_LABELS, STATUS_TONE } from "@/src/data/projects";
+import EmptyState from "@/src/components/admin/ui/EmptyState";
+import ProjectCard from "@/src/components/admin/projects/ProjectCard";
+import cards from "@/src/components/admin/projects/ProjectCard.module.scss";
 import { requireAdmin } from "@/src/server/auth/dal";
-import { listProjects } from "@/src/server/repositories/projects";
-import type { DbProject } from "@/src/server/db/types";
-
-type Row = DbProject & { memberCount: number };
+import { listProjectsWithMembers } from "@/src/server/repositories/projects";
 
 const Page = async () => {
   await requireAdmin();
-  const projects = await listProjects();
+  const projects = await listProjectsWithMembers();
   return (
     <>
       <PageHeader
         title="Проекты"
+        description={`${projects.length} в портфолио сообщества`}
         action={
           <Button href="/admin/projects/new" variant="primary">
             Создать проект
           </Button>
         }
       />
-      <DataTable<Row>
-        rows={projects}
-        rowKey={(row) => row.id}
-        rowHref={(row) => `/admin/projects/${row.id}`}
-        empty="Проектов пока нет."
-        columns={[
-          { key: "name", label: "Название", render: (row) => row.name },
-          {
-            key: "status",
-            label: "Статус",
-            render: (row) => (
-              <StatusBadge tone={STATUS_TONE[row.status] as BadgeTone}>
-                {STATUS_LABELS[row.status]}
-              </StatusBadge>
-            ),
-          },
-          { key: "category", label: "Категория", render: (row) => CATEGORY_LABELS[row.category] },
-          { key: "count", label: "Участников", render: (row) => row.memberCount },
-        ]}
-      />
+      {projects.length === 0 ? (
+        <EmptyState title="Проектов пока нет" />
+      ) : (
+        <div className={cards.grid}>
+          {projects.map(({ project, members }) => (
+            <ProjectCard key={project.id} project={project} members={members} />
+          ))}
+        </div>
+      )}
     </>
   );
 };

@@ -522,3 +522,84 @@
   flex-wrap: wrap;
   align-items: center;
 }
+
+.person {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.person__avatar {
+  position: relative;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--color-surface-2);
+}
+
+.person__img {
+  object-fit: cover;
+}
+
+.person__text {
+  display: flex;
+  flex-direction: column;
+}
+
+.person__name {
+  font-weight: 600;
+}
+
+.person__caption {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-mist);
+}
+
+.row__muted td {
+  opacity: 0.55;
+}
+
+.filters > .smallButton {
+  min-height: 44px;
+  padding: 0 16px;
+}
+
+// Section heading inside a .formGrid — splits long forms into
+// meaningful groups (Доступ / Профиль / Ссылки).
+.formSection {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+
+  &:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  @media (min-width: 768px) {
+    grid-column: 1 / -1;
+  }
+}
+
+.formSection__title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.formSection__hint {
+  font-size: 13px;
+  color: var(--color-mist);
+}
+
+.pageHeader__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}

@@ -3,6 +3,7 @@
 import { FC, useActionState, useRef } from "react";
 import Field from "@/src/components/admin/ui/Field";
 import FormActions from "@/src/components/admin/ui/FormActions";
+import FormSection from "@/src/components/admin/ui/FormSection";
 import scss from "@/src/components/admin/ui/admin-ui.module.scss";
 import { generatePasswordAction } from "@/src/actions/admin/members";
 import type { FormState } from "@/src/actions/admin/form-state";
@@ -54,6 +55,7 @@ const MemberForm: FC<MemberFormProps> = ({ action, initial, withPassword, submit
 
   return (
     <form action={formAction} className={scss.formGrid} noValidate>
+      <FormSection title="Доступ" hint="С этими данными участник входит на платформу." />
       <Field label="Логин" htmlFor="member-login" required error={errors.login} hint="Латиница, цифры, . _ -">
         <input {...control("login")} autoComplete="off" spellCheck={false} />
       </Field>
@@ -76,6 +78,7 @@ const MemberForm: FC<MemberFormProps> = ({ action, initial, withPassword, submit
         </Field>
       )}
 
+      <FormSection title="Профиль" hint="Это видят клиенты на публичной странице участника." />
       <Field label="Имя" htmlFor="member-firstName" required error={errors.firstName}>
         <input {...control("firstName")} />
       </Field>
@@ -107,6 +110,7 @@ const MemberForm: FC<MemberFormProps> = ({ action, initial, withPassword, submit
         <textarea {...control("bio")} rows={3} />
       </Field>
 
+      <FormSection title="Ссылки" hint="Необязательно. Пустые ссылки на сайте не показываются." />
       <Field label="GitHub" htmlFor="member-github" error={errors.github}>
         <input {...control("github")} type="url" placeholder="https://github.com/…" />
       </Field>

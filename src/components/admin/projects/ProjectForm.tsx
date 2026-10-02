@@ -3,6 +3,7 @@
 import { FC, useActionState } from "react";
 import Field from "@/src/components/admin/ui/Field";
 import FormActions from "@/src/components/admin/ui/FormActions";
+import FormSection from "@/src/components/admin/ui/FormSection";
 import scss from "@/src/components/admin/ui/admin-ui.module.scss";
 import type { FormState } from "@/src/actions/admin/form-state";
 import { CATEGORY_LABELS, STATUS_LABELS } from "@/src/data/projects";
@@ -46,6 +47,7 @@ const ProjectForm: FC<ProjectFormProps> = ({ action, initial, isNew, submitLabel
 
   return (
     <form action={formAction} className={scss.formGrid} noValidate>
+      <FormSection title="О проекте" />
       {isNew && (
         <Field label="Адрес страницы" htmlFor="project-id" required error={errors.id} hint="Будет /projects/адрес — потом не меняется">
           <input {...control("id")} spellCheck={false} />
@@ -62,6 +64,7 @@ const ProjectForm: FC<ProjectFormProps> = ({ action, initial, isNew, submitLabel
         <textarea {...control("details")} rows={4} />
       </Field>
 
+      <FormSection title="Публикация" hint="Статус и категория видны в портфолио на сайте." />
       <Field label="Статус" htmlFor="project-status" required error={errors.status}>
         <select {...control("status")}>
           {Object.entries(STATUS_LABELS).map(([value, label]) => (
@@ -91,6 +94,7 @@ const ProjectForm: FC<ProjectFormProps> = ({ action, initial, isNew, submitLabel
         <input {...control("year")} inputMode="numeric" />
       </Field>
 
+      <FormSection title="Медиа и ссылки" />
       <Field label="Превью (ссылка на картинку)" htmlFor="project-image" required error={errors.image} full>
         <input {...control("image")} type="url" />
       </Field>

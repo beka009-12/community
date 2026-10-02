@@ -1,32 +1,68 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, ReactNode, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion, useReducedMotion } from "motion/react";
 import { logout } from "@/src/actions/auth";
+import { springs } from "@/src/lib/motion-tokens";
+import {
+  LogoutIcon,
+  MembersIcon,
+  OverviewIcon,
+  ProjectsIcon,
+  RequestsIcon,
+  SettingsIcon,
+  TeamsIcon,
+} from "./icons";
 import scss from "./AdminShell.module.scss";
 
-const LINKS = [
-  { href: "/admin", label: "Обзор" },
-  { href: "/admin/members", label: "Участники" },
-  { href: "/admin/teams", label: "Команды" },
-  { href: "/admin/projects", label: "Проекты" },
-  { href: "/admin/requests", label: "Заявки" },
-  { href: "/admin/settings", label: "Настройки" },
-];
+export interface NavCounts {
+  members: number;
+  teams: number;
+  projects: number;
+  newRequests: number;
+}
+
+interface NavLink {
+  href: string;
+  label: string;
+  icon: ReactNode;
+  count?: number;
+  // Accent badge = needs attention; plain number = just a total.
+  alert?: boolean;
+}
 
 const isActive = (pathname: string, href: string) =>
   href === "/admin" ? pathname === href : pathname.startsWith(href);
 
-const AdminNav: FC<{ newRequests: number }> = ({ newRequests }) => {
+const AdminNav: FC<{ counts: NavCounts }> = ({ counts }) => {
   const pathname = usePathname();
+  const reduce = useReducedMotion();
   const [open, setOpen] = useState(false);
+
+  const links: NavLink[] = [
+    { href: "/admin", label: "Обзор", icon: <OverviewIcon /> },
+    { href: "/admin/members", label: "Участники", icon: <MembersIcon />, count: counts.members },
+    { href: "/admin/teams", label: "Команды", icon: <TeamsIcon />, count: counts.teams },
+    { href: "/admin/projects", label: "Проекты", icon: <ProjectsIcon />, count: counts.projects },
+    {
+      href: "/admin/requests",
+      label: "Заявки",
+      icon: <RequestsIcon />,
+      count: counts.newRequests || undefined,
+      alert: true,
+    },
+    { href: "/admin/settings", label: "Настройки", icon: <SettingsIcon /> },
+  ];
 
   return (
     <aside className={scss.sidebar}>
       <div className={scss.sidebar__top}>
-        <Link href="/admin" className={scss.brand}>
-          Motion <span>admin</span>
+        <Link href="/admin" className={scss.brand} aria-label="Motion admin — обзор">
+          <Image src="/brand/motion-logo.svg" alt="" width={40} height={21} />
+          <span>admin</span>
         </Link>
         <button
           type="button"
@@ -45,7 +81,7 @@ const AdminNav: FC<{ newRequests: number }> = ({ newRequests }) => {
         aria-label="Разделы админки"
       >
         <ul>
-          {LINKS.map((link) => {
+          {links.map((link) => {
             const active = isActive(pathname, link.href);
             return (
               <li key={link.href}>
@@ -55,10 +91,21 @@ const AdminNav: FC<{ newRequests: number }> = ({ newRequests }) => {
                   aria-current={active ? "page" : undefined}
                   onClick={() => setOpen(false)}
                 >
-                  {link.label}
-                  {link.href === "/admin/requests" && newRequests > 0 && (
-                    <span className={scss.badge} aria-label={`Новых: ${newRequests}`}>
-                      {newRequests}
+                  {active && (
+                    <motion.span
+                      layoutId="admin-nav-pill"
+                      className={scss.nav__pill}
+                      transition={reduce ? { duration: 0 } : springs.snappy}
+                    />
+                  )}
+                  <span className={scss.nav__icon}>{link.icon}</span>
+                  <span className={scss.nav__label}>{link.label}</span>
+                  {link.count !== undefined && (
+                    <span
+                      className={`${scss.nav__count} ${link.alert ? scss["nav__count--alert"] : ""}`}
+                      aria-label={link.alert ? `Новых: ${link.count}` : `Всего: ${link.count}`}
+                    >
+                      {link.count}
                     </span>
                   )}
                 </Link>
@@ -67,9 +114,20 @@ const AdminNav: FC<{ newRequests: number }> = ({ newRequests }) => {
           })}
         </ul>
 
-        <form action={logout} className={scss.logout}>
-          <button type="submit">Выйти</button>
-        </form>
+        <div className={scss.account}>
+          <span className={scss.account__avatar} aria-hidden="true">
+            A
+          </span>
+          <span className={scss.account__name}>
+            Админ
+            <small>Motion Community</small>
+          </span>
+          <form action={logout}>
+            <button type="submit" className={scss.account__logout} aria-label="Выйти">
+              <LogoutIcon />
+            </button>
+          </form>
+        </div>
       </nav>
     </aside>
   );

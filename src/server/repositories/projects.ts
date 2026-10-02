@@ -1,5 +1,6 @@
 import "server-only";
 import { mutateDb, readDb } from "@/src/server/db/store";
+import type { Db } from "@/src/server/db/types";
 import type { DbProject, MembershipRole } from "@/src/server/db/types";
 import { ConflictError, NotFoundError } from "./errors";
 import { joinMember } from "./members";
@@ -17,19 +18,36 @@ export async function listProjects(): Promise<
   }));
 }
 
+const membersOf = (db: Db, projectId: string): MemberWithRole[] =>
+  db.projectMembers
+    .filter((row) => row.projectId === projectId)
+    .flatMap((row) => {
+      const member = joinMember(db, row.userId);
+      return member ? [{ ...member, membershipRole: row.role }] : [];
+    });
+
+export async function listProjectsWithMembers(): Promise<
+  Array<{ project: DbProject; members: MemberWithRole[] }>
+> {
+  const db = await readDb();
+  return db.projects.map((project) => ({ project, members: membersOf(db, project.id) }));
+}
+
+export async function countProjectsByMember(): Promise<Record<string, number>> {
+  const { projectMembers } = await readDb();
+  return projectMembers.reduce<Record<string, number>>((counts, row) => {
+    counts[row.userId] = (counts[row.userId] ?? 0) + 1;
+    return counts;
+  }, {});
+}
+
 export async function getProject(
   id: string,
 ): Promise<{ project: DbProject; members: MemberWithRole[] } | null> {
   const db = await readDb();
   const project = db.projects.find((item) => item.id === id);
   if (!project) return null;
-  const members = db.projectMembers
-    .filter((row) => row.projectId === id)
-    .flatMap((row) => {
-      const member = joinMember(db, row.userId);
-      return member ? [{ ...member, membershipRole: row.role }] : [];
-    });
-  return { project, members };
+  return { project, members: membersOf(db, id) };
 }
 
 export async function createProject(input: ProjectInput): Promise<DbProject> {

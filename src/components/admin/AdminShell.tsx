@@ -1,13 +1,10 @@
 import { FC, ReactNode } from "react";
-import AdminNav from "./AdminNav";
+import AdminNav, { type NavCounts } from "./AdminNav";
 import scss from "./AdminShell.module.scss";
 
-const AdminShell: FC<{ newRequests: number; children: ReactNode }> = ({
-  newRequests,
-  children,
-}) => (
+const AdminShell: FC<{ counts: NavCounts; children: ReactNode }> = ({ counts, children }) => (
   <div className={scss.shell}>
-    <AdminNav newRequests={newRequests} />
+    <AdminNav counts={counts} />
     <main className={scss.content}>{children}</main>
   </div>
 );

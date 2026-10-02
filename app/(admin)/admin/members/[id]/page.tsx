@@ -4,6 +4,8 @@ import Panel from "@/src/components/admin/ui/Panel";
 import MemberForm from "@/src/components/admin/members/MemberForm";
 import MemberSidebar from "@/src/components/admin/members/MemberSidebar";
 import scss from "@/src/components/admin/ui/admin-ui.module.scss";
+import StatusBadge from "@/src/components/admin/ui/StatusBadge";
+import { ROLE_LABELS, USER_STATUS_LABELS, USER_STATUS_TONE } from "@/src/components/admin/labels";
 import { updateMemberAction } from "@/src/actions/admin/members";
 import { requireAdmin } from "@/src/server/auth/dal";
 import { getMember } from "@/src/server/repositories/members";
@@ -36,6 +38,12 @@ const Page = async ({ params, searchParams }: PageProps<"/admin/members/[id]">) 
       <PageHeader
         title={`${profile.firstName} ${profile.lastName}`}
         back={{ href: "/admin/members", label: "Участники" }}
+        description={`${ROLE_LABELS[user.role]} · ${profile.roleTitle}`}
+        meta={
+          <StatusBadge tone={USER_STATUS_TONE[user.status]}>
+            {USER_STATUS_LABELS[user.status]}
+          </StatusBadge>
+        }
       />
       {created && (
         <p className={scss.notice} role="status">
@@ -43,7 +51,7 @@ const Page = async ({ params, searchParams }: PageProps<"/admin/members/[id]">) 
         </p>
       )}
       <div className={scss.split}>
-        <Panel title="Профиль">
+        <Panel>
           <MemberForm
             action={updateMemberAction.bind(null, id)}
             initial={initial}

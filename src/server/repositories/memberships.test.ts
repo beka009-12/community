@@ -44,3 +44,18 @@ describe("memberships", () => {
     await expect(createProject({ ...existing })).rejects.toBeInstanceOf(ConflictError);
   });
 });
+
+describe("overview queries", () => {
+  it("lists projects with their members in one read", async () => {
+    const { listProjectsWithMembers } = await import("./projects");
+    const amanat = (await listProjectsWithMembers()).find((row) => row.project.id === "amanat");
+    expect(amanat?.members.map((m) => m.user.id).sort()).toEqual(["backend-dev", "frontend-lead"]);
+  });
+
+  it("counts projects per member, zero for members without projects", async () => {
+    const { countProjectsByMember } = await import("./projects");
+    const counts = await countProjectsByMember();
+    expect(counts["frontend-dev"]).toBe(3);
+    expect(counts["qa-dev"] ?? 0).toBe(0);
+  });
+});

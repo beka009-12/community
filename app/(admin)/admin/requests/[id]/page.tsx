@@ -3,7 +3,12 @@ import PageHeader from "@/src/components/admin/ui/PageHeader";
 import Panel from "@/src/components/admin/ui/Panel";
 import StatusForm from "@/src/components/admin/requests/StatusForm";
 import scss from "@/src/components/admin/ui/admin-ui.module.scss";
-import { formatDate } from "@/src/components/admin/labels";
+import StatusBadge from "@/src/components/admin/ui/StatusBadge";
+import {
+  REQUEST_STATUS_LABELS,
+  REQUEST_STATUS_TONE,
+  formatDate,
+} from "@/src/components/admin/labels";
 import { setRequestStatusAction } from "@/src/actions/admin/requests";
 import { CATEGORY_LABELS } from "@/src/data/projects";
 import { requireAdmin } from "@/src/server/auth/dal";
@@ -34,6 +39,11 @@ const Page = async ({ params }: PageProps<"/admin/requests/[id]">) => {
         title={request.title}
         description={`Заявка от ${formatDate(request.createdAt)}`}
         back={{ href: "/admin/requests", label: "Заявки" }}
+        meta={
+          <StatusBadge tone={REQUEST_STATUS_TONE[request.status]}>
+            {REQUEST_STATUS_LABELS[request.status]}
+          </StatusBadge>
+        }
       />
       <div className={scss.split}>
         <Panel title="Описание">

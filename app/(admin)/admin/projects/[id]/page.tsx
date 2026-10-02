@@ -9,6 +9,8 @@ import {
   toMembershipRows,
 } from "@/src/components/admin/membership-rows";
 import scss from "@/src/components/admin/ui/admin-ui.module.scss";
+import StatusBadge, { type BadgeTone } from "@/src/components/admin/ui/StatusBadge";
+import { CATEGORY_LABELS, STATUS_LABELS, STATUS_TONE } from "@/src/data/projects";
 import {
   removeProjectMemberAction,
   updateProjectAction,
@@ -30,6 +32,12 @@ const Page = async ({ params }: PageProps<"/admin/projects/[id]">) => {
       <PageHeader
         title={project.name}
         back={{ href: "/admin/projects", label: "Проекты" }}
+        description={`${CATEGORY_LABELS[project.category]} · ${project.year}`}
+        meta={
+          <StatusBadge tone={STATUS_TONE[project.status] as BadgeTone}>
+            {STATUS_LABELS[project.status]}
+          </StatusBadge>
+        }
         action={
           <Link
             href={`/projects/${id}`}

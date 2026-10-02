@@ -1,0 +1,35 @@
+.stack {
+  display: inline-flex;
+  align-items: center;
+}
+
+.avatar {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  overflow: hidden;
+  border: 2px solid var(--color-surface);
+  border-radius: 50%;
+  background: var(--color-surface-2);
+
+  & + & {
+    margin-left: -8px;
+  }
+}
+
+.avatar__img {
+  object-fit: cover;
+}
+
+.more {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-mist);
+}
+
+.none {
+  font-size: 13px;
+  color: var(--color-mist);
+}
