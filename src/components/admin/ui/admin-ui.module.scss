@@ -442,3 +442,52 @@
     color: var(--color-accent);
   }
 }
+
+// Membership editor (teams, projects)
+.membership__list {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.membership__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+
+  & + & {
+    border-top: 1px solid var(--color-border);
+  }
+}
+
+.inlineSelect {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface-2);
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-paper);
+}
+
+.membership__add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+
+  .field {
+    min-width: 180px;
+  }
+}
+
+.membership__add > button {
+  min-height: 44px;
+  padding: 0 18px;
+}
