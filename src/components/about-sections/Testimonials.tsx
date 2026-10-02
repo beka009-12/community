@@ -24,9 +24,9 @@ const Testimonials: FC = () => {
       <div className={`container ${scss.testimonials__inner}`}>
         <span className={scss.testimonials__eyebrow}>
           <span className={scss.testimonials__index}>§ 05</span>
-          Отзывы партнёров
+          Отзывы клиентов
         </span>
-        <h2 className={scss.testimonials__title}>Что говорят компании</h2>
+        <h2 className={scss.testimonials__title}>Что говорят клиенты</h2>
 
         <motion.div
           className={scss.grid}

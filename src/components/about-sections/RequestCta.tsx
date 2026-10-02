@@ -7,7 +7,7 @@ const RequestCta: FC = () => (
   <section className={scss.cta}>
     <div className={`container ${scss.cta__inner}`}>
       <span className={scss.cta__eyebrow}>
-        <span className={scss.cta__index}>§ 06</span>
+        <span className={scss.cta__index}>§ 07</span>
         Начать проект
       </span>
       <h2 className={scss.cta__title}>Есть задача? Расскажите о ней</h2>

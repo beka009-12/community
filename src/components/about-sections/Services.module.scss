@@ -1,0 +1,246 @@
+.services {
+  padding: 56px 0;
+  // Anchor target for the homepage "Смотреть все услуги" link.
+  scroll-margin-top: 96px;
+}
+
+// Same eyebrow/title treatment as the other numbered About sections.
+.services__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.services__index {
+  color: var(--color-mist);
+}
+
+.services__title {
+  margin-bottom: 28px;
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+  font-weight: 700;
+}
+
+.layout {
+  display: grid;
+  gap: 16px;
+
+  @media (min-width: 960px) {
+    grid-template-columns: 300px minmax(0, 1fr);
+    align-items: start;
+    gap: 24px;
+  }
+}
+
+// Mobile: wrapping pills; desktop: vertical list.
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  @media (min-width: 960px) {
+    flex-direction: column;
+    gap: 4px;
+    padding: 6px;
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    background: var(--color-surface);
+  }
+}
+
+.tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-mist);
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--color-paper);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  @media (min-width: 960px) {
+    min-height: 52px;
+    border-color: transparent;
+    border-radius: 14px;
+  }
+}
+
+.tab--active {
+  color: var(--color-paper);
+}
+
+// Same tint as the header's sliding nav/lang pill.
+.tab__highlight {
+  position: absolute;
+  inset: -1px;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: inherit;
+  background: rgba(56, 189, 248, 0.12);
+}
+
+.tab__label,
+.tab__count {
+  position: relative;
+  z-index: 1;
+}
+
+.tab__count {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-mist);
+
+  .tab--active & {
+    color: var(--color-accent);
+  }
+}
+
+.panel {
+  min-height: 0;
+  padding: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  background: var(--color-surface);
+
+  @media (min-width: 640px) {
+    padding: 32px;
+  }
+}
+
+.panel__description {
+  max-width: 600px;
+  margin-bottom: 28px;
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--color-paper);
+}
+
+.panel__label {
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-mist);
+}
+
+.columns {
+  display: grid;
+  gap: 24px;
+  margin-bottom: 28px;
+
+  @media (min-width: 640px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.includes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style: none;
+
+  li {
+    position: relative;
+    padding-left: 18px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--color-paper);
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0.6em;
+      left: 0;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-accent);
+    }
+  }
+}
+
+.team {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+
+  li {
+    padding: 6px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    font-size: 13px;
+    color: var(--color-paper);
+  }
+}
+
+.projects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 16px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-surface-2);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-paper);
+    transition: border-color 0.2s ease;
+
+    &:hover {
+      border-color: var(--color-accent);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
+    }
+  }
+}
+
+.projects__empty {
+  font-size: 14px;
+  color: var(--color-mist);
+
+  a {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+.panel__cta {
+  margin-top: 28px;
+}
