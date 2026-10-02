@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { useTempDb } from "./test-db";
+import { setupTempDb } from "./test-db";
 import {
   createMember,
   getMember,
@@ -11,7 +11,7 @@ import {
 import { ConflictError, NotFoundError } from "./errors";
 import { verifyPassword } from "@/src/server/auth/password";
 
-useTempDb();
+setupTempDb();
 
 const input = {
   role: "DEVELOPER" as const,

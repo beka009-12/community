@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 
 // Each test gets a fresh seeded store in a temp dir.
-export function useTempDb(): void {
+export function setupTempDb(): void {
   let dir = "";
   beforeEach(async () => {
     dir = await mkdtemp(path.join(tmpdir(), "mc-repo-"));

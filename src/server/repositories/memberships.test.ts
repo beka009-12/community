@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { useTempDb } from "./test-db";
+import { setupTempDb } from "./test-db";
 import {
   createProject,
   getProject,
@@ -9,7 +9,7 @@ import {
 import { createTeam, getTeam, upsertTeamMember } from "./teams";
 import { ConflictError, NotFoundError } from "./errors";
 
-useTempDb();
+setupTempDb();
 
 describe("memberships", () => {
   it("adding the same user twice updates the role instead of duplicating", async () => {

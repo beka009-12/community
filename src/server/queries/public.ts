@@ -49,10 +49,7 @@ const toMember = (db: Db, userId: string): Member | null => {
   };
 };
 
-const toProject = ({ id, createdAt: _createdAt, ...rest }: DbProject): Project => ({
-  slug: id,
-  ...rest,
-});
+const toProject = ({ id, ...rest }: DbProject): Project => ({ slug: id, ...rest });
 
 const projectMembers = (db: Db, projectId: string): Member[] =>
   db.projectMembers

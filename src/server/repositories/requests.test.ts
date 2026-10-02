@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { useTempDb } from "./test-db";
+import { setupTempDb } from "./test-db";
 import {
   createClientRequest,
   getClientRequest,
@@ -7,7 +7,7 @@ import {
   setClientRequestStatus,
 } from "./requests";
 
-useTempDb();
+setupTempDb();
 
 describe("client requests repository", () => {
   it("creates NEW requests and lists newest first, filtered by status", async () => {
