@@ -91,7 +91,7 @@ const Roster: FC = () => {
         <div className={scss.footer}>
           <p className={scss.footer__text}>Нужна команда под ваш проект?</p>
           <div className={scss.footer__actions}>
-            <Button href="/about#request" variant="primary">
+            <Button href="/contact" variant="primary">
               Обсудить проект
             </Button>
             <Button href="https://motion.kg" variant="ghost" external>

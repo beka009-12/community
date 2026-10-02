@@ -1,0 +1,225 @@
+.column {
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px 48px;
+
+  @media (min-width: 640px) {
+    padding: 40px 56px;
+  }
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+// The left panel carries the logo on desktop.
+.topbar__logo {
+  display: inline-flex;
+  width: 56px;
+  border-radius: 8px;
+
+  img {
+    width: 100%;
+    height: auto;
+  }
+
+  @media (min-width: 960px) {
+    visibility: hidden;
+  }
+}
+
+.topbar__back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 14px;
+  color: var(--color-mist);
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--color-paper);
+  }
+}
+
+.topbar__logo,
+.topbar__back,
+.note a {
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+  }
+}
+
+.content {
+  width: 100%;
+  max-width: 380px;
+  // Top-anchored, not vertically centred, so errors appearing below
+  // don't shift the heading.
+  margin: 0 auto;
+  padding-top: clamp(48px, 18vh, 200px);
+}
+
+.title {
+  margin-bottom: 12px;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2rem);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.lead {
+  margin-bottom: 32px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-mist);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+// Same form-control look as contact-sections/RequestForm.
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-paper);
+  }
+
+  input {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-surface-2);
+    color: var(--color-paper);
+    font-family: var(--font-body);
+    font-size: 16px;
+    transition: border-color 0.2s ease;
+
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    &:focus-visible {
+      outline: none;
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 3px rgba(86, 187, 255, 0.2);
+    }
+
+    &[aria-invalid="true"] {
+      border-color: var(--color-danger);
+    }
+  }
+}
+
+.field__error {
+  font-size: 13px;
+  color: var(--color-danger);
+}
+
+.field__hint {
+  font-size: 13px;
+  color: var(--color-mist);
+}
+
+.password {
+  position: relative;
+
+  input {
+    padding-right: 52px;
+  }
+}
+
+.password__toggle {
+  position: absolute;
+  top: 50%;
+  right: 2px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-mist);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--color-paper);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
+  }
+}
+
+.alert {
+  padding: 12px 14px;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  border-radius: 10px;
+  background: rgba(248, 113, 113, 0.08);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-paper);
+}
+
+.submit {
+  width: 100%;
+  height: 48px;
+  gap: 10px;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: progress;
+  }
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2s;
+  }
+}
+
+.note {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-border);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-mist);
+
+  a {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}

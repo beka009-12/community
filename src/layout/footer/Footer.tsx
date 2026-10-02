@@ -1,6 +1,7 @@
 import { FC } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { SOCIAL_LINKS } from "@/src/data/socials";
 import scss from "./Footer.module.scss";
 
 const NAV_COLUMNS = [
@@ -16,16 +17,9 @@ const NAV_COLUMNS = [
     title: "Академия",
     links: [
       { href: "/about", label: "О нас" },
-      { href: "/", label: "Вступить" },
+      { href: "https://motion.kg", label: "Вступить" },
     ],
   },
-];
-
-const SOCIAL_LINKS = [
-  { href: "https://wa.me/", label: "WhatsApp" },
-  { href: "https://t.me/", label: "Telegram" },
-  { href: "https://instagram.com/", label: "Instagram" },
-  { href: "https://linkedin.com/", label: "LinkedIn" },
 ];
 
 const Footer: FC = () => {
@@ -54,7 +48,13 @@ const Footer: FC = () => {
               <ul>
                 {col.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href}>{link.label}</Link>
+                    {link.href.startsWith("http") ? (
+                      <a href={link.href} target="_blank" rel="noreferrer">
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link href={link.href}>{link.label}</Link>
+                    )}
                   </li>
                 ))}
               </ul>

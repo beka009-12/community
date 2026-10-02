@@ -197,8 +197,9 @@ const Header: FC = () => {
           </div>
 
           <div className={`${scss.island} ${scss.island__auth}`}>
-            <Button variant="ghost">Войти</Button>
-            <Button variant="primary">Регистрация</Button>
+            <Button href="/login" variant="ghost">
+              Войти
+            </Button>
           </div>
 
           <button
@@ -278,8 +279,9 @@ const Header: FC = () => {
                 </div>
 
                 <div className={scss.mobileMenu__auth}>
-                  <Button variant="ghost">Войти</Button>
-                  <Button variant="primary">Регистрация</Button>
+                  <Button href="/login" variant="ghost">
+                    Войти
+                  </Button>
                 </div>
               </div>
             </nav>

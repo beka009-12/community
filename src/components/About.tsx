@@ -4,7 +4,7 @@ import Academy from "@/src/components/about-sections/Academy";
 import Advantages from "@/src/components/about-sections/Advantages";
 import Testimonials from "@/src/components/about-sections/Testimonials";
 import ServicesPreview from "@/src/components/hero-sections/ServicesPreview";
-import RequestForm from "@/src/components/about-sections/RequestForm";
+import RequestCta from "@/src/components/about-sections/RequestCta";
 import scss from "./About.module.scss";
 
 // Same section-per-file pattern as hero-sections/ and projects-sections/.
@@ -19,7 +19,7 @@ const About = () => (
     <Advantages />
     <Testimonials />
     <ServicesPreview />
-    <RequestForm />
+    <RequestCta />
   </div>
 );
 

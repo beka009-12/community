@@ -24,7 +24,7 @@ const Intro: FC = () => (
           помогаем компаниям находить уже проверенных людей.
         </p>
 
-        <Button href="#request" variant="primary" className={scss.intro__cta}>
+        <Button href="/contact" variant="primary" className={scss.intro__cta}>
           Обсудить проект
         </Button>
       </div>
