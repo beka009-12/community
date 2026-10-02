@@ -15,6 +15,7 @@ const Page = async () => {
     <>
       <PageHeader
         title="Команды"
+        description="Внутренние команды сообщества. На сайте «Команды по проектам» собираются из участников проектов — их состав меняется в разделе «Проекты»."
         action={
           <Button href="/admin/teams/new" variant="primary">
             Создать команду

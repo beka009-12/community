@@ -5,7 +5,7 @@ import Link from "next/link";
 import ConfirmButton from "@/src/components/admin/ui/ConfirmButton";
 import scss from "@/src/components/admin/ui/admin-ui.module.scss";
 import { MEMBERSHIP_LABELS } from "@/src/components/admin/labels";
-import type { FormState } from "@/src/actions/admin/form-state";
+import type { ActionResult, FormState } from "@/src/actions/admin/form-state";
 import type { MembershipRole } from "@/src/server/db/types";
 
 export interface MembershipRow {
@@ -25,7 +25,7 @@ interface MembershipEditorProps {
   rows: MembershipRow[];
   candidates: Candidate[];
   upsertAction: (prev: FormState, formData: FormData) => Promise<FormState>;
-  removeAction: (userId: string) => Promise<void>;
+  removeAction: (userId: string) => Promise<ActionResult>;
 }
 
 const ROLES = Object.entries(MEMBERSHIP_LABELS) as [MembershipRole, string][];
@@ -36,11 +36,15 @@ const RoleCell: FC<{
   row: MembershipRow;
   upsertAction: MembershipEditorProps["upsertAction"];
 }> = ({ row, upsertAction }) => {
-  const [, formAction, pending] = useActionState(upsertAction, {});
+  const [state, formAction, pending] = useActionState(upsertAction, {});
+  const error = pending ? undefined : (state.error ?? state.fieldErrors?.role);
   return (
-    <form action={formAction}>
+    <form action={formAction} className={scss.roleCell}>
       <input type="hidden" name="userId" value={row.userId} />
+      {/* Remount after every response: on failure the select snaps back to
+          the saved role instead of showing an unsaved one. */}
       <select
+        key={JSON.stringify(state)}
         name="role"
         defaultValue={row.membershipRole}
         aria-label={`Роль: ${row.name}`}
@@ -54,6 +58,11 @@ const RoleCell: FC<{
           </option>
         ))}
       </select>
+      {error && (
+        <span role="alert" className={scss.field__error}>
+          {error}
+        </span>
+      )}
     </form>
   );
 };

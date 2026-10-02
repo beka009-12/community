@@ -8,6 +8,13 @@ export interface FormState {
   values?: Record<string, string>;
 }
 
+// Result of one-click mutations (confirm buttons): the UI shows `error`.
+export interface ActionResult {
+  error?: string;
+}
+
+export const SAVE_FAILED = "Не удалось сохранить. Попробуйте ещё раз.";
+
 export const echoValues = (formData: FormData): Record<string, string> =>
   Object.fromEntries(
     [...formData.entries()].filter(

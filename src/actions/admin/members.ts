@@ -11,8 +11,16 @@ import {
   updateMember,
 } from "@/src/server/repositories/members";
 import type { UserStatus } from "@/src/server/db/types";
-import { parseMemberCreate, parseMemberUpdate } from "@/src/server/validation/member";
-import { echoValues, type FormState } from "./form-state";
+import {
+  parseMemberCreate,
+  parseMemberUpdate,
+} from "@/src/server/validation/member";
+import {
+  echoValues,
+  SAVE_FAILED,
+  type ActionResult,
+  type FormState,
+} from "./form-state";
 import { toFormError } from "./handle-error";
 
 const revalidateMember = (id: string) => {
@@ -61,16 +69,20 @@ export async function updateMemberAction(
 
 const STATUSES: UserStatus[] = ["ACTIVE", "INACTIVE"];
 
-export async function setMemberStatusAction(id: string, status: UserStatus): Promise<void> {
+export async function setMemberStatusAction(
+  id: string,
+  status: UserStatus,
+): Promise<ActionResult> {
   await requireAdmin();
-  if (!STATUSES.includes(status)) return;
+  if (!STATUSES.includes(status)) return { error: "Неизвестный статус" };
   try {
     await setMemberStatus(id, status);
   } catch (error) {
     console.error("Status change failed", error);
-    return;
+    return { error: SAVE_FAILED };
   }
   revalidateMember(id);
+  return {};
 }
 
 // Returns the new password once so the admin can hand it over; only the

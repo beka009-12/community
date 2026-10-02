@@ -10,7 +10,12 @@ import {
   upsertTeamMember,
 } from "@/src/server/repositories/teams";
 import { parseMembership, parseTeam } from "@/src/server/validation/team";
-import { echoValues, type FormState } from "./form-state";
+import {
+  echoValues,
+  SAVE_FAILED,
+  type ActionResult,
+  type FormState,
+} from "./form-state";
 import { toFormError } from "./handle-error";
 
 const revalidateTeam = (id: string) => {
@@ -18,7 +23,10 @@ const revalidateTeam = (id: string) => {
   revalidatePath(`/admin/teams/${id}`);
 };
 
-export async function createTeamAction(_prev: FormState, formData: FormData): Promise<FormState> {
+export async function createTeamAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
   await requireAdmin();
   const values = echoValues(formData);
   const parsed = parseTeam(formData);
@@ -71,13 +79,17 @@ export async function upsertTeamMemberAction(
   return { ok: true };
 }
 
-export async function removeTeamMemberAction(teamId: string, userId: string): Promise<void> {
+export async function removeTeamMemberAction(
+  teamId: string,
+  userId: string,
+): Promise<ActionResult> {
   await requireAdmin();
   try {
     await removeTeamMember(teamId, userId);
   } catch (error) {
     console.error("Remove team member failed", error);
-    return;
+    return { error: SAVE_FAILED };
   }
   revalidateTeam(teamId);
+  return {};
 }

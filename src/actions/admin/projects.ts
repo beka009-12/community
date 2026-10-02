@@ -9,9 +9,17 @@ import {
   updateProject,
   upsertProjectMember,
 } from "@/src/server/repositories/projects";
-import { parseProjectCreate, parseProjectUpdate } from "@/src/server/validation/project";
+import {
+  parseProjectCreate,
+  parseProjectUpdate,
+} from "@/src/server/validation/project";
 import { parseMembership } from "@/src/server/validation/team";
-import { echoValues, type FormState } from "./form-state";
+import {
+  echoValues,
+  SAVE_FAILED,
+  type ActionResult,
+  type FormState,
+} from "./form-state";
 import { toFormError } from "./handle-error";
 
 // Projects show up on the homepage, /projects, project pages and member
@@ -22,7 +30,10 @@ const revalidateProject = (id: string) => {
   revalidatePath("/", "layout");
 };
 
-export async function createProjectAction(_prev: FormState, formData: FormData): Promise<FormState> {
+export async function createProjectAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
   await requireAdmin();
   const values = echoValues(formData);
   const parsed = parseProjectCreate(formData);
@@ -74,13 +85,17 @@ export async function upsertProjectMemberAction(
   return { ok: true };
 }
 
-export async function removeProjectMemberAction(projectId: string, userId: string): Promise<void> {
+export async function removeProjectMemberAction(
+  projectId: string,
+  userId: string,
+): Promise<ActionResult> {
   await requireAdmin();
   try {
     await removeProjectMember(projectId, userId);
   } catch (error) {
     console.error("Remove project member failed", error);
-    return;
+    return { error: SAVE_FAILED };
   }
   revalidateProject(projectId);
+  return {};
 }
