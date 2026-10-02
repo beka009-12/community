@@ -1,31 +1,74 @@
 "use client";
 
-import { FC, FormEvent, useState } from "react";
+import { FC, ReactNode, useActionState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { motionTokens, springs } from "@/src/lib/motion-tokens";
 import Button from "@/src/ui/Button";
 import { CATEGORY_LABELS } from "@/src/data/projects";
+import {
+  submitClientRequest,
+  type RequestFormState,
+} from "@/src/actions/client-requests";
 import scss from "./RequestForm.module.scss";
 
-// Form only — the page heading lives in contact-sections/Intro.
-// No backend yet (matches the rest of the site) — submitting just shows
-// a confirmation state client-side. Field names mirror the ClientRequest
-// entity from the platform plan (name, company, email, phone, title,
-// description, projectType, budget) so wiring this to a real endpoint
-// later is a drop-in, not a redesign.
-const RequestForm: FC = () => {
-  const [submitted, setSubmitted] = useState(false);
+interface FieldProps {
+  name: string;
+  label: string;
+  required?: boolean;
+  full?: boolean;
+  error?: string;
+  children: (describedBy: string | undefined) => ReactNode;
+}
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setSubmitted(true);
-  };
+const Field: FC<FieldProps> = ({
+  name,
+  label,
+  required,
+  full,
+  error,
+  children,
+}) => {
+  const errorId = error ? `request-${name}-error` : undefined;
+  return (
+    <div className={`${scss.field} ${full ? scss["field--full"] : ""}`}>
+      <label htmlFor={`request-${name}`}>
+        {label} {required && <span className={scss.required}>*</span>}
+      </label>
+      {children(errorId)}
+      {error && (
+        <p id={errorId} className={scss.field__error}>
+          {error}
+        </p>
+      )}
+    </div>
+  );
+};
+
+const INITIAL_STATE: RequestFormState = {};
+
+// Form only — the page heading lives in contact-sections/Intro. Field
+// names mirror the ClientRequest entity (ТЗ §9); the request lands in
+// the admin's "Заявки".
+const RequestForm: FC = () => {
+  const [state, formAction, pending] = useActionState(
+    submitClientRequest,
+    INITIAL_STATE,
+  );
+  const errors = pending ? {} : (state.fieldErrors ?? {});
+  const value = (name: string) => state.values?.[name] ?? "";
+  const inputProps = (name: string, describedBy: string | undefined) => ({
+    id: `request-${name}`,
+    name,
+    defaultValue: value(name),
+    "aria-invalid": Boolean(errors[name]),
+    "aria-describedby": describedBy,
+  });
 
   return (
     // initial={false}: the form is server-rendered visible; only the
     // form → success swap animates.
     <AnimatePresence mode="wait" initial={false}>
-      {submitted ? (
+      {state.ok ? (
         <motion.div
           key="success"
           className={scss.success}
@@ -33,6 +76,7 @@ const RequestForm: FC = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: motionTokens.distance.sm }}
           transition={springs.snappy}
+          role="status"
         >
           <h3>Заявка отправлена</h3>
           <p>Мы свяжемся с вами в ближайшее время.</p>
@@ -41,82 +85,126 @@ const RequestForm: FC = () => {
         <motion.form
           key="form"
           className={scss.form}
-          onSubmit={handleSubmit}
+          action={formAction}
+          noValidate
           initial={{ opacity: 0, y: motionTokens.distance.sm }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: motionTokens.distance.sm }}
           transition={springs.snappy}
         >
-          <div className={scss.field}>
-            <label htmlFor="request-name">
-              Имя <span className={scss.required}>*</span>
-            </label>
-            <input id="request-name" name="name" type="text" autoComplete="name" required />
-          </div>
+          <Field name="name" label="Имя" required error={errors.name}>
+            {(describedBy) => (
+              <input
+                {...inputProps("name", describedBy)}
+                type="text"
+                autoComplete="name"
+                required
+              />
+            )}
+          </Field>
 
-          <div className={scss.field}>
-            <label htmlFor="request-company">Компания</label>
-            <input
-              id="request-company"
-              name="company"
-              type="text"
-              autoComplete="organization"
-            />
-          </div>
+          <Field name="company" label="Компания" error={errors.company}>
+            {(describedBy) => (
+              <input
+                {...inputProps("company", describedBy)}
+                type="text"
+                autoComplete="organization"
+              />
+            )}
+          </Field>
 
-          <div className={scss.field}>
-            <label htmlFor="request-email">
-              Email <span className={scss.required}>*</span>
-            </label>
-            <input id="request-email" name="email" type="email" autoComplete="email" required />
-          </div>
+          <Field name="email" label="Email" required error={errors.email}>
+            {(describedBy) => (
+              <input
+                {...inputProps("email", describedBy)}
+                type="email"
+                autoComplete="email"
+                required
+              />
+            )}
+          </Field>
 
-          <div className={scss.field}>
-            <label htmlFor="request-phone">Телефон</label>
-            <input id="request-phone" name="phone" type="tel" autoComplete="tel" />
-          </div>
+          <Field name="phone" label="Телефон" error={errors.phone}>
+            {(describedBy) => (
+              <input
+                {...inputProps("phone", describedBy)}
+                type="tel"
+                autoComplete="tel"
+              />
+            )}
+          </Field>
 
-          <div className={scss.field}>
-            <label htmlFor="request-title">
-              Название проекта <span className={scss.required}>*</span>
-            </label>
-            <input id="request-title" name="title" type="text" required />
-          </div>
+          <Field
+            name="title"
+            label="Название проекта"
+            required
+            error={errors.title}
+          >
+            {(describedBy) => (
+              <input
+                {...inputProps("title", describedBy)}
+                type="text"
+                required
+              />
+            )}
+          </Field>
 
-          <div className={scss.field}>
-            <label htmlFor="request-type">Тип проекта</label>
-            <select id="request-type" name="projectType" defaultValue="">
-              <option value="" disabled>
-                Выберите тип
-              </option>
-              {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <Field
+            name="projectType"
+            label="Тип проекта"
+            error={errors.projectType}
+          >
+            {(describedBy) => (
+              <select {...inputProps("projectType", describedBy)}>
+                <option value="">Выберите тип</option>
+                {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            )}
+          </Field>
 
-          <div className={scss.field}>
-            <label htmlFor="request-budget">Бюджет (опционально)</label>
-            <input
-              id="request-budget"
-              name="budget"
-              type="text"
-              placeholder="Например, 300 000 сом"
-            />
-          </div>
+          <Field
+            name="budget"
+            label="Бюджет (опционально)"
+            error={errors.budget}
+          >
+            {(describedBy) => (
+              <input
+                {...inputProps("budget", describedBy)}
+                type="text"
+                placeholder="Например, 300 000 сом"
+              />
+            )}
+          </Field>
 
-          <div className={`${scss.field} ${scss["field--full"]}`}>
-            <label htmlFor="request-description">
-              Описание проекта <span className={scss.required}>*</span>
-            </label>
-            <textarea id="request-description" name="description" rows={5} required />
-          </div>
+          <Field
+            name="description"
+            label="Описание проекта"
+            required
+            full
+            error={errors.description}
+          >
+            {(describedBy) => (
+              <textarea
+                {...inputProps("description", describedBy)}
+                rows={5}
+                required
+              />
+            )}
+          </Field>
+
+          {state.error && !pending && (
+            <p role="alert" className={scss.alert}>
+              {state.error}
+            </p>
+          )}
 
           <div className={scss.submitRow}>
-            <Button type="submit" variant="primary">
-              Отправить заявку
+            <Button type="submit" variant="primary" disabled={pending}>
+              {pending ? "Отправляем…" : "Отправить заявку"}
             </Button>
           </div>
         </motion.form>

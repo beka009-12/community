@@ -320,8 +320,3 @@ export const getMemberName = (member: Member) =>
 
 export const isTeamLead = (member: Member) => member.role.startsWith("Тимлид");
 
-// Only ACTIVE members are public; INACTIVE ones are kept for history.
-export const PUBLIC_MEMBERS = MEMBERS.filter((member) => member.status === "ACTIVE");
-
-export const getPublicMember = (id: string) =>
-  PUBLIC_MEMBERS.find((member) => member.id === id);

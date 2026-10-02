@@ -119,3 +119,27 @@
     }
   }
 }
+
+.field__error {
+  font-size: 13px;
+  color: var(--color-danger);
+}
+
+.field input[aria-invalid="true"],
+.field select[aria-invalid="true"],
+.field textarea[aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+
+.alert {
+  padding: 12px 14px;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  border-radius: 10px;
+  background: rgba(248, 113, 113, 0.08);
+  font-size: 14px;
+  color: var(--color-paper);
+
+  @media (min-width: 640px) {
+    grid-column: 1 / -1;
+  }
+}

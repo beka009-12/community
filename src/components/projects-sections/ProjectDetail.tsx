@@ -8,10 +8,9 @@ import {
   CATEGORY_LABELS,
   STATUS_LABELS,
   STATUS_TONE,
-  getAdjacentProjects,
   type Project,
 } from "@/src/data/projects";
-import { getProjectMembers } from "@/src/data/teams";
+import type { Member } from "@/src/data/members";
 import scss from "./ProjectDetail.module.scss";
 
 const ORIGIN_LABELS: Record<Project["origin"], string> = {
@@ -24,9 +23,18 @@ const ORIGIN_LABELS: Record<Project["origin"], string> = {
 // shipped to the browser (matches the project's Server-Components-first
 // convention). Only HeroImage and TeamSection carry their own small
 // client boundary, for the scroll-parallax and scroll-reveal respectively.
-const ProjectDetail: FC<{ project: Project }> = ({ project }) => {
+interface ProjectDetailProps {
+  project: Project;
+  members: Member[];
+  adjacent: { prev: Project; next: Project };
+}
+
+const ProjectDetail: FC<ProjectDetailProps> = ({
+  project,
+  members,
+  adjacent,
+}) => {
   const hasLinks = Boolean(project.demoUrl || project.githubUrl);
-  const adjacent = getAdjacentProjects(project.slug);
 
   return (
     <article className={scss.detail}>
@@ -72,7 +80,7 @@ const ProjectDetail: FC<{ project: Project }> = ({ project }) => {
 
         <div className={scss.detail__section}>
           <span className={scss.detail__sectionLabel}>Команда проекта</span>
-          <TeamSection members={getProjectMembers(project.slug)} />
+          <TeamSection members={members} />
         </div>
 
         {hasLinks && (
@@ -91,7 +99,7 @@ const ProjectDetail: FC<{ project: Project }> = ({ project }) => {
         )}
       </div>
 
-      {adjacent && (
+      {adjacent.next.slug !== project.slug && (
         <nav
           className={`container ${scss.pager}`}
           aria-label="Соседние проекты"

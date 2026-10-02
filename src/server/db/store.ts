@@ -7,8 +7,10 @@ import type { Db } from "./types";
 export class StoreError extends Error {}
 
 // Read per call (not at import) so tests can point it at a temp file.
+// turbopackIgnore: a runtime data file, not something to trace into the build.
 const dbFile = () =>
-  process.env.DB_FILE ?? path.join(process.cwd(), "data", "db.json");
+  process.env.DB_FILE ??
+  path.join(/* turbopackIgnore: true */ process.cwd(), "data", "db.json");
 
 let queue: Promise<unknown> = Promise.resolve();
 

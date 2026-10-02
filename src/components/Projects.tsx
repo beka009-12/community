@@ -7,21 +7,21 @@ import Header, {
 } from "@/src/components/projects-sections/Header";
 import Grid from "@/src/components/projects-sections/Grid";
 import EditorialList from "@/src/components/projects-sections/EditorialList";
-import { PROJECTS } from "@/src/data/projects";
+import type { Project } from "@/src/data/projects";
 
-const Projects: FC = () => {
+const Projects: FC<{ projects: Project[] }> = ({ projects }) => {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilterKey>("all");
 
   const visible = useMemo(
     () =>
-      PROJECTS.filter((project) => {
+      projects.filter((project) => {
         const matchesOrigin = filter === "all" || project.origin === filter;
         const matchesStatus =
           statusFilter === "all" || project.status === statusFilter;
         return matchesOrigin && matchesStatus;
       }),
-    [filter, statusFilter],
+    [filter, statusFilter, projects],
   );
 
   return (

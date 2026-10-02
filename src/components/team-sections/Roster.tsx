@@ -9,7 +9,7 @@ import Button from "@/src/ui/Button";
 import Select from "@/src/ui/Select";
 import { SPECIALIZATIONS } from "@/src/data/specializations";
 import { SPECIALIZATION_ICONS } from "./specialization-icons";
-import { PUBLIC_MEMBERS, getMemberName } from "@/src/data/members";
+import { getMemberName, type Member } from "@/src/data/members";
 import scss from "./Roster.module.scss";
 
 type FilterKey = "all" | (typeof SPECIALIZATIONS)[number]["id"];
@@ -30,15 +30,15 @@ const DIRECTION_OPTIONS = [
 // radius/shadow), photos desaturated until hover/focus reveals color +
 // role/stack — a distinct visual moment for the one section on this
 // page that's actually about people, not another spotlight-card grid.
-const Roster: FC = () => {
+const Roster: FC<{ members: Member[] }> = ({ members }) => {
   const [filter, setFilter] = useState<FilterKey>("all");
 
   const visible = useMemo(
     () =>
       filter === "all"
-        ? PUBLIC_MEMBERS
-        : PUBLIC_MEMBERS.filter((member) => member.specializationId === filter),
-    [filter],
+        ? members
+        : members.filter((member) => member.specializationId === filter),
+    [filter, members],
   );
 
   return (

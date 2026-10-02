@@ -1,5 +1,5 @@
-import { MEMBERS, isTeamLead, type Member } from "./members";
-import { PROJECTS, type Project } from "./projects";
+import { MEMBERS, type Member } from "./members";
+import type { Project } from "./projects";
 
 export interface Team {
   id: string;
@@ -8,6 +8,8 @@ export interface Team {
   memberIds: string[];
 }
 
+// Seed data only — src/server/db/seed.ts turns this into Team, TeamMember
+// and ProjectMember rows; the site reads the store, not this file.
 // Teams reference members by id instead of re-describing people —
 // same placeholder roster as the Участники roster, just grouped by
 // project. A member can appear on more than one team (lead here,
@@ -32,12 +34,6 @@ export function getTeamMembers(team: Team): Member[] {
     .filter((member): member is Member => Boolean(member));
 }
 
-// Single source of truth for "who worked on this project" — the project
-// page and member profiles both read it from TEAMS.
-export function getProjectMembers(projectSlug: string): Member[] {
-  const team = TEAMS.find((item) => item.projectSlug === projectSlug);
-  return team ? getTeamMembers(team) : [];
-}
 
 export type ProjectRole = "TEAM_LEAD" | "DEVELOPER";
 
@@ -46,13 +42,3 @@ export interface MemberProject {
   role: ProjectRole;
 }
 
-export function getMemberProjects(member: Member): MemberProject[] {
-  return TEAMS.filter((team) => team.memberIds.includes(member.id)).flatMap(
-    (team) => {
-      const project = PROJECTS.find((item) => item.slug === team.projectSlug);
-      if (!project) return [];
-      const role: ProjectRole = isTeamLead(member) ? "TEAM_LEAD" : "DEVELOPER";
-      return [{ project, role }];
-    },
-  );
-}

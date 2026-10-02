@@ -1,22 +1,18 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import MemberProfile from "@/src/components/MemberProfile";
-import {
-  PUBLIC_MEMBERS,
-  getMemberName,
-  getPublicMember,
-} from "@/src/data/members";
+import { getMemberName } from "@/src/data/members";
 import { SPECIALIZATIONS } from "@/src/data/specializations";
-
-export async function generateStaticParams() {
-  return PUBLIC_MEMBERS.map((member) => ({ id: member.id }));
-}
+import {
+  getMemberProjects,
+  getPublicMember,
+} from "@/src/server/queries/public";
 
 export async function generateMetadata({
   params,
 }: PageProps<"/team/[id]">): Promise<Metadata> {
   const { id } = await params;
-  const member = getPublicMember(id);
+  const member = await getPublicMember(id);
 
   if (!member) return {};
 
@@ -32,11 +28,12 @@ export async function generateMetadata({
 
 const Page = async ({ params }: PageProps<"/team/[id]">) => {
   const { id } = await params;
-  const member = getPublicMember(id);
+  const member = await getPublicMember(id);
 
   if (!member) notFound();
 
-  return <MemberProfile member={member} />;
+  const projects = await getMemberProjects(member.id);
+  return <MemberProfile member={member} projects={projects} />;
 };
 
 export default Page;

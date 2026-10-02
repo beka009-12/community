@@ -1,7 +1,7 @@
 import { FC } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { TEAMS, getTeamMembers } from "@/src/data/teams";
+import type { ProjectTeam } from "@/src/server/queries/public";
 import scss from "./Teams.module.scss";
 
 const MAX_VISIBLE_AVATARS = 3;
@@ -12,7 +12,7 @@ const MAX_VISIBLE_AVATARS = 3;
 // Only the team lead's role/stack is shown below — the cluster itself
 // already communicates "this many people," a full roster duplicates
 // the Roster section above.
-const Teams: FC = () => (
+const Teams: FC<{ teams: ProjectTeam[] }> = ({ teams }) => (
   <section className={scss.teams}>
     <div className={`container ${scss.teams__inner}`}>
       <h2 className={scss.teams__title}>Команды по проектам</h2>
@@ -21,8 +21,8 @@ const Teams: FC = () => (
       </p>
 
       <div className={scss.grid}>
-        {TEAMS.map((team) => {
-          const members = getTeamMembers(team);
+        {teams.map((team) => {
+          const { members } = team;
           const visibleMembers = members.slice(0, MAX_VISIBLE_AVATARS);
           const overflowCount = members.length - MAX_VISIBLE_AVATARS;
           const lead = members.find((member) => member.role.startsWith("Тимлид")) ?? members[0];

@@ -9,16 +9,8 @@ import {
 } from "motion/react";
 import { springs, motionTokens } from "@/src/lib/motion-tokens";
 import Button from "@/src/ui/Button";
-import {
-  CATEGORY_LABELS,
-  getFeaturedProjects,
-  type Project,
-} from "@/src/data/projects";
+import { CATEGORY_LABELS, type Project } from "@/src/data/projects";
 import scss from "./Portfolio.module.scss";
-
-// Same 3 projects shown here also live on /projects, in the full list —
-// this preview is just the featured subset of one shared dataset.
-const PROJECTS = getFeaturedProjects();
 
 // Намного меньше смещение.
 // Задние карточки будут показывать только угол.
@@ -115,17 +107,18 @@ const slideVariants = {
   }),
 };
 
-const Portfolio: FC = () => {
+// The featured subset of the store's projects, passed in by Hero.
+const Portfolio: FC<{ projects: Project[] }> = ({ projects }) => {
   const reduce = useReducedMotion();
 
-  const total = PROJECTS.length;
+  const total = projects.length;
 
-  const [order, setOrder] = useState(() => PROJECTS.map((_, i) => i));
+  const [order, setOrder] = useState(() => projects.map((_, i) => i));
   const [direction, setDirection] = useState(1);
   const [paused, setPaused] = useState(false);
 
   const front = order[0];
-  const project = PROJECTS[front];
+  const project = projects[front];
 
   const advance = useCallback(() => {
     setDirection(1);
@@ -246,7 +239,7 @@ const Portfolio: FC = () => {
           </AnimatePresence>
 
           <div className={scss.dots} role="group" aria-label="Проект">
-            {PROJECTS.map((p, i) => (
+            {projects.map((p, i) => (
               <button
                 key={p.name}
                 type="button"
@@ -262,7 +255,7 @@ const Portfolio: FC = () => {
         </div>
 
         <div className={scss.stack}>
-          {PROJECTS.map((p, i) => {
+          {projects.map((p, i) => {
             const pos = order.indexOf(i);
             const isFront = pos === 0;
 

@@ -5,14 +5,18 @@ import ProfileCard from "@/src/components/member-sections/ProfileCard";
 import ProjectPath from "@/src/components/member-sections/ProjectPath";
 import ResumeTimeline from "@/src/components/member-sections/ResumeTimeline";
 import type { Member } from "@/src/data/members";
-import { getMemberProjects } from "@/src/data/teams";
+import type { MemberProject } from "@/src/data/teams";
 import scss from "./MemberProfile.module.scss";
 
 // Scenario 4 in the platform plan: a client checks someone's résumé and
 // portfolio before sending a request. Only ProjectPath is a client
 // component (its one scroll-in moment).
-const MemberProfile: FC<{ member: Member }> = ({ member }) => {
-  const projects = getMemberProjects(member);
+interface MemberProfileProps {
+  member: Member;
+  projects: MemberProject[];
+}
+
+const MemberProfile: FC<MemberProfileProps> = ({ member, projects }) => {
   const experience = member.experience.map((item) => ({
     title: item.company,
     subtitle: item.role,

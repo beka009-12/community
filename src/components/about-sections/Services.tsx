@@ -1,24 +1,29 @@
 "use client";
 
-import { FC, KeyboardEvent, useRef, useState } from "react";
+import { FC, KeyboardEvent, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { motionTokens, springs } from "@/src/lib/motion-tokens";
 import Button from "@/src/ui/Button";
 import ArrowIcon from "@/src/ui/ArrowIcon";
 import { SERVICES } from "@/src/data/services";
-import { PROJECTS } from "@/src/data/projects";
+import type { Project } from "@/src/data/projects";
 import scss from "./Services.module.scss";
 
 // Homepage ServicesPreview is the teaser; this is the detail a client
 // reads on /about: scope, team and real projects per service. Ordered
 // by how many community projects back each service up.
-const ITEMS = SERVICES.map((service) => ({
-  ...service,
-  projects: PROJECTS.filter((project) => project.category === service.category),
-})).sort((a, b) => b.projects.length - a.projects.length);
-
-const Services: FC = () => {
+const Services: FC<{ projects: Project[] }> = ({ projects }) => {
+  const ITEMS = useMemo(
+    () =>
+      SERVICES.map((service) => ({
+        ...service,
+        projects: projects.filter(
+          (project) => project.category === service.category,
+        ),
+      })).sort((a, b) => b.projects.length - a.projects.length),
+    [projects],
+  );
   const [active, setActive] = useState(0);
   const reduce = useReducedMotion();
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
