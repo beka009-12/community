@@ -2,13 +2,14 @@
 
 import { FC, useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { springs } from "@/src/lib/motion-tokens";
 import Button from "@/src/ui/Button";
 import Select from "@/src/ui/Select";
 import { SPECIALIZATIONS } from "@/src/data/specializations";
 import { SPECIALIZATION_ICONS } from "./specialization-icons";
-import { MEMBERS } from "@/src/data/members";
+import { PUBLIC_MEMBERS, getMemberName } from "@/src/data/members";
 import scss from "./Roster.module.scss";
 
 type FilterKey = "all" | (typeof SPECIALIZATIONS)[number]["id"];
@@ -35,8 +36,8 @@ const Roster: FC = () => {
   const visible = useMemo(
     () =>
       filter === "all"
-        ? MEMBERS
-        : MEMBERS.filter((member) => member.specializationId === filter),
+        ? PUBLIC_MEMBERS
+        : PUBLIC_MEMBERS.filter((member) => member.specializationId === filter),
     [filter],
   );
 
@@ -65,23 +66,28 @@ const Roster: FC = () => {
                   exit={{ opacity: 0 }}
                   transition={springs.gentle}
                   className={scss.cell}
-                  tabIndex={0}
                 >
-                  <Image
-                    src={member.photo}
-                    alt=""
-                    fill
-                    sizes="(min-width: 960px) 200px, 33vw"
-                    className={scss.cell__img}
-                  />
-                  <span className={scss.cell__index}>
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <span className={scss.cell__scrim} aria-hidden="true" />
-                  <div className={scss.cell__caption}>
-                    <span className={scss.cell__role}>{member.role}</span>
-                    <span className={scss.cell__stack}>{member.stack}</span>
-                  </div>
+                  <Link
+                    href={`/team/${member.id}`}
+                    className={scss.cell__link}
+                    aria-label={`${getMemberName(member)}, ${member.role}`}
+                  >
+                    <Image
+                      src={member.photo}
+                      alt=""
+                      fill
+                      sizes="(min-width: 960px) 200px, 33vw"
+                      className={scss.cell__img}
+                    />
+                    <span className={scss.cell__index}>
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className={scss.cell__scrim} aria-hidden="true" />
+                    <div className={scss.cell__caption}>
+                      <span className={scss.cell__role}>{member.role}</span>
+                      <span className={scss.cell__stack}>{member.stack}</span>
+                    </div>
+                  </Link>
                 </motion.div>
               ))}
             </AnimatePresence>

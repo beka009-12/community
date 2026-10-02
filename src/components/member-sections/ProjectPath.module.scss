@@ -1,0 +1,134 @@
+$node: 14px;
+
+.path {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  list-style: none;
+}
+
+// Node centre to node centre (first/last steps' node sits at 28px).
+.path__rail {
+  position: absolute;
+  top: 28px;
+  bottom: 28px;
+  left: calc(#{$node} / 2 - 1px);
+  width: 2px;
+  background: linear-gradient(
+    to bottom,
+    var(--color-accent),
+    rgba(86, 187, 255, 0.2)
+  );
+  transform-origin: top;
+}
+
+.step {
+  position: relative;
+  display: grid;
+  grid-template-columns: $node minmax(0, 1fr);
+  gap: 20px;
+}
+
+.step__node {
+  position: relative;
+  z-index: 1;
+  width: $node;
+  height: $node;
+  margin-top: 21px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  background: var(--color-ink);
+}
+
+.step__link {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 14px 14px 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+  transition: border-color 0.2s ease;
+
+  &:hover {
+    border-color: rgba(86, 187, 255, 0.35);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+.step__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.step__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.step__role {
+  padding: 2px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-paper);
+}
+
+.step__name {
+  margin-bottom: 4px;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.step__description {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-mist);
+}
+
+.step__image {
+  display: none;
+  flex: none;
+  width: 144px;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 10px;
+  background: var(--color-surface-2);
+
+  @media (min-width: 640px) {
+    display: block;
+  }
+}
+
+// Status tones — same palette as ProjectDetail's status pills.
+.tone--positive {
+  color: var(--color-signal);
+}
+
+.tone--accent {
+  color: var(--color-accent);
+}
+
+.tone--neutral {
+  color: var(--color-mist);
+}
+
+.tone--muted {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.empty {
+  font-size: 15px;
+  color: var(--color-mist);
+}

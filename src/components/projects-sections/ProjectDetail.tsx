@@ -11,6 +11,7 @@ import {
   getAdjacentProjects,
   type Project,
 } from "@/src/data/projects";
+import { getProjectMembers } from "@/src/data/teams";
 import scss from "./ProjectDetail.module.scss";
 
 const ORIGIN_LABELS: Record<Project["origin"], string> = {
@@ -71,7 +72,7 @@ const ProjectDetail: FC<{ project: Project }> = ({ project }) => {
 
         <div className={scss.detail__section}>
           <span className={scss.detail__sectionLabel}>Команда проекта</span>
-          <TeamSection members={project.team} />
+          <TeamSection members={getProjectMembers(project.slug)} />
         </div>
 
         {hasLinks && (

@@ -2,14 +2,11 @@
 
 import { FC } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 import { motionTokens, springs } from "@/src/lib/motion-tokens";
-import type { ProjectTeamMember } from "@/src/data/projects";
+import { getMemberName, type Member } from "@/src/data/members";
 import scss from "./TeamSection.module.scss";
-
-// Same stand-in used by the homepage's CommunityPreview section — no
-// real member photos exist yet.
-const PLACEHOLDER_AVATAR = "/team/placeholder-1.webp";
 
 const containerVariants = {
   hidden: {},
@@ -21,7 +18,7 @@ const memberVariants = {
   visible: { opacity: 1, y: 0, transition: springs.gentle },
 };
 
-const TeamSection: FC<{ members: ProjectTeamMember[] }> = ({ members }) => {
+const TeamSection: FC<{ members: Member[] }> = ({ members }) => {
   const reduce = useReducedMotion();
 
   return (
@@ -34,24 +31,30 @@ const TeamSection: FC<{ members: ProjectTeamMember[] }> = ({ members }) => {
     >
       {members.map((member) => (
         <motion.li
-          key={member.role}
+          key={member.id}
           className={scss.member}
           variants={reduce ? undefined : memberVariants}
         >
-          <span className={scss.member__avatar}>
-            <Image
-              src={PLACEHOLDER_AVATAR}
-              alt=""
-              fill
-              sizes="48px"
-              className={scss.member__avatarImg}
-            />
-          </span>
+          <Link
+            href={`/team/${member.id}`}
+            className={scss.member__link}
+            aria-label={`${getMemberName(member)}, ${member.role}`}
+          >
+            <span className={scss.member__avatar}>
+              <Image
+                src={member.photo}
+                alt=""
+                fill
+                sizes="48px"
+                className={scss.member__avatarImg}
+              />
+            </span>
 
-          <span className={scss.member__info}>
-            <span className={scss.member__role}>{member.role}</span>
-            <span className={scss.member__stack}>{member.stack}</span>
-          </span>
+            <span className={scss.member__info}>
+              <span className={scss.member__role}>{member.role}</span>
+              <span className={scss.member__stack}>{member.stack}</span>
+            </span>
+          </Link>
         </motion.li>
       ))}
     </motion.ul>

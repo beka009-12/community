@@ -1,0 +1,97 @@
+$node: 10px;
+
+.timeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  list-style: none;
+}
+
+.entry {
+  position: relative;
+  padding-left: 28px;
+
+  // Rail segment down to the next entry; the last one has none.
+  &:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    top: 14px;
+    bottom: -24px;
+    left: calc(#{$node} / 2 - 0.5px);
+    width: 1px;
+    background: var(--color-border);
+  }
+}
+
+.entry__node {
+  position: absolute;
+  top: 7px;
+  left: 0;
+  width: $node;
+  height: $node;
+  border: 2px solid var(--color-mist);
+  border-radius: 50%;
+  background: var(--color-ink);
+}
+
+.entry__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+}
+
+.entry__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-paper);
+}
+
+.entry__period {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-mist);
+}
+
+.entry__subtitle {
+  margin-top: 2px;
+  font-size: 14px;
+  color: var(--color-mist);
+}
+
+.entry__description {
+  max-width: 560px;
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-paper);
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  margin-top: 16px;
+  padding: 0 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-paper);
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+
+  &:hover {
+    border-color: var(--color-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}

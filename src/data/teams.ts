@@ -1,4 +1,5 @@
-import { MEMBERS } from "./members";
+import { MEMBERS, isTeamLead, type Member } from "./members";
+import { PROJECTS, type Project } from "./projects";
 
 export interface Team {
   id: string;
@@ -25,8 +26,33 @@ export const TEAMS: Team[] = [
   { id: "salamat", projectSlug: "salamat", projectName: "Salamat", memberIds: ["ai-lead", "backend-dev"] },
 ];
 
-export function getTeamMembers(team: Team) {
+export function getTeamMembers(team: Team): Member[] {
   return team.memberIds
     .map((id) => MEMBERS.find((member) => member.id === id))
-    .filter((member): member is (typeof MEMBERS)[number] => Boolean(member));
+    .filter((member): member is Member => Boolean(member));
+}
+
+// Single source of truth for "who worked on this project" — the project
+// page and member profiles both read it from TEAMS.
+export function getProjectMembers(projectSlug: string): Member[] {
+  const team = TEAMS.find((item) => item.projectSlug === projectSlug);
+  return team ? getTeamMembers(team) : [];
+}
+
+export type ProjectRole = "TEAM_LEAD" | "DEVELOPER";
+
+export interface MemberProject {
+  project: Project;
+  role: ProjectRole;
+}
+
+export function getMemberProjects(member: Member): MemberProject[] {
+  return TEAMS.filter((team) => team.memberIds.includes(member.id)).flatMap(
+    (team) => {
+      const project = PROJECTS.find((item) => item.slug === team.projectSlug);
+      if (!project) return [];
+      const role: ProjectRole = isTeamLead(member) ? "TEAM_LEAD" : "DEVELOPER";
+      return [{ project, role }];
+    },
+  );
 }

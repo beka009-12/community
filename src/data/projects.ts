@@ -2,15 +2,6 @@ export type ProjectStatus = "PLANNED" | "IN_PROGRESS" | "COMPLETED" | "PAUSED";
 export type ProjectOrigin = "community" | "client";
 export type ProjectCategory = "web" | "systems" | "bots" | "ai";
 
-// No real member profiles exist yet (the /team page is still a stub, and
-// there's no backend behind any of this), so members are identified by
-// role only — same convention the homepage's CommunityPreview section
-// already uses, never a fabricated personal name.
-export interface ProjectTeamMember {
-  role: string;
-  stack: string;
-}
-
 export interface Project {
   slug: string;
   name: string;
@@ -22,7 +13,6 @@ export interface Project {
   description: string;
   details: string;
   stack: string[];
-  team: ProjectTeamMember[];
   demoUrl?: string;
   githubUrl?: string;
   featured: boolean;
@@ -70,10 +60,6 @@ export const PROJECTS: Project[] = [
     details:
       "Система помогает создавать сборы, отслеживать поступления и формировать понятные отчёты для пользователей и администраторов.",
     stack: ["React", "FastAPI", "PostgreSQL"],
-    team: [
-      { role: "Тимлид Frontend", stack: "React · Next.js" },
-      { role: "Backend-разработчик", stack: "FastAPI · PostgreSQL" },
-    ],
     featured: true,
   },
   {
@@ -90,10 +76,6 @@ export const PROJECTS: Project[] = [
     details:
       "Централизованная система для работы с документами, пользователями и внутренними процессами образовательной организации.",
     stack: ["React", "NestJS", "PostgreSQL"],
-    team: [
-      { role: "Тимлид Backend", stack: "NestJS · PostgreSQL" },
-      { role: "Frontend-разработчик", stack: "React · TypeScript" },
-    ],
     featured: true,
   },
   {
@@ -109,10 +91,6 @@ export const PROJECTS: Project[] = [
     details:
       "Автоматизирует регистрацию посещаемости, хранение истории и формирование статистики по сотрудникам и рабочему времени.",
     stack: ["React", "FastAPI", "OpenCV"],
-    team: [
-      { role: "AI/ML-инженер", stack: "Python · OpenCV" },
-      { role: "Frontend-разработчик", stack: "React · TypeScript" },
-    ],
     featured: true,
   },
   // Проекты на заказ — placeholder-контент, ждёт реальных данных
@@ -131,10 +109,6 @@ export const PROJECTS: Project[] = [
     details:
       "Клиенты оформляют заказ прямо в Telegram, а команда ресторана ведёт меню, статусы заказов и доставку в отдельной панели.",
     stack: ["React", "NestJS", "PostgreSQL"],
-    team: [
-      { role: "Тимлид Frontend", stack: "React · Next.js" },
-      { role: "Backend-разработчик", stack: "NestJS · PostgreSQL" },
-    ],
     featured: false,
   },
   {
@@ -150,10 +124,6 @@ export const PROJECTS: Project[] = [
     details:
       "Диспетчеры видят все рейсы на карте в реальном времени, а клиенты получают ссылку для отслеживания своей посылки.",
     stack: ["React", "FastAPI", "PostgreSQL"],
-    team: [
-      { role: "Frontend-разработчик", stack: "React · TypeScript" },
-      { role: "Backend-разработчик", stack: "FastAPI · PostgreSQL" },
-    ],
     featured: false,
   },
   {
@@ -169,10 +139,6 @@ export const PROJECTS: Project[] = [
     details:
       "Чат-бот собирает жалобы пациента, подсказывает нужного врача и бронирует свободный слот без участия администратора.",
     stack: ["Python", "LLM", "PostgreSQL"],
-    team: [
-      { role: "AI/ML-инженер", stack: "Python · LLM" },
-      { role: "Backend-разработчик", stack: "FastAPI · PostgreSQL" },
-    ],
     featured: false,
   },
 ];

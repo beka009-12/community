@@ -9,6 +9,10 @@
 
 .member {
   display: flex;
+}
+
+.member__link {
+  display: flex;
   align-items: center;
   gap: 12px;
   padding: 10px 16px 10px 10px;
@@ -19,6 +23,11 @@
 
   &:hover {
     border-color: rgba(56, 189, 248, 0.35);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
   }
 }
 
