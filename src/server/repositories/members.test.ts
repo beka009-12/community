@@ -41,6 +41,13 @@ describe("members repository", () => {
     expect(await listMembers()).toHaveLength(before);
   });
 
+  it("rejects creating a login that is still another member's id after a rename", async () => {
+    await updateMember("frontend-dev", { ...input, login: "anna" });
+    const attempt = createMember({ ...input, login: "frontend-dev", password: "pw-123456" });
+    await expect(attempt).rejects.toMatchObject({ field: "login" });
+    expect((await listMembers()).filter((m) => m.user.id === "frontend-dev")).toHaveLength(1);
+  });
+
   it("rejects renaming to a login another member uses", async () => {
     await expect(
       updateMember("frontend-dev", { ...input, login: "backend-dev" }),

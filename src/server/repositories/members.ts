@@ -39,9 +39,15 @@ export const joinMember = (db: Db, userId: string): AdminMember | null => {
   return user && profile ? { user, profile } : null;
 };
 
+// A login is taken if another user has it as their login OR as their id:
+// ids come from the original login and never change (they're in public
+// URLs), so a renamed member still owns their old login as an id.
 const assertLoginFree = (db: Db, login: string, exceptId?: string) => {
+  const wanted = login.toLowerCase();
   const taken = db.users.some(
-    (user) => user.id !== exceptId && user.login.toLowerCase() === login.toLowerCase(),
+    (user) =>
+      user.id !== exceptId &&
+      (user.login.toLowerCase() === wanted || user.id === wanted),
   );
   if (taken) throw new ConflictError("login", "Логин уже занят");
 };
