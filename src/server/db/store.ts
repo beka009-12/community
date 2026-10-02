@@ -6,6 +6,12 @@ import type { Db } from "./types";
 
 export class StoreError extends Error {}
 
+const fail = (message: string, cause: unknown): never => {
+  const error = new StoreError(message, { cause });
+  console.error(error);
+  throw error;
+};
+
 // Read per call (not at import) so tests can point it at a temp file.
 // turbopackIgnore: a runtime data file, not something to trace into the build.
 const dbFile = () =>
@@ -29,7 +35,7 @@ async function load(): Promise<Db> {
     raw = await readFile(dbFile(), "utf8");
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
-      throw new StoreError("Cannot read the store file", { cause: error });
+      return fail("Cannot read the store file", error);
     }
     const seed = await buildSeed();
     await save(seed);
@@ -38,7 +44,7 @@ async function load(): Promise<Db> {
   try {
     return JSON.parse(raw) as Db;
   } catch (error) {
-    throw new StoreError("The store file is not valid JSON", { cause: error });
+    return fail("The store file is not valid JSON", error);
   }
 }
 

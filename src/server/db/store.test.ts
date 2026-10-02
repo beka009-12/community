@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -39,9 +39,12 @@ describe("store", () => {
     expect(ids).toEqual(expect.arrayContaining(["a", "b"]));
   });
 
-  it("throws StoreError on corrupt JSON and leaves the file alone", async () => {
+  it("throws StoreError on corrupt JSON, logs it, and leaves the file alone", async () => {
     await writeFile(file, "{not json", "utf8");
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
     await expect(readDb()).rejects.toBeInstanceOf(StoreError);
+    expect(log).toHaveBeenCalled();
+    log.mockRestore();
     expect(await readFile(file, "utf8")).toBe("{not json");
   });
 });
