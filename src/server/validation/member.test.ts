@@ -50,3 +50,22 @@ describe("member validation", () => {
     }
   });
 });
+
+describe("profile-only and role validation", () => {
+  it("parses a profile without login, role or password", async () => {
+    const { parseMemberProfile } = await import("./member");
+    const profileOnly = new FormData();
+    Object.entries(valid)
+      .filter(([key]) => key !== "login" && key !== "role")
+      .forEach(([key, value]) => profileOnly.set(key, value));
+    const result = parseMemberProfile(profileOnly);
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data).not.toHaveProperty("login");
+  });
+
+  it("accepts only known roles", async () => {
+    const { parseRole } = await import("./member");
+    expect(parseRole(form({ role: "TEAM_LEAD" })).success).toBe(true);
+    expect(parseRole(form({ role: "ADMIN" })).success).toBe(false);
+  });
+});

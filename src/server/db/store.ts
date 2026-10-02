@@ -42,7 +42,10 @@ async function load(): Promise<Db> {
     return seed;
   }
   try {
-    return JSON.parse(raw) as Db;
+    const db = JSON.parse(raw) as Db;
+    // Collections added after a store file was first written.
+    db.notifications ??= [];
+    return db;
   } catch (error) {
     return fail("The store file is not valid JSON", error);
   }

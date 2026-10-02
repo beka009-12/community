@@ -37,6 +37,14 @@ const memberCreateSchema = z.object({ ...memberShape, password: passwordSchema }
 export type MemberUpdateFields = z.infer<typeof memberUpdateSchema>;
 export type MemberCreateFields = z.infer<typeof memberCreateSchema>;
 
+const memberProfileSchema = z.object(memberShape).omit({ login: true, role: true, photo: true });
+const roleSchema = z.object({ role: memberShape.role });
+
+export const parseMemberProfile = (formData: FormData) =>
+  parseForm(memberProfileSchema, formData);
+
+export const parseRole = (formData: FormData) => parseForm(roleSchema, formData);
+
 export const parseMemberUpdate = (formData: FormData) =>
   parseForm(memberUpdateSchema, formData);
 

@@ -1,4 +1,5 @@
 import "server-only";
+import { randomUUID } from "node:crypto";
 import { hashPassword } from "@/src/server/auth/password";
 import { mutateDb, readDb } from "@/src/server/db/store";
 import type {
@@ -118,6 +119,56 @@ export async function updateMember(
     const profile = toProfile(id, input, current.profile);
     db.profiles = db.profiles.map((item) => (item.userId === id ? profile : item));
     return { user: current.user, profile };
+  });
+}
+
+// Profile fields a member fills in themselves (ТЗ: Developer edits own
+// profile). Admin edits are allowed but leave a notification behind.
+export type MemberProfileInput = Omit<MemberInput, "login" | "role" | "photo">;
+
+const PROFILE_FIELDS: (keyof MemberProfileInput)[] = [
+  "firstName",
+  "lastName",
+  "specializationId",
+  "roleTitle",
+  "stack",
+  "bio",
+  "skills",
+  "github",
+  "linkedin",
+  "portfolio",
+];
+
+const same = (a: unknown, b: unknown) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+
+export async function updateMemberProfileByAdmin(
+  id: string,
+  input: MemberProfileInput,
+): Promise<string[]> {
+  return mutateDb((db) => {
+    const current = joinMember(db, id);
+    if (!current) throw new NotFoundError("Участник не найден");
+    const changed = PROFILE_FIELDS.filter((field) => !same(current.profile[field], input[field]));
+    if (changed.length === 0) return changed;
+
+    const profile = toProfile(id, { ...input, login: current.user.login, role: current.user.role }, current.profile);
+    db.profiles = db.profiles.map((item) => (item.userId === id ? profile : item));
+    db.notifications.unshift({
+      id: randomUUID(),
+      userId: id,
+      kind: "PROFILE_EDITED_BY_ADMIN",
+      fields: changed,
+      createdAt: new Date().toISOString(),
+    });
+    return changed;
+  });
+}
+
+export async function setMemberRole(id: string, role: MembershipRole): Promise<void> {
+  await mutateDb((db) => {
+    const user = db.users.find((item) => item.id === id);
+    if (!user) throw new NotFoundError("Участник не найден");
+    user.role = role;
   });
 }
 

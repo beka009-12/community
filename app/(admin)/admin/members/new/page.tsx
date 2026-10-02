@@ -25,7 +25,7 @@ const Page = async () => {
     <>
       <PageHeader title="Новый участник" back={{ href: "/admin/members", label: "Участники" }} />
       <Panel>
-        <MemberForm action={createMemberAction} initial={EMPTY} withPassword submitLabel="Создать участника" />
+        <MemberForm action={createMemberAction} initial={EMPTY} mode="create" submitLabel="Создать участника" />
       </Panel>
     </>
   );

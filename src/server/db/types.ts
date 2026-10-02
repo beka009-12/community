@@ -94,6 +94,17 @@ export interface DbClientRequest {
   createdAt: string;
 }
 
+// Messages for a member (shown in their future dashboard). Today the
+// only kind is "an admin edited your profile".
+export interface DbNotification {
+  id: string;
+  userId: string;
+  kind: "PROFILE_EDITED_BY_ADMIN";
+  fields: string[];
+  createdAt: string;
+  readAt?: string;
+}
+
 export interface Db {
   users: DbUser[];
   profiles: DbProfile[];
@@ -102,4 +113,5 @@ export interface Db {
   projects: DbProject[];
   projectMembers: DbProjectMember[];
   clientRequests: DbClientRequest[];
+  notifications: DbNotification[];
 }

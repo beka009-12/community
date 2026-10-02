@@ -577,7 +577,9 @@
   padding-top: 20px;
   border-top: 1px solid var(--color-border);
 
-  &:first-child {
+  // first-of-type, not first-child: React puts a hidden action <input>
+  // first inside forms that use Server Actions.
+  &:first-of-type {
     padding-top: 0;
     border-top: 0;
   }
@@ -602,4 +604,25 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 14px;
+}
+
+.roleForm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+
+  .inlineSelect {
+    min-height: 40px;
+    flex: 1;
+  }
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }

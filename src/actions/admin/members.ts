@@ -7,13 +7,15 @@ import { requireAdmin } from "@/src/server/auth/dal";
 import {
   createMember,
   resetMemberPassword,
+  setMemberRole,
   setMemberStatus,
-  updateMember,
+  updateMemberProfileByAdmin,
 } from "@/src/server/repositories/members";
 import type { UserStatus } from "@/src/server/db/types";
 import {
   parseMemberCreate,
-  parseMemberUpdate,
+  parseMemberProfile,
+  parseRole,
 } from "@/src/server/validation/member";
 import {
   echoValues,
@@ -46,25 +48,6 @@ export async function createMemberAction(
   }
   revalidateMember(id);
   redirect(`/admin/members/${id}?created=1`);
-}
-
-export async function updateMemberAction(
-  id: string,
-  _prev: FormState,
-  formData: FormData,
-): Promise<FormState> {
-  await requireAdmin();
-  const values = echoValues(formData);
-  const parsed = parseMemberUpdate(formData);
-  if (!parsed.success) return { fieldErrors: parsed.fieldErrors, values };
-
-  try {
-    await updateMember(id, parsed.data);
-  } catch (error) {
-    return toFormError(error, values);
-  }
-  revalidateMember(id);
-  return { ok: true, values };
 }
 
 const STATUSES: UserStatus[] = ["ACTIVE", "INACTIVE"];
@@ -104,4 +87,41 @@ export async function resetPasswordAction(
 export async function generatePasswordAction(): Promise<string> {
   await requireAdmin();
   return generatePassword();
+}
+
+export async function updateMemberProfileAction(
+  id: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  await requireAdmin();
+  const values = echoValues(formData);
+  const parsed = parseMemberProfile(formData);
+  if (!parsed.success) return { fieldErrors: parsed.fieldErrors, values };
+
+  try {
+    await updateMemberProfileByAdmin(id, parsed.data);
+  } catch (error) {
+    return toFormError(error, values);
+  }
+  revalidateMember(id);
+  return { ok: true, values };
+}
+
+export async function setMemberRoleAction(
+  id: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  await requireAdmin();
+  const parsed = parseRole(formData);
+  if (!parsed.success) return { fieldErrors: parsed.fieldErrors };
+
+  try {
+    await setMemberRole(id, parsed.data.role);
+  } catch (error) {
+    return toFormError(error, {});
+  }
+  revalidateMember(id);
+  return { ok: true };
 }

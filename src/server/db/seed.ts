@@ -94,5 +94,6 @@ export async function buildSeed(): Promise<Db> {
     projects,
     projectMembers,
     clientRequests: [],
+    notifications: [],
   };
 }
