@@ -6,6 +6,7 @@ import { authedDelete, authedGet, authedSend, publicGet } from "./client";
 import { nullIfNotFound } from "./errors";
 import {
   createdSchema,
+  listOf,
   membershipSchema,
   projectDetailSchema,
   projectListItemSchema,
@@ -23,7 +24,7 @@ export interface ProjectWrite {
   github_url: string | null;
 }
 
-const listSchema = z.array(projectListItemSchema);
+const listSchema = listOf(projectListItemSchema);
 
 export const getProjects = cache(
   (fresh = false): Promise<ProjectListItem[]> =>
@@ -48,7 +49,7 @@ export const getProjectsWithMembers = cache(async (fresh = false): Promise<Proje
 });
 
 export const getProjectMembers = cache(
-  (id: number): Promise<Membership[]> => authedGet(`/projects/${id}/members/`, z.array(membershipSchema)),
+  (id: number): Promise<Membership[]> => authedGet(`/projects/${id}/members/`, listOf(membershipSchema)),
 );
 
 export async function createProject(data: ProjectWrite): Promise<number> {

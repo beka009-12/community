@@ -8,6 +8,7 @@ import { requestNoContent } from "./http";
 import {
   clientRequestDetailSchema,
   clientRequestListItemSchema,
+  listOf,
   type ClientRequestDetail,
   type ClientRequestListItem,
 } from "./schemas";
@@ -31,7 +32,7 @@ export async function createClientRequest(data: ClientRequestWrite): Promise<voi
 
 export const getClientRequests = cache(
   (): Promise<ClientRequestListItem[]> =>
-    authedGet("/client-requests/", z.array(clientRequestListItemSchema)),
+    authedGet("/client-requests/", listOf(clientRequestListItemSchema)),
 );
 
 export const getClientRequest = cache(

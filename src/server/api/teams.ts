@@ -6,6 +6,7 @@ import { authedDelete, authedGet, authedSend } from "./client";
 import { nullIfNotFound } from "./errors";
 import {
   createdSchema,
+  listOf,
   membershipSchema,
   teamDetailSchema,
   teamListItemSchema,
@@ -21,7 +22,7 @@ export interface TeamWrite {
 
 // /teams/ needs a token, so teams exist only inside the admin.
 export const getTeams = cache(
-  (): Promise<TeamListItem[]> => authedGet("/teams/", z.array(teamListItemSchema)),
+  (): Promise<TeamListItem[]> => authedGet("/teams/", listOf(teamListItemSchema)),
 );
 
 export const getTeam = cache(
@@ -29,7 +30,7 @@ export const getTeam = cache(
 );
 
 export const getTeamMembers = cache(
-  (id: number): Promise<Membership[]> => authedGet(`/teams/${id}/members/`, z.array(membershipSchema)),
+  (id: number): Promise<Membership[]> => authedGet(`/teams/${id}/members/`, listOf(membershipSchema)),
 );
 
 export async function createTeam(data: TeamWrite): Promise<number> {

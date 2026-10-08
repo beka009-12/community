@@ -8,6 +8,7 @@ import {
   adminMemberDetailSchema,
   adminMemberListItemSchema,
   createdSchema,
+  listOf,
   type AdminMemberDetail,
   type AdminMemberListItem,
 } from "./schemas";
@@ -33,7 +34,7 @@ export interface AdminMemberPatch {
 }
 
 export const getAdminMembers = cache(
-  (): Promise<AdminMemberListItem[]> => authedGet("/admin/members/", z.array(adminMemberListItemSchema)),
+  (): Promise<AdminMemberListItem[]> => authedGet("/admin/members/", listOf(adminMemberListItemSchema)),
 );
 
 export const getAdminMember = cache(

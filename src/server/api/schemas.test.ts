@@ -1,9 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   accountSchema,
+  listOf,
   memberDetailSchema,
   memberListItemSchema,
   projectDetailSchema,
+  projectListItemSchema,
   statsSchema,
 } from "./schemas";
 
@@ -85,6 +87,18 @@ describe("api schemas", () => {
   it("still fails on a missing or mistyped required field", () => {
     expect(projectDetailSchema.safeParse({ ...PROJECT_DETAIL, name: undefined }).success).toBe(false);
     expect(projectDetailSchema.safeParse({ ...PROJECT_DETAIL, members: "[]" }).success).toBe(false);
+  });
+
+  it("drops a row with an unknown enum value instead of failing the whole list", () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const rows = [PROJECT, { ...PROJECT, id: 2, project_status: "Archived" }];
+    expect(listOf(projectListItemSchema).parse(rows)).toEqual([PROJECT]);
+    const detail = projectDetailSchema.parse({
+      ...PROJECT_DETAIL,
+      members: [...PROJECT_DETAIL.members, { id: 3, project: 1, user: 9, role: "Owner" }],
+    });
+    expect(detail.members.map((row) => row.user)).toEqual([2, 4]);
+    expect(log).toHaveBeenCalled();
   });
 
   it("routes API media through our own /media path", () => {

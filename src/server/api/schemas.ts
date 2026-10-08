@@ -20,6 +20,18 @@ const media = z.string().nullish().transform((value) => toMediaPath(value));
 // Fresh accounts have no position yet; anything unknown reads as "none".
 const position = z.enum(POSITIONS).nullable().catch(null);
 
+// A row that doesn't match (say, an enum value the frontend doesn't know yet)
+// is logged and dropped, so one odd row never takes a whole page down.
+export const listOf = <T extends z.ZodType>(item: T) =>
+  z.array(z.unknown()).transform((rows) =>
+    rows.flatMap((row): z.output<T>[] => {
+      const parsed = item.safeParse(row);
+      if (parsed.success) return [parsed.data];
+      console.error("Dropped an API row that doesn't match the schema", parsed.error.issues);
+      return [];
+    }),
+  );
+
 export const createdSchema = z.object({ id: z.number() });
 
 export const statsSchema = z.object({
@@ -48,7 +60,7 @@ export const projectDetailSchema = projectListItemSchema.extend({
   demo_url: url,
   github_url: url,
   created_at: z.string(),
-  members: z.array(membershipSchema),
+  members: listOf(membershipSchema),
 });
 
 export const memberListItemSchema = z.object({
@@ -67,7 +79,7 @@ export const memberDetailSchema = memberListItemSchema.extend({
   linkedin: url,
   portfolio: url,
   resume: media,
-  projects: z.array(projectListItemSchema),
+  projects: listOf(projectListItemSchema),
 });
 
 export const teamListItemSchema = z.object({
@@ -79,7 +91,7 @@ export const teamListItemSchema = z.object({
 export const teamDetailSchema = teamListItemSchema.extend({
   description: text,
   created_at: z.string(),
-  members: z.array(membershipSchema),
+  members: listOf(membershipSchema),
 });
 
 export const clientRequestListItemSchema = z.object({

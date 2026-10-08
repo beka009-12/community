@@ -9,9 +9,10 @@ import {
   memberListItemSchema,
   type MemberDetail,
   type MemberListItem,
+  listOf,
 } from "./schemas";
 
-const listSchema = z.array(memberListItemSchema);
+const listSchema = listOf(memberListItemSchema);
 
 // `fresh`: the admin reads through its token, never from the shared cache.
 export const getMembers = cache(
