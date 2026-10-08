@@ -1,42 +1,28 @@
 "use client";
 
-import { FC, KeyboardEvent, useMemo, useRef, useState } from "react";
-import Link from "next/link";
+import { FC, KeyboardEvent, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { motionTokens, springs } from "@/src/lib/motion-tokens";
 import Button from "@/src/ui/Button";
-import ArrowIcon from "@/src/ui/ArrowIcon";
 import { SERVICES } from "@/src/data/services";
-import type { Project } from "@/src/data/projects";
 import scss from "./Services.module.scss";
 
 // Homepage ServicesPreview is the teaser; this is the detail a client
-// reads on /about: scope, team and real projects per service. Ordered
-// by how many community projects back each service up.
-const Services: FC<{ projects: Project[] }> = ({ projects }) => {
-  const ITEMS = useMemo(
-    () =>
-      SERVICES.map((service) => ({
-        ...service,
-        projects: projects.filter(
-          (project) => project.category === service.category,
-        ),
-      })).sort((a, b) => b.projects.length - a.projects.length),
-    [projects],
-  );
+// reads on /about: scope and team per service.
+const Services: FC = () => {
   const [active, setActive] = useState(0);
   const reduce = useReducedMotion();
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const current = ITEMS[active];
+  const current = SERVICES[active];
 
   // WAI-ARIA tabs: arrows move between tabs, Home/End jump to the ends.
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    const last = ITEMS.length - 1;
+    const last = SERVICES.length - 1;
     const next =
       event.key === "ArrowDown" || event.key === "ArrowRight"
-        ? (active + 1) % ITEMS.length
+        ? (active + 1) % SERVICES.length
         : event.key === "ArrowUp" || event.key === "ArrowLeft"
-          ? (active - 1 + ITEMS.length) % ITEMS.length
+          ? (active - 1 + SERVICES.length) % SERVICES.length
           : event.key === "Home"
             ? 0
             : event.key === "End"
@@ -55,9 +41,7 @@ const Services: FC<{ projects: Project[] }> = ({ projects }) => {
           <span className={scss.services__index}>§ 06</span>
           Услуги
         </span>
-        <h2 className={scss.services__title}>
-          Как мы работаем с вашим проектом
-        </h2>
+        <h2 className={scss.services__title}>Как мы работаем с вашим проектом</h2>
 
         <div className={scss.layout}>
           <div
@@ -67,7 +51,7 @@ const Services: FC<{ projects: Project[] }> = ({ projects }) => {
             aria-orientation="vertical"
             onKeyDown={handleKeyDown}
           >
-            {ITEMS.map((item, index) => {
+            {SERVICES.map((item, index) => {
               const selected = index === active;
               return (
                 <button
@@ -92,12 +76,6 @@ const Services: FC<{ projects: Project[] }> = ({ projects }) => {
                     />
                   )}
                   <span className={scss.tab__label}>{item.title}</span>
-                  <span
-                    className={scss.tab__count}
-                    aria-label={`Проектов: ${item.projects.length}`}
-                  >
-                    {item.projects.length}
-                  </span>
                 </button>
               );
             })}
@@ -112,19 +90,10 @@ const Services: FC<{ projects: Project[] }> = ({ projects }) => {
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={current.category}
-                initial={{
-                  opacity: 0,
-                  y: reduce ? 0 : motionTokens.distance.sm,
-                }}
+                initial={{ opacity: 0, y: reduce ? 0 : motionTokens.distance.sm }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{
-                  opacity: 0,
-                  transition: { duration: motionTokens.duration.instant },
-                }}
-                transition={{
-                  duration: motionTokens.duration.fast,
-                  ease: motionTokens.easing.smooth,
-                }}
+                exit={{ opacity: 0, transition: { duration: motionTokens.duration.instant } }}
+                transition={{ duration: motionTokens.duration.fast, ease: motionTokens.easing.smooth }}
               >
                 <p className={scss.panel__description}>{current.description}</p>
 
@@ -147,30 +116,7 @@ const Services: FC<{ projects: Project[] }> = ({ projects }) => {
                   </div>
                 </div>
 
-                <h3 className={scss.panel__label}>Уже сделали</h3>
-                {current.projects.length > 0 ? (
-                  <ul className={scss.projects}>
-                    {current.projects.map((project) => (
-                      <li key={project.slug}>
-                        <Link href={`/projects/${project.slug}`}>
-                          {project.name}
-                          <ArrowIcon />
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className={scss.projects__empty}>
-                    Здесь пока нет проектов сообщества.{" "}
-                    <Link href="/projects">Смотреть все проекты</Link>
-                  </p>
-                )}
-
-                <Button
-                  href="/contact"
-                  variant="ghost"
-                  className={scss.panel__cta}
-                >
+                <Button href="/contact" variant="ghost" className={scss.panel__cta}>
                   Обсудить такой проект
                 </Button>
               </motion.div>
