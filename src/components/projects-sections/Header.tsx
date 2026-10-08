@@ -3,107 +3,92 @@
 import { FC } from "react";
 import { motion } from "motion/react";
 import { springs } from "@/src/lib/motion-tokens";
-import {
-  STATUS_LABELS,
-  STATUS_TONE,
-  type ProjectOrigin,
-  type ProjectStatus,
-} from "@/src/data/projects";
+import type { ProjectStatus } from "@/src/lib/api-enums";
+import { PROJECT_STATUS_LABELS, PROJECT_STATUS_TONE } from "@/src/lib/api-labels";
 import scss from "./Header.module.scss";
 
-export type FilterKey = "all" | ProjectOrigin;
-export type StatusFilterKey = "all" | ProjectStatus;
-
-const FILTERS: { key: FilterKey; label: string }[] = [
-  { key: "all", label: "Все" },
-  { key: "community", label: "Наши проекты" },
-  { key: "client", label: "На заказ" },
-];
-
-// COMPLETED first — "готовые проекты" is the most likely thing someone
+// Completed first — "готовые проекты" is the most likely thing someone
 // filters for.
-const STATUS_FILTERS: { key: StatusFilterKey; label: string }[] = [
-  { key: "all", label: "Все статусы" },
-  { key: "COMPLETED", label: STATUS_LABELS.COMPLETED },
-  { key: "IN_PROGRESS", label: STATUS_LABELS.IN_PROGRESS },
-  { key: "PLANNED", label: STATUS_LABELS.PLANNED },
-  { key: "PAUSED", label: STATUS_LABELS.PAUSED },
-];
+const STATUS_ORDER: ProjectStatus[] = ["Completed", "In_progress", "Planned", "Paused"];
 
 interface HeaderProps {
-  filter: FilterKey;
-  onFilterChange: (key: FilterKey) => void;
-  statusFilter: StatusFilterKey;
-  onStatusFilterChange: (key: StatusFilterKey) => void;
+  categories: string[];
+  category: string | null;
+  onCategoryChange: (category: string | null) => void;
+  status: ProjectStatus | null;
+  onStatusChange: (status: ProjectStatus | null) => void;
 }
 
 const Header: FC<HeaderProps> = ({
-  filter,
-  onFilterChange,
-  statusFilter,
-  onStatusFilterChange,
-}) => (
-  <div className={`container ${scss.header}`}>
-    <span className={scss.header__eyebrow}>Portfolio</span>
-    <h1 className={scss.header__title}>Все проекты</h1>
-    <p className={scss.header__subtitle}>
-      Проекты, которые сообщество делает для себя, и проекты, которые мы
-      берём в разработку на заказ.
-    </p>
+  categories,
+  category,
+  onCategoryChange,
+  status,
+  onStatusChange,
+}) => {
+  const tabs: { key: string | null; label: string }[] = [
+    { key: null, label: "Все" },
+    ...categories.map((item) => ({ key: item, label: item })),
+  ];
+  const statusTabs: { key: ProjectStatus | null; label: string }[] = [
+    { key: null, label: "Все статусы" },
+    ...STATUS_ORDER.map((key) => ({ key, label: PROJECT_STATUS_LABELS[key] })),
+  ];
 
-    <div
-      className={scss.header__tabs}
-      role="group"
-      aria-label="Фильтр проектов"
-    >
-      {FILTERS.map((item) => (
-        <button
-          key={item.key}
-          type="button"
-          className={scss.tab}
-          aria-pressed={filter === item.key}
-          onClick={() => onFilterChange(item.key)}
-        >
-          {filter === item.key && (
-            <motion.span
-              layoutId="projects-filter-pill"
-              className={scss.tab__pill}
-              transition={springs.snappy}
-            />
-          )}
-          <span
-            className={`${scss.tab__label} ${filter === item.key ? scss["tab__label--active"] : ""}`}
-          >
-            {item.label}
-          </span>
-        </button>
-      ))}
+  return (
+    <div className={`container ${scss.header}`}>
+      <span className={scss.header__eyebrow}>Portfolio</span>
+      <h1 className={scss.header__title}>Все проекты</h1>
+      <p className={scss.header__subtitle}>
+        Проекты, которые сообщество делает для себя, и проекты, которые мы
+        берём в разработку на заказ.
+      </p>
+
+      <div className={scss.header__tabs} role="group" aria-label="Фильтр по категории">
+        {tabs.map((item) => {
+          const active = category === item.key;
+          return (
+            <button
+              key={item.key ?? "all"}
+              type="button"
+              className={scss.tab}
+              aria-pressed={active}
+              onClick={() => onCategoryChange(item.key)}
+            >
+              {active && (
+                <motion.span
+                  layoutId="projects-filter-pill"
+                  className={scss.tab__pill}
+                  transition={springs.snappy}
+                />
+              )}
+              <span className={`${scss.tab__label} ${active ? scss["tab__label--active"] : ""}`}>
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className={scss.header__statusTabs} role="group" aria-label="Фильтр по статусу">
+        {statusTabs.map((item) => {
+          const tone = item.key ? PROJECT_STATUS_TONE[item.key] : null;
+          return (
+            <button
+              key={item.key ?? "all"}
+              type="button"
+              className={`${scss.statusTab} ${tone ? scss[`statusTab--${tone}`] : ""}`}
+              aria-pressed={status === item.key}
+              onClick={() => onStatusChange(item.key)}
+            >
+              {tone && <span className={scss.statusTab__dot} aria-hidden="true" />}
+              {item.label}
+            </button>
+          );
+        })}
+      </div>
     </div>
-
-    <div
-      className={scss.header__statusTabs}
-      role="group"
-      aria-label="Фильтр по статусу"
-    >
-      {STATUS_FILTERS.map((item) => {
-        const isActive = statusFilter === item.key;
-        const tone = item.key === "all" ? null : STATUS_TONE[item.key];
-
-        return (
-          <button
-            key={item.key}
-            type="button"
-            className={`${scss.statusTab} ${tone ? scss[`statusTab--${tone}`] : ""}`}
-            aria-pressed={isActive}
-            onClick={() => onStatusFilterChange(item.key)}
-          >
-            {tone && <span className={scss.statusTab__dot} aria-hidden="true" />}
-            {item.label}
-          </button>
-        );
-      })}
-    </div>
-  </div>
-);
+  );
+};
 
 export default Header;
