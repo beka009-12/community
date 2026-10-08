@@ -2,8 +2,17 @@
 
 import { FC, ReactNode } from "react";
 import { useCountUp } from "@/src/hooks/use-count-up";
-import { STATS, type StatId } from "@/src/data/stats";
+import { plural } from "@/src/lib/plural";
+import type { Stats as StatsData } from "@/src/server/api/schemas";
 import scss from "./Stats.module.scss";
+
+type StatId = "members" | "projects" | "companies";
+
+interface StatItemProps {
+  id: StatId;
+  value: number;
+  label: string;
+}
 
 const ICON_PROPS = {
   viewBox: "0 0 24 24",
@@ -30,24 +39,24 @@ const ICONS: Record<StatId, ReactNode> = {
       <path d="M3 13l9 5 9-5" />
     </svg>
   ),
-  hires: (
+  companies: (
     <svg {...ICON_PROPS}>
-      <circle cx="12" cy="12" r="8.5" />
-      <path d="M8.4 12.3 11 15l4.6-6" />
+      <path d="M4 20V6.5L12 3l8 3.5V20" />
+      <path d="M9 20v-5h6v5" />
+      <path d="M8 9h.01M12 9h.01M16 9h.01M8 12.5h.01M16 12.5h.01" />
     </svg>
   ),
 };
 
-const StatItem: FC<(typeof STATS)[number]> = ({ id, target, suffix, label }) => {
-  const { ref, value } = useCountUp(target);
+const StatItem: FC<StatItemProps> = ({ id, value, label }) => {
+  const { ref, value: shown } = useCountUp(value);
 
   return (
     <div className={scss.stat}>
       <span className={scss.stat__icon}>{ICONS[id]}</span>
       <div className={scss.stat__body}>
         <span ref={ref} className={scss.stat__value}>
-          {value}
-          {suffix}
+          {shown}
         </span>
         <span className={scss.stat__label}>{label}</span>
       </div>
@@ -55,7 +64,26 @@ const StatItem: FC<(typeof STATS)[number]> = ({ id, target, suffix, label }) => 
   );
 };
 
-const Stats: FC = () => {
+// Live numbers from GET /stats/, shown exactly.
+const Stats: FC<{ stats: StatsData }> = ({ stats }) => {
+  const items: StatItemProps[] = [
+    {
+      id: "members",
+      value: stats.members_count,
+      label: plural(stats.members_count, "участник", "участника", "участников"),
+    },
+    {
+      id: "projects",
+      value: stats.projects_count,
+      label: plural(stats.projects_count, "проект", "проекта", "проектов"),
+    },
+    {
+      id: "companies",
+      value: stats.companies_count,
+      label: plural(stats.companies_count, "компания", "компании", "компаний"),
+    },
+  ];
+
   return (
     <section className={scss.stats}>
       <div className={`container ${scss.stats__inner}`}>
@@ -68,8 +96,8 @@ const Stats: FC = () => {
         </div>
 
         <div className={scss.stats__grid}>
-          {STATS.map((stat) => (
-            <StatItem key={stat.id} {...stat} />
+          {items.map((item) => (
+            <StatItem key={item.id} {...item} />
           ))}
         </div>
       </div>

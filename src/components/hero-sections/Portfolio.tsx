@@ -9,7 +9,9 @@ import {
 } from "motion/react";
 import { springs, motionTokens } from "@/src/lib/motion-tokens";
 import Button from "@/src/ui/Button";
-import { CATEGORY_LABELS, type Project } from "@/src/data/projects";
+import ProjectCover from "@/src/ui/ProjectCover";
+import { PROJECT_STATUS_LABELS } from "@/src/lib/api-labels";
+import type { ProjectListItem } from "@/src/server/api/schemas";
 import scss from "./Portfolio.module.scss";
 
 // Намного меньше смещение.
@@ -21,7 +23,7 @@ const PEEK = {
 };
 
 const ProjectFace: FC<{
-  project: Project;
+  project: ProjectListItem;
   index: number;
 }> = ({ project, index }) => (
   <>
@@ -36,16 +38,17 @@ const ProjectFace: FC<{
     </div>
 
     <div className={scss.card__art} data-variant={index % 3}>
-      <img
-        src={project.image}
-        alt={`${project.name} preview`}
-        className={scss.card__image}
+      <ProjectCover
+        src={project.preview_image}
+        name={project.name}
+        bare
+        imageClassName={scss.card__image}
       />
 
       <div className={scss.card__overlay} />
 
       <div className={scss.card__content}>
-        <span className={scss.card__label}>Featured project</span>
+        <span className={scss.card__label}>{project.category}</span>
 
         <div className={scss.card__footer}>
           <span className={scss.card__projectName}>{project.name}</span>
@@ -55,30 +58,30 @@ const ProjectFace: FC<{
   </>
 );
 
-// ≤1024px: just the photo, no browser-chrome framing. Name + a short
-// description sit directly on the image over a readable gradient scrim —
-// the fuller write-up (details, stack, CTA) stays desktop-only, where
-// it lives beside the card stack instead of crowding a phone screen.
-const ProjectPhoto: FC<{ project: Project }> = ({ project }) => (
+// ≤1024px: just the cover, no browser-chrome framing. The name sits on the
+// image over a readable gradient scrim; the list endpoint has no
+// description, so the CTA leads to the project page for the rest.
+const ProjectPhoto: FC<{ project: ProjectListItem }> = ({ project }) => (
   <>
-    <img
-      src={project.image}
-      alt={`${project.name} preview`}
-      className={scss.photo__image}
+    <ProjectCover
+      src={project.preview_image}
+      name={project.name}
+      bare
+      imageClassName={scss.photo__image}
     />
 
     <div className={scss.photo__overlay} />
 
     <div className={scss.photo__caption}>
       <h3 className={scss.photo__name}>{project.name}</h3>
-      <p className={scss.photo__description}>{project.description}</p>
+      <p className={scss.photo__description}>{project.category}</p>
 
       {/* Stops the tap reaching the drag handle around it — otherwise the
           swipe gesture claims the pointer and the link never gets a
           click. */}
       <div onPointerDown={(e) => e.stopPropagation()}>
         <Button
-          href={`/projects/${project.slug}`}
+          href={`/projects/${project.id}`}
           variant="primary"
           className={scss.photo__cta}
         >
@@ -107,8 +110,8 @@ const slideVariants = {
   }),
 };
 
-// The featured subset of the store's projects, passed in by Hero.
-const Portfolio: FC<{ projects: Project[] }> = ({ projects }) => {
+// Every project from GET /projects/ — the API has no «featured» flag.
+const Portfolio: FC<{ projects: ProjectListItem[] }> = ({ projects }) => {
   const reduce = useReducedMotion();
 
   const total = projects.length;
@@ -171,7 +174,7 @@ const Portfolio: FC<{ projects: Project[] }> = ({ projects }) => {
       <div className={`container ${scss.portfolio__header}`}>
         <span className={scss.portfolio__eyebrow}>Portfolio</span>
 
-        <h2 className={scss.portfolio__title}>Флагманские проекты</h2>
+        <h2 className={scss.portfolio__title}>Проекты сообщества</h2>
 
         <p className={scss.portfolio__subtitle}>
           Несколько проектов, в которых мы превращали идеи в полноценные
@@ -193,7 +196,7 @@ const Portfolio: FC<{ projects: Project[] }> = ({ projects }) => {
         <div className={scss.portfolio__intro}>
           <AnimatePresence mode="wait">
             <motion.div
-              key={project.name}
+              key={project.id}
               className={scss.portfolio__info}
               initial={{
                 opacity: 0,
@@ -210,26 +213,14 @@ const Portfolio: FC<{ projects: Project[] }> = ({ projects }) => {
               transition={springs.instant}
             >
               <div className={scss.portfolio__meta}>
-                <span>{CATEGORY_LABELS[project.category]}</span>
-                <span>{project.year}</span>
+                <span>{project.category}</span>
+                <span>{PROJECT_STATUS_LABELS[project.project_status]}</span>
               </div>
 
               <h3 className={scss.portfolio__name}>{project.name}</h3>
 
-              <p className={scss.portfolio__description}>
-                {project.description}
-              </p>
-
-              <p className={scss.portfolio__details}>{project.details}</p>
-
-              <ul className={scss.portfolio__stack}>
-                {project.stack.map((tech) => (
-                  <li key={tech}>{tech}</li>
-                ))}
-              </ul>
-
               <Button
-                href={`/projects/${project.slug}`}
+                href={`/projects/${project.id}`}
                 variant="ghost"
                 className={scss.portfolio__cta}
               >
@@ -241,7 +232,7 @@ const Portfolio: FC<{ projects: Project[] }> = ({ projects }) => {
           <div className={scss.dots} role="group" aria-label="Проект">
             {projects.map((p, i) => (
               <button
-                key={p.name}
+                key={p.id}
                 type="button"
                 className={`${scss.dot} ${
                   i === front ? scss["dot--active"] : ""
@@ -261,7 +252,7 @@ const Portfolio: FC<{ projects: Project[] }> = ({ projects }) => {
 
             return (
               <motion.div
-                key={p.name}
+                key={p.id}
                 className={`${scss.card} ${isFront ? scss["card--front"] : ""}`}
                 style={{
                   zIndex: total - pos,
@@ -321,7 +312,7 @@ const Portfolio: FC<{ projects: Project[] }> = ({ projects }) => {
         <div className={scss.mobileSlider}>
           <AnimatePresence mode="wait" custom={direction} initial={false}>
             <motion.div
-              key={project.name}
+              key={project.id}
               className={scss.mobileSlider__card}
               custom={direction}
               variants={reduce ? undefined : slideVariants}
