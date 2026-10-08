@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   accountSchema,
   memberDetailSchema,
@@ -6,6 +6,11 @@ import {
   projectDetailSchema,
   statsSchema,
 } from "./schemas";
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.restoreAllMocks();
+});
 
 // Real API responses, captured 2026-10-08.
 const MEMBER = {
@@ -80,6 +85,19 @@ describe("api schemas", () => {
   it("still fails on a missing or mistyped required field", () => {
     expect(projectDetailSchema.safeParse({ ...PROJECT_DETAIL, name: undefined }).success).toBe(false);
     expect(projectDetailSchema.safeParse({ ...PROJECT_DETAIL, members: "[]" }).success).toBe(false);
+  });
+
+  it("routes API media through our own /media path", () => {
+    vi.stubEnv("API_URL", "http://api.test/ru");
+    const parsed = memberDetailSchema.parse({
+      ...MEMBER_DETAIL,
+      avatar: "http://api.test/media/avatars/a.png",
+      resume: "http://api.test/media/cv/c.pdf",
+      github: "https://github.com/anvar",
+    });
+    expect(parsed.avatar).toBe("/media/avatars/a.png");
+    expect(parsed.resume).toBe("/media/cv/c.pdf");
+    expect(parsed.github).toBe("https://github.com/anvar");
   });
 
   it("rejects the anonymous /personal-account/ answer", () => {

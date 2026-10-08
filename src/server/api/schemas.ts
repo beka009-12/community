@@ -7,6 +7,7 @@ import {
   USER_ROLES,
   USER_STATUSES,
 } from "@/src/lib/api-enums";
+import { toMediaPath } from "./media";
 
 // Mirrors the API's Swagger docs (API_URL + /docs/), corrected where real responses
 // differ from the Swagger file: `members` and `projects` are arrays, not
@@ -14,6 +15,8 @@ import {
 
 const text = z.string().nullish().transform((value) => value ?? "");
 const url = z.string().nullish().transform((value) => value || null);
+// Uploaded files go through our /media route, never straight to the API host.
+const media = z.string().nullish().transform((value) => toMediaPath(value));
 // Fresh accounts have no position yet; anything unknown reads as "none".
 const position = z.enum(POSITIONS).nullable().catch(null);
 
@@ -37,7 +40,7 @@ export const projectListItemSchema = z.object({
   name: z.string(),
   project_status: z.enum(PROJECT_STATUSES),
   category: z.string(),
-  preview_image: url,
+  preview_image: media,
 });
 
 export const projectDetailSchema = projectListItemSchema.extend({
@@ -53,7 +56,7 @@ export const memberListItemSchema = z.object({
   first_name: text,
   last_name: text,
   position,
-  avatar: url,
+  avatar: media,
   status: z.enum(USER_STATUSES),
 });
 
@@ -63,14 +66,14 @@ export const memberDetailSchema = memberListItemSchema.extend({
   github: url,
   linkedin: url,
   portfolio: url,
-  resume: url,
+  resume: media,
   projects: z.array(projectListItemSchema),
 });
 
 export const teamListItemSchema = z.object({
   id: z.number(),
   team_name: z.string(),
-  team_image: url,
+  team_image: media,
 });
 
 export const teamDetailSchema = teamListItemSchema.extend({
@@ -107,14 +110,14 @@ export const adminMemberDetailSchema = adminMemberListItemSchema.extend({
   created_at: z.string(),
   first_name: text,
   last_name: text,
-  avatar: url,
+  avatar: media,
   bio: text,
   position,
   skills: text,
   github: url,
   linkedin: url,
   portfolio: url,
-  resume: url,
+  resume: media,
 });
 
 // GET /personal-account/ — a numeric id also guards against the anonymous
