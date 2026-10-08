@@ -1,7 +1,8 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { createClientRequest } from "@/src/server/repositories/requests";
+import { updateTag } from "next/cache";
+import { createClientRequest } from "@/src/server/api/client-requests";
+import { apiErrorMessage, isApiError } from "@/src/server/api/errors";
 import { parseClientRequest } from "@/src/server/validation/client-request";
 import type { FieldErrors } from "@/src/server/validation/form";
 
@@ -35,14 +36,22 @@ export async function submitClientRequest(
   try {
     await createClientRequest(parsed.data);
   } catch (error) {
-    console.error("Failed to save client request", error);
+    if (isApiError(error, "validation")) {
+      const hasFields = Object.keys(error.fieldErrors).length > 0;
+      return {
+        fieldErrors: error.fieldErrors,
+        error: hasFields ? error.message || undefined : apiErrorMessage(error),
+        values: echo(formData),
+      };
+    }
+    console.error("Failed to submit client request", error);
     return {
-      error:
-        "Не удалось отправить заявку. Попробуйте ещё раз или напишите нам в Telegram.",
+      error: "Не удалось отправить заявку. Попробуйте ещё раз или напишите нам в Telegram.",
       values: echo(formData),
     };
   }
 
-  revalidatePath("/admin", "layout");
+  // companies_count on /stats/ may have changed.
+  updateTag("stats");
   return { ok: true };
 }

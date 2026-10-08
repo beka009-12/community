@@ -1,21 +1,26 @@
 import { z } from "zod";
-import { CATEGORY_LABELS, type ProjectCategory } from "@/src/data/projects";
-import { optionalText, parseForm, requiredText } from "./form";
+import { PROJECT_TYPES } from "@/src/data/services";
+import { parseForm, requiredText } from "./form";
 
-const categories = Object.keys(CATEGORY_LABELS) as [ProjectCategory, ...ProjectCategory[]];
+// "300 000" → 300000, blank → null: budget is optional and in som.
+const budget = z.preprocess(
+  (value) => (typeof value === "string" ? value.replace(/\s/g, "") : ""),
+  z
+    .string()
+    .regex(/^\d{0,12}$/, "Укажите сумму цифрами, в сомах")
+    .transform((value) => (value === "" ? null : Number(value))),
+);
 
+// Field names and limits from the API's ClientRequestCreate.
 export const clientRequestSchema = z.object({
-  name: requiredText(2, 80, "Имя"),
-  email: z.email("Проверьте email: например, name@company.kg"),
-  title: requiredText(2, 120, "Название проекта"),
+  name: requiredText(2, 150, "Имя"),
+  company: requiredText(1, 150, "Компания"),
+  email: z.email("Проверьте email: например, name@company.kg").max(254, "Не больше 254 символов"),
+  phone: requiredText(1, 128, "Телефон"),
+  title: requiredText(2, 150, "Название проекта"),
   description: requiredText(10, 2000, "Описание проекта"),
-  company: optionalText(120),
-  phone: optionalText(40),
-  budget: optionalText(120),
-  projectType: z.preprocess(
-    (value) => (value === "" ? undefined : value),
-    z.enum(categories, "Выберите тип из списка").optional(),
-  ),
+  project_type: z.enum(PROJECT_TYPES, "Выберите тип из списка"),
+  budget,
 });
 
 export type ClientRequestFields = z.infer<typeof clientRequestSchema>;
