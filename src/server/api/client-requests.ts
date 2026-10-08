@@ -4,11 +4,10 @@ import { z } from "zod";
 import type { RequestStatus } from "@/src/lib/api-enums";
 import { authedGet, authedSend } from "./client";
 import { nullIfNotFound } from "./errors";
-import { request } from "./http";
+import { requestNoContent } from "./http";
 import {
   clientRequestDetailSchema,
   clientRequestListItemSchema,
-  createdSchema,
   type ClientRequestDetail,
   type ClientRequestListItem,
 } from "./schemas";
@@ -24,9 +23,10 @@ export interface ClientRequestWrite {
   budget: number | null;
 }
 
-// Clients have no account, so this one goes out without a token.
+// Clients have no account, so this one goes out without a token. Any 2xx
+// means saved: the response body isn't needed, and its shape is unverified.
 export async function createClientRequest(data: ClientRequestWrite): Promise<void> {
-  await request("/client-requests/", createdSchema, { method: "POST", body: data, cache: "no-store" });
+  await requestNoContent("/client-requests/", { method: "POST", body: data, cache: "no-store" });
 }
 
 export const getClientRequests = cache(
