@@ -96,13 +96,13 @@ $node: 14px;
   color: var(--color-mist);
 }
 
-.step__image {
+.step__thumb {
+  position: relative;
   display: none;
   flex: none;
   width: 144px;
-  height: auto;
   aspect-ratio: 16 / 10;
-  object-fit: cover;
+  overflow: hidden;
   border-radius: 10px;
   background: var(--color-surface-2);
 

@@ -4,14 +4,10 @@ import { FC } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 import { motionTokens } from "@/src/lib/motion-tokens";
-import { STATUS_LABELS, STATUS_TONE } from "@/src/data/projects";
-import type { MemberProject, ProjectRole } from "@/src/data/teams";
+import ProjectCover from "@/src/ui/ProjectCover";
+import { PROJECT_STATUS_LABELS, PROJECT_STATUS_TONE } from "@/src/lib/api-labels";
+import type { ProjectListItem } from "@/src/server/api/schemas";
 import scss from "./ProjectPath.module.scss";
-
-const ROLE_LABELS: Record<ProjectRole, string> = {
-  TEAM_LEAD: "Тимлид",
-  DEVELOPER: "Разработчик",
-};
 
 const STAGGER = 0.1;
 
@@ -40,12 +36,12 @@ const railVariants = {
 };
 
 // Same rail-and-nodes motif as the /login path panel, here as this
-// member's own track record. The page's one motion moment: the rail
-// draws in once when it scrolls into view and each project lights up.
-const ProjectPath: FC<{ items: MemberProject[] }> = ({ items }) => {
+// member's track record. The API doesn't say which role they had in each
+// project, so there's no role badge.
+const ProjectPath: FC<{ projects: ProjectListItem[] }> = ({ projects }) => {
   const reduce = useReducedMotion();
 
-  if (items.length === 0) {
+  if (projects.length === 0) {
     return (
       <p className={scss.empty}>
         Участник пока не входил в команды проектов сообщества.
@@ -66,40 +62,28 @@ const ProjectPath: FC<{ items: MemberProject[] }> = ({ items }) => {
         aria-hidden="true"
         variants={railVariants}
       />
-      {items.map(({ project, role }) => (
-        <motion.li
-          key={project.slug}
-          className={scss.step}
-          variants={itemVariants}
-        >
-          <span
-            className={`${scss.step__node} ${scss[`tone--${STATUS_TONE[project.status]}`]}`}
-            aria-hidden="true"
-          />
-          <Link href={`/projects/${project.slug}`} className={scss.step__link}>
-            <div className={scss.step__body}>
-              <div className={scss.step__meta}>
-                <span className={scss[`tone--${STATUS_TONE[project.status]}`]}>
-                  {STATUS_LABELS[project.status]}
-                </span>
-                <span className={scss.step__role}>{ROLE_LABELS[role]}</span>
+      {projects.map((project) => {
+        const tone = PROJECT_STATUS_TONE[project.project_status];
+        return (
+          <motion.li key={project.id} className={scss.step} variants={itemVariants}>
+            <span className={`${scss.step__node} ${scss[`tone--${tone}`]}`} aria-hidden="true" />
+            <Link href={`/projects/${project.id}`} className={scss.step__link}>
+              <div className={scss.step__body}>
+                <div className={scss.step__meta}>
+                  <span className={scss[`tone--${tone}`]}>
+                    {PROJECT_STATUS_LABELS[project.project_status]}
+                  </span>
+                  <span className={scss.step__role}>{project.category}</span>
+                </div>
+                <h3 className={scss.step__name}>{project.name}</h3>
               </div>
-              <h3 className={scss.step__name}>{project.name}</h3>
-              <p className={scss.step__description}>{project.description}</p>
-            </div>
-            {/* External placeholder images on various hosts — same plain
-                <img> as projects-sections/Grid. */}
-            <img
-              src={project.image}
-              alt=""
-              width={144}
-              height={90}
-              loading="lazy"
-              className={scss.step__image}
-            />
-          </Link>
-        </motion.li>
-      ))}
+              <span className={scss.step__thumb}>
+                <ProjectCover src={project.preview_image} name={project.name} />
+              </span>
+            </Link>
+          </motion.li>
+        );
+      })}
     </motion.ol>
   );
 };
