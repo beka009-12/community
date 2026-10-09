@@ -7,13 +7,10 @@ import { SAVE_FAILED, type ActionResult, type FormState } from "./form-state";
 // (the redirect on an expired session) pass straight through.
 export function toFormError(error: unknown, values: Record<string, string>): FormState {
   unstable_rethrow(error);
+  // A field error may name a field the form doesn't have, so the form
+  // always gets a message too.
   if (isApiError(error, "validation")) {
-    const hasFields = Object.keys(error.fieldErrors).length > 0;
-    return {
-      fieldErrors: error.fieldErrors,
-      error: hasFields ? error.message || undefined : apiErrorMessage(error),
-      values,
-    };
+    return { fieldErrors: error.fieldErrors, error: apiErrorMessage(error), values };
   }
   if (isApiError(error)) return { error: apiErrorMessage(error), values };
   console.error("Admin mutation failed", error);

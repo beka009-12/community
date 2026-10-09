@@ -3,13 +3,14 @@ import { ApiError } from "@/src/server/api/errors";
 import { toActionError, toFormError } from "./handle-error";
 
 describe("admin error mapping", () => {
-  it("maps DRF field errors onto the form and keeps the values", () => {
+  it("maps DRF field errors onto the form, keeps the values and says why", () => {
     const state = toFormError(
       new ApiError("validation", 400, "", { team_name: "Такая команда уже есть." }),
       { team_name: "A" },
     );
     expect(state).toEqual({
       fieldErrors: { team_name: "Такая команда уже есть." },
+      error: "Проверьте поля формы.",
       values: { team_name: "A" },
     });
   });
