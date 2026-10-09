@@ -1,5 +1,5 @@
 import type { MembershipRole } from "@/src/lib/api-enums";
-import type { MemberListItem, Membership, ProjectDetail } from "./schemas";
+import type { MemberListItem, Membership, ProjectDetail, TeamDetail } from "./schemas";
 
 export interface TeamPerson {
   member: MemberListItem;
@@ -48,3 +48,30 @@ export const splitSkills = (skills: string): string[] => [
       .filter(Boolean),
   ),
 ];
+
+export interface MyProject {
+  project: ProjectDetail;
+  role: MembershipRole;
+}
+
+export interface MyTeam {
+  team: TeamDetail;
+  role: MembershipRole;
+}
+
+const roleOf = (members: Membership[], userId: number): MembershipRole | null =>
+  members.find((row) => row.user === userId)?.role ?? null;
+
+// From the full member lists, so it also works for an Admin, who has no
+// public profile with a project list.
+export const myProjects = (projects: ProjectDetail[], userId: number): MyProject[] =>
+  projects.flatMap((project) => {
+    const role = roleOf(project.members, userId);
+    return role ? [{ project, role }] : [];
+  });
+
+export const myTeams = (teams: TeamDetail[], userId: number): MyTeam[] =>
+  teams.flatMap((team) => {
+    const role = roleOf(team.members, userId);
+    return role ? [{ team, role }] : [];
+  });
