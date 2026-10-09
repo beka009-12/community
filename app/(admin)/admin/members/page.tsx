@@ -6,15 +6,26 @@ import PageHeader from "@/src/components/admin/ui/PageHeader";
 import StatusBadge from "@/src/components/admin/ui/StatusBadge";
 import scss from "@/src/components/admin/ui/admin-ui.module.scss";
 import PersonCell from "@/src/components/admin/PersonCell";
+import MembersUnavailable from "@/src/components/admin/members/MembersUnavailable";
+import { USER_ROLES, USER_STATUSES } from "@/src/lib/api-enums";
 import {
-  ROLE_LABELS,
+  USER_ROLE_LABELS,
   USER_STATUS_LABELS,
   USER_STATUS_TONE,
-} from "@/src/components/admin/labels";
-import { SPECIALIZATIONS } from "@/src/data/specializations";
+  positionLabel,
+} from "@/src/lib/api-labels";
+import { fullName } from "@/src/lib/people";
+import { getAdminMembers, loadMembersSection } from "@/src/server/api/admin-members";
+import { getMembers } from "@/src/server/api/members";
+import { getProjectsWithMembers } from "@/src/server/api/projects";
+import type { AdminMemberListItem, MemberListItem } from "@/src/server/api/schemas";
 import { requireAdmin } from "@/src/server/auth/dal";
-import { listMembers, type AdminMember } from "@/src/server/repositories/members";
-import { countProjectsByMember } from "@/src/server/repositories/projects";
+
+interface Row {
+  account: AdminMemberListItem;
+  profile: MemberListItem | null;
+  projects: number;
+}
 
 const one = (value: string | string[] | undefined) =>
   (Array.isArray(value) ? value[0] : value) ?? "";
@@ -26,27 +37,58 @@ const Page = async ({ searchParams }: PageProps<"/admin/members">) => {
   const role = one(params.role);
   const status = one(params.status);
 
-  const projectCounts = await countProjectsByMember();
-  const members = (await listMembers()).filter(({ user, profile }) => {
-    const haystack = `${profile.firstName} ${profile.lastName} ${user.login}`.toLowerCase();
+  const header = (
+    <PageHeader
+      title="Участники"
+      description="Аккаунты создаёт только админ: логин и пароль передаются участнику."
+      action={
+        <Button href="/admin/members/new" variant="primary">
+          Добавить участника
+        </Button>
+      }
+    />
+  );
+
+  const [section, roster, projects] = await Promise.all([
+    loadMembersSection(getAdminMembers()),
+    getMembers(true),
+    getProjectsWithMembers(true),
+  ]);
+  if (section.blocked) {
     return (
-      (!q || haystack.includes(q)) &&
-      (!role || user.role === role) &&
-      (!status || user.status === status)
+      <>
+        {header}
+        <MembersUnavailable />
+      </>
     );
-  });
+  }
+
+  const profiles = new Map(roster.map((member) => [member.id, member]));
+  const projectCounts = new Map<number, number>();
+  for (const project of projects) {
+    for (const row of project.members) {
+      projectCounts.set(row.user, (projectCounts.get(row.user) ?? 0) + 1);
+    }
+  }
+
+  const rows: Row[] = section.data
+    .map((account) => ({
+      account,
+      profile: profiles.get(account.id) ?? null,
+      projects: projectCounts.get(account.id) ?? 0,
+    }))
+    .filter(({ account, profile }) => {
+      const haystack = `${profile ? fullName(profile, "") : ""} ${account.login}`.toLowerCase();
+      return (
+        (!q || haystack.includes(q)) &&
+        (!role || account.role === role) &&
+        (!status || account.status === status)
+      );
+    });
 
   return (
     <>
-      <PageHeader
-        title="Участники"
-        description="Аккаунты создаёт только админ: логин и пароль передаются участнику."
-        action={
-          <Button href="/admin/members/new" variant="primary">
-            Добавить участника
-          </Button>
-        }
-      />
+      {header}
 
       <form className={scss.filters} method="get">
         <div className={scss.field}>
@@ -62,8 +104,7 @@ const Page = async ({ searchParams }: PageProps<"/admin/members">) => {
             block
             options={[
               { value: "", label: "Все роли" },
-              { value: "TEAM_LEAD", label: "Тимлид" },
-              { value: "DEVELOPER", label: "Разработчик" },
+              ...USER_ROLES.map((value) => ({ value, label: USER_ROLE_LABELS[value] })),
             ]}
           />
         </div>
@@ -76,8 +117,7 @@ const Page = async ({ searchParams }: PageProps<"/admin/members">) => {
             block
             options={[
               { value: "", label: "Все статусы" },
-              { value: "ACTIVE", label: "Активен" },
-              { value: "INACTIVE", label: "Неактивен" },
+              ...USER_STATUSES.map((value) => ({ value, label: USER_STATUS_LABELS[value] })),
             ]}
           />
         </div>
@@ -91,42 +131,37 @@ const Page = async ({ searchParams }: PageProps<"/admin/members">) => {
         )}
       </form>
 
-      <DataTable<AdminMember>
-        rows={members}
-        rowKey={(row) => row.user.id}
-        rowHref={(row) => `/admin/members/${row.user.id}`}
+      <DataTable<Row>
+        rows={rows}
+        rowKey={(row) => String(row.account.id)}
+        rowHref={(row) => `/admin/members/${row.account.id}`}
         empty="Никого не нашли — измените фильтры."
-        rowClassName={(row) => (row.user.status === "INACTIVE" ? scss.row__muted : undefined)}
+        rowClassName={(row) => (row.account.status === "Inactive" ? scss.row__muted : undefined)}
         columns={[
           {
             key: "name",
             label: "Участник",
-            render: ({ profile, user }) => (
+            render: ({ account, profile }) => (
               <PersonCell
-                avatar={profile.photo}
-                name={`${profile.firstName} ${profile.lastName}`}
-                caption={user.login}
+                avatar={profile?.avatar ?? null}
+                name={profile ? fullName(profile, account.login) : account.login}
+                caption={account.login}
               />
             ),
           },
-          { key: "role", label: "Роль", render: ({ user }) => ROLE_LABELS[user.role] },
+          { key: "role", label: "Роль", render: ({ account }) => USER_ROLE_LABELS[account.role] },
           {
-            key: "spec",
+            key: "position",
             label: "Направление",
-            render: ({ profile }) =>
-              SPECIALIZATIONS.find((spec) => spec.id === profile.specializationId)?.title ?? "—",
+            render: ({ profile }) => positionLabel(profile?.position ?? null) ?? "—",
           },
-          {
-            key: "projects",
-            label: "Проектов",
-            render: ({ user }) => projectCounts[user.id] ?? 0,
-          },
+          { key: "projects", label: "Проектов", render: (row) => row.projects },
           {
             key: "status",
             label: "Статус",
-            render: ({ user }) => (
-              <StatusBadge tone={USER_STATUS_TONE[user.status]}>
-                {USER_STATUS_LABELS[user.status]}
+            render: ({ account }) => (
+              <StatusBadge tone={USER_STATUS_TONE[account.status]}>
+                {USER_STATUS_LABELS[account.status]}
               </StatusBadge>
             ),
           },

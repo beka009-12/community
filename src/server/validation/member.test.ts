@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseMemberCreate, parseMemberUpdate } from "./member";
+import { parseMemberCreate, parseMemberProfile } from "./member";
 
 const form = (fields: Record<string, string>) => {
   const data = new FormData();
@@ -7,65 +7,48 @@ const form = (fields: Record<string, string>) => {
   return data;
 };
 
-const valid = {
-  login: "new.dev",
-  role: "DEVELOPER",
-  firstName: "Айбек",
-  lastName: "Садыков",
-  specializationId: "frontend",
-  roleTitle: "Frontend-разработчик",
-  stack: "React",
+const profile = {
+  login: "anvar",
+  first_name: "Анвар",
+  last_name: "Касымов",
+  position: "",
   bio: "",
-  skills: "React, TypeScript, ,",
+  skills: "React, Next.js",
   github: "",
+  linkedin: "https://linkedin.com/in/anvar",
+  portfolio: "",
 };
 
 describe("member validation", () => {
-  it("parses skills from a comma list and drops blank links", () => {
-    const result = parseMemberUpdate(form(valid));
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.skills).toEqual(["React", "TypeScript"]);
-      expect(result.data.github).toBeUndefined();
-    }
+  it("creates with login, password and role only", () => {
+    const result = parseMemberCreate(form({ login: " Anvar.K ", password: "secret-123", role: "Team_Lead" }));
+    expect(result.success && result.data).toEqual({ login: "anvar.k", password: "secret-123", role: "Team_Lead" });
   });
 
-  it("rejects a login with spaces or cyrillic", () => {
-    const result = parseMemberUpdate(form({ ...valid, login: "Новый юзер" }));
-    expect(result.success).toBe(false);
-    if (!result.success) expect(result.fieldErrors.login).toBeDefined();
-  });
-
-  it("requires an 8+ char password on create only", () => {
-    expect(parseMemberCreate(form({ ...valid, password: "short" })).success).toBe(false);
-    expect(parseMemberCreate(form({ ...valid, password: "long-enough" })).success).toBe(true);
-  });
-
-  it("rejects an unknown specialization and a non-url github", () => {
-    const result = parseMemberUpdate(form({ ...valid, specializationId: "chef", github: "github" }));
+  it("rejects a bad login, a short password and an unknown role", () => {
+    const result = parseMemberCreate(form({ login: "a b", password: "123", role: "Owner" }));
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.fieldErrors.specializationId).toBeDefined();
-      expect(result.fieldErrors.github).toBeDefined();
+      expect(Object.keys(result.fieldErrors).sort()).toEqual(["login", "password", "role"]);
     }
   });
-});
 
-describe("profile-only and role validation", () => {
-  it("parses a profile without login, role or password", async () => {
-    const { parseMemberProfile } = await import("./member");
-    const profileOnly = new FormData();
-    Object.entries(valid)
-      .filter(([key]) => key !== "login" && key !== "role")
-      .forEach(([key, value]) => profileOnly.set(key, value));
-    const result = parseMemberProfile(profileOnly);
+  it("parses the profile with null URLs and no position", () => {
+    const result = parseMemberProfile(form(profile));
     expect(result.success).toBe(true);
-    if (result.success) expect(result.data).not.toHaveProperty("login");
+    if (result.success) {
+      expect(result.data.position).toBeUndefined();
+      expect(result.data.github).toBeNull();
+      expect(result.data.linkedin).toBe("https://linkedin.com/in/anvar");
+    }
   });
 
-  it("accepts only known roles", async () => {
-    const { parseRole } = await import("./member");
-    expect(parseRole(form({ role: "TEAM_LEAD" })).success).toBe(true);
-    expect(parseRole(form({ role: "ADMIN" })).success).toBe(false);
+  it("rejects an unknown position and a broken URL", () => {
+    const result = parseMemberProfile(form({ ...profile, position: "Chef", github: "github" }));
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.fieldErrors.position).toBeDefined();
+      expect(result.fieldErrors.github).toBeDefined();
+    }
   });
 });

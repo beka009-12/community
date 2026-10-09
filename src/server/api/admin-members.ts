@@ -3,7 +3,7 @@ import { cache } from "react";
 import { z } from "zod";
 import type { Position, UserRole } from "@/src/lib/api-enums";
 import { authedDelete, authedGet, authedSend } from "./client";
-import { nullIfNotFound } from "./errors";
+import { isApiError, nullIfNotFound } from "./errors";
 import {
   adminMemberDetailSchema,
   adminMemberListItemSchema,
@@ -51,3 +51,16 @@ export async function updateAdminMember(id: number, patch: AdminMemberPatch): Pr
 }
 
 export const deleteAdminMember = (id: number): Promise<void> => authedDelete(`/admin/members/${id}/`);
+
+export type MembersSection<T> = { blocked: false; data: T } | { blocked: true };
+
+// /admin/members/ is shadowed by the Django admin today (302 —
+// docs/backend-issues.md #1): the pages explain that instead of crashing.
+export async function loadMembersSection<T>(load: Promise<T>): Promise<MembersSection<T>> {
+  try {
+    return { blocked: false, data: await load };
+  } catch (error) {
+    if (isApiError(error, "redirected")) return { blocked: true };
+    throw error;
+  }
+}
