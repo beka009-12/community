@@ -8,7 +8,7 @@ import StatusBadge from "@/src/components/admin/ui/StatusBadge";
 import scss from "@/src/components/admin/ui/admin-ui.module.scss";
 import { MEMBERSHIP_ROLES, type MembershipRole } from "@/src/lib/api-enums";
 import { MEMBERSHIP_ROLE_LABELS } from "@/src/lib/api-labels";
-import type { ActionResult, FormState } from "@/src/actions/admin/form-state";
+import type { ActionResult, FormState } from "@/src/actions/form-state";
 
 export interface MembershipRow {
   userId: number;

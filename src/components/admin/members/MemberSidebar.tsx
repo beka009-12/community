@@ -14,7 +14,7 @@ import {
   resetPasswordAction,
   setMemberStatusAction,
 } from "@/src/actions/admin/members";
-import type { FormState } from "@/src/actions/admin/form-state";
+import type { FormState } from "@/src/actions/form-state";
 import { USER_ROLES, type UserRole, type UserStatus } from "@/src/lib/api-enums";
 import { USER_ROLE_LABELS, USER_STATUS_LABELS, USER_STATUS_TONE } from "@/src/lib/api-labels";
 

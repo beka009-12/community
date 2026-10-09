@@ -4,7 +4,7 @@ import { FC, useActionState } from "react";
 import Field from "@/src/components/admin/ui/Field";
 import FormActions from "@/src/components/admin/ui/FormActions";
 import scss from "@/src/components/admin/ui/admin-ui.module.scss";
-import type { FormState } from "@/src/actions/admin/form-state";
+import type { FormState } from "@/src/actions/form-state";
 
 export interface TeamFormValues {
   team_name: string;

@@ -4,7 +4,7 @@ import Select from "@/src/ui/Select";
 import { FC, useActionState } from "react";
 import Field from "@/src/components/admin/ui/Field";
 import FormActions from "@/src/components/admin/ui/FormActions";
-import type { FormState } from "@/src/actions/admin/form-state";
+import type { FormState } from "@/src/actions/form-state";
 import { REQUEST_STATUSES, type RequestStatus } from "@/src/lib/api-enums";
 import { REQUEST_STATUS_LABELS } from "@/src/lib/api-labels";
 

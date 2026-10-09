@@ -3,7 +3,7 @@
 import { FC, useCallback, useEffect, useRef, useState } from "react";
 import MemberProfileForm, { type MemberProfileValues } from "./MemberProfileForm";
 import scss from "./EditProfileDialog.module.scss";
-import type { FormState } from "@/src/actions/admin/form-state";
+import type { FormState } from "@/src/actions/form-state";
 
 interface EditProfileDialogProps {
   memberName: string;

@@ -7,7 +7,7 @@ import FormActions from "@/src/components/admin/ui/FormActions";
 import FormSection from "@/src/components/admin/ui/FormSection";
 import scss from "@/src/components/admin/ui/admin-ui.module.scss";
 import { generatePasswordAction } from "@/src/actions/admin/members";
-import type { FormState } from "@/src/actions/admin/form-state";
+import type { FormState } from "@/src/actions/form-state";
 import { USER_ROLES } from "@/src/lib/api-enums";
 import { USER_ROLE_LABELS } from "@/src/lib/api-labels";
 

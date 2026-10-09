@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, useActionState, useState } from "react";
-import type { ActionResult } from "@/src/actions/admin/form-state";
+import type { ActionResult } from "@/src/actions/form-state";
 import scss from "./admin-ui.module.scss";
 
 interface DeleteButtonProps {

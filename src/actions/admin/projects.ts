@@ -11,8 +11,8 @@ import {
 import { requireAdmin } from "@/src/server/auth/dal";
 import { parseMembership } from "@/src/server/validation/membership";
 import { parseProject } from "@/src/server/validation/project";
-import { echoValues, type ActionResult, type FormState } from "./form-state";
-import { toActionError, toFormError } from "./handle-error";
+import { echoValues, type ActionResult, type FormState } from "../form-state";
+import { toActionError, toFormError } from "../handle-error";
 import { refreshAfterAdminChange } from "./refresh";
 
 export async function createProjectAction(_prev: FormState, formData: FormData): Promise<FormState> {

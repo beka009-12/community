@@ -3,8 +3,8 @@
 import { setClientRequestStatus } from "@/src/server/api/client-requests";
 import { requireAdmin } from "@/src/server/auth/dal";
 import { parseRequestStatus } from "@/src/server/validation/request-status";
-import type { FormState } from "./form-state";
-import { toFormError } from "./handle-error";
+import type { FormState } from "../form-state";
+import { toFormError } from "../handle-error";
 import { refreshAfterAdminChange } from "./refresh";
 
 export async function setRequestStatusAction(
