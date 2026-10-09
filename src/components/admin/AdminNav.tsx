@@ -13,7 +13,6 @@ import {
   OverviewIcon,
   ProjectsIcon,
   RequestsIcon,
-  SettingsIcon,
   TeamsIcon,
 } from "./icons";
 import scss from "./AdminShell.module.scss";
@@ -54,7 +53,6 @@ const AdminNav: FC<{ counts: NavCounts }> = ({ counts }) => {
       count: counts.newRequests || undefined,
       alert: true,
     },
-    { href: "/admin/settings", label: "Настройки", icon: <SettingsIcon /> },
   ];
 
   return (

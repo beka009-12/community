@@ -30,9 +30,8 @@ const ProjectCard: FC<{ project: DbProject; members: MemberWithRole[] }> = ({ pr
         <span className={scss.card__footer}>
           <AvatarStack
             people={members.map((member) => ({
-              id: member.user.id,
               name: `${member.profile.firstName} ${member.profile.lastName}`,
-              photo: member.profile.photo,
+              avatar: member.profile.photo,
             }))}
           />
           <span className={`${scss.card__lead} ${lead ? "" : scss["card__lead--missing"]}`}>
