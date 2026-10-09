@@ -9,10 +9,18 @@ import type { TeamPerson } from "@/src/server/api/joins";
 import type { ProjectDetail } from "@/src/server/api/schemas";
 import scss from "./ProjectCard.module.scss";
 
-const ProjectCard: FC<{ project: ProjectDetail; team: TeamPerson[] }> = ({ project, team }) => {
+interface ProjectCardProps {
+  project: ProjectDetail;
+  team: TeamPerson[];
+  // The cabinet links to the public page and shows the member's role.
+  href?: string;
+  note?: string;
+}
+
+const ProjectCard: FC<ProjectCardProps> = ({ project, team, href, note }) => {
   const lead = team.find((person) => person.role === "Team_Lead");
   return (
-    <Link href={`/admin/projects/${project.id}`} className={scss.card}>
+    <Link href={href ?? `/admin/projects/${project.id}`} className={scss.card}>
       <span className={scss.card__media}>
         <ProjectCover src={project.preview_image} name={project.name} imageClassName={scss.card__image} />
         <span className={scss.card__status}>
@@ -24,6 +32,7 @@ const ProjectCard: FC<{ project: ProjectDetail; team: TeamPerson[] }> = ({ proje
       <span className={scss.card__body}>
         <span className={scss.card__meta}>{project.category}</span>
         <span className={scss.card__name}>{project.name}</span>
+        {note && <span className={scss.card__meta}>{note}</span>}
         <span className={scss.card__footer}>
           <AvatarStack
             people={team.map(({ member }) => ({ name: fullName(member), avatar: member.avatar }))}
