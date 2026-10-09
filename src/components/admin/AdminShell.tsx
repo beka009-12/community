@@ -1,12 +1,43 @@
 import { FC, ReactNode } from "react";
-import AdminNav, { type NavCounts } from "./AdminNav";
-import scss from "./AdminShell.module.scss";
+import DashboardShell from "@/src/components/dashboard/DashboardShell";
+import type { DashboardPerson } from "@/src/components/dashboard/DashboardNav";
+import { MembersIcon, OverviewIcon, ProjectsIcon, RequestsIcon, TeamsIcon } from "./icons";
 
-const AdminShell: FC<{ counts: NavCounts; children: ReactNode }> = ({ counts, children }) => (
-  <div className={scss.shell}>
-    <AdminNav counts={counts} />
-    <main className={scss.content}>{children}</main>
-  </div>
+export interface NavCounts {
+  members: number;
+  teams: number;
+  projects: number;
+  newRequests: number;
+}
+
+interface AdminShellProps {
+  counts: NavCounts;
+  person: DashboardPerson;
+  children: ReactNode;
+}
+
+const AdminShell: FC<AdminShellProps> = ({ counts, person, children }) => (
+  <DashboardShell
+    brand="admin"
+    homeHref="/admin"
+    navLabel="Разделы админки"
+    person={person}
+    links={[
+      { href: "/admin", label: "Обзор", icon: <OverviewIcon /> },
+      { href: "/admin/members", label: "Участники", icon: <MembersIcon />, count: counts.members },
+      { href: "/admin/teams", label: "Команды", icon: <TeamsIcon />, count: counts.teams },
+      { href: "/admin/projects", label: "Проекты", icon: <ProjectsIcon />, count: counts.projects },
+      {
+        href: "/admin/requests",
+        label: "Заявки",
+        icon: <RequestsIcon />,
+        count: counts.newRequests || undefined,
+        alert: true,
+      },
+    ]}
+  >
+    {children}
+  </DashboardShell>
 );
 
 export default AdminShell;
