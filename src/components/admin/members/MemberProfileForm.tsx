@@ -26,6 +26,8 @@ interface MemberProfileFormProps {
   action: (prev: FormState, formData: FormData) => Promise<FormState>;
   initial: MemberProfileValues;
   onSaved?: () => void;
+  // The cabinet hides it: only the admin changes logins.
+  showLogin?: boolean;
 }
 
 const POSITION_OPTIONS = [
@@ -33,7 +35,7 @@ const POSITION_OPTIONS = [
   ...POSITIONS.map((value) => ({ value, label: POSITION_LABELS[value] })),
 ];
 
-const MemberProfileForm: FC<MemberProfileFormProps> = ({ action, initial, onSaved }) => {
+const MemberProfileForm: FC<MemberProfileFormProps> = ({ action, initial, onSaved, showLogin = true }) => {
   const [state, formAction, pending] = useActionState(action, {});
   const errors = pending ? {} : (state.fieldErrors ?? {});
   const value = (name: keyof MemberProfileValues) => state.values?.[name] ?? initial[name];
@@ -51,9 +53,11 @@ const MemberProfileForm: FC<MemberProfileFormProps> = ({ action, initial, onSave
 
   return (
     <form action={formAction} className={scss.formGrid} noValidate>
-      <Field label="Логин" htmlFor="member-login" required error={errors.login}>
-        <input {...control("login")} autoComplete="off" spellCheck={false} />
-      </Field>
+      {showLogin && (
+        <Field label="Логин" htmlFor="member-login" required error={errors.login}>
+          <input {...control("login")} autoComplete="off" spellCheck={false} />
+        </Field>
+      )}
       <Field label="Направление" htmlFor="member-position" error={errors.position}>
         <Select
           id="member-position"

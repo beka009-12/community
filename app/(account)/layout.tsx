@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-// Minimal on purpose: the full cabinet (spec 2) gets its own shell here.
-export default function AccountLayout({ children }: { children: ReactNode }) {
-  return <main>{children}</main>;
+// No site header/footer: the cabinet has its own shell (account/layout.tsx).
+export default function AccountGroupLayout({ children }: { children: ReactNode }) {
+  return <>{children}</>;
 }
