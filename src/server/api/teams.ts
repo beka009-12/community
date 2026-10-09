@@ -33,6 +33,13 @@ export const getTeamMembers = cache(
   (id: number): Promise<Membership[]> => authedGet(`/teams/${id}/members/`, listOf(membershipSchema)),
 );
 
+// Like projects: the list has no members, so each team is loaded (in parallel).
+export const getTeamsWithMembers = cache(async (): Promise<TeamDetail[]> => {
+  const teams = await getTeams();
+  const details = await Promise.all(teams.map((team) => getTeam(team.id)));
+  return details.filter((team): team is TeamDetail => team !== null);
+});
+
 export async function createTeam(data: TeamWrite): Promise<number> {
   return (await authedSend("POST", "/teams/", data, createdSchema)).id;
 }
