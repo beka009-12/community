@@ -1,14 +1,14 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { setClientRequestStatus } from "@/src/server/api/client-requests";
 import { requireAdmin } from "@/src/server/auth/dal";
-import { setClientRequestStatus } from "@/src/server/repositories/requests";
 import { parseRequestStatus } from "@/src/server/validation/request-status";
 import type { FormState } from "./form-state";
 import { toFormError } from "./handle-error";
+import { refreshAfterAdminChange } from "./refresh";
 
 export async function setRequestStatusAction(
-  id: string,
+  id: number,
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
@@ -21,7 +21,6 @@ export async function setRequestStatusAction(
   } catch (error) {
     return toFormError(error, {});
   }
-  // The layout shows the NEW-requests badge, so refresh all admin pages.
-  revalidatePath("/admin", "layout");
+  refreshAfterAdminChange();
   return { ok: true };
 }

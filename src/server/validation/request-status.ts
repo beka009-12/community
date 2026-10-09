@@ -1,14 +1,6 @@
 import { z } from "zod";
+import { REQUEST_STATUSES } from "@/src/lib/api-enums";
 import { parseForm } from "./form";
-
-export const REQUEST_STATUSES = [
-  "NEW",
-  "REVIEWING",
-  "ACCEPTED",
-  "IN_PROGRESS",
-  "COMPLETED",
-  "REJECTED",
-] as const;
 
 const requestStatusSchema = z.object({
   status: z.enum(REQUEST_STATUSES, "Выберите статус из списка"),
