@@ -24,16 +24,182 @@ curl -i "$API_URL/admin/members/"
 `django-admin/`) или переименовать API-префикс. Сообщите, какой путь будет
 финальным.
 
-### 2. Нет тестовых аккаунтов
+### 2. Нет тестовых аккаунтов Team_Lead и Developer
 
-Нужны логины для ролей Admin, Team_Lead и Developer на этом сервере. Пока их
-нет, вход, обновление токена, выход и вся админка написаны только по схеме и
-не проверены вживую.
+Аккаунт Admin есть (2026-10-09): вход, обновление токена, выход и админка
+проверены вживую. Для Team_Lead и Developer аккаунтов пока нет, поэтому
+кабинет `/account` и запрет входа в админку для этих ролей не проверены.
 
 ### 3. API работает по http на голом IP
 
 Логин, пароль и JWT передаются между сервером сайта и API открытым текстом.
 Для продакшна нужны домен и HTTPS.
+
+### 4. Участник может сам поменять себе роль (безопасность)
+
+По Swagger в `PATCH /personal-account/` (схема `UserProfileName`) поле `role`
+доступно на запись. Если сервер это действительно принимает, любой Developer
+может сделать себя Admin одним запросом и получить всю админку. Мы это не
+проверяли, чтобы не менять права в обход.
+
+Проверить на тестовом Developer:
+
+```
+PATCH /ru/personal-account/  {"role": "Admin"}   (Bearer токен Developer)
+→ ожидаем 400 или игнор поля; role в ответе должна остаться "Developer"
+```
+
+Исправление: в сериализаторе личного кабинета `role` (и `status`) только для
+чтения — `read_only_fields = ["role", "status"]`. Менять роль может только
+админ через `/admin/members/{id}/`.
+
+## Доработка: команда у проекта
+
+Сейчас проект и команда никак не связаны: у `Project` нет поля команды ни в
+модели, ни в API. Если в админке создать команду, назначить её на проект
+нельзя, и участников приходится добавлять в проект заново по одному.
+
+### Что нужно
+
+1. Поле `team` у проекта: одна команда на проект, можно без команды.
+2. В ответах `GET /projects/` и `GET /projects/{id}/` поля `team` (id) и
+   `team_name`. Так публичный сайт сможет показать команду проекта без доступа
+   к `/teams/`.
+3. `team` можно передать в `POST /projects/` и `PATCH /projects/{id}/`, `null`
+   снимает команду.
+4. Когда проекту назначают команду, её участники добавляются в участники
+   проекта с теми же ролями (`Team_Lead` / `Developer`). Тех, кто уже есть в
+   проекте, не трогаем. Всё в одной транзакции.
+5. Когда команду снимают (`team: null`), участники проекта остаются.
+6. Фильтр `GET /projects/?team=6`.
+
+### Контракт
+
+```
+PATCH /ru/projects/1/
+Authorization: Bearer <access админа>
+{"team": 6}
+
+→ 200
+{
+  "id": 1,
+  "name": "Motion LMS Platform",
+  "project_status": "In_progress",
+  "category": "Education",
+  "team": 6,
+  "team_name": "тест",
+  "members": [
+    {"id": 41, "project": 1, "user": 2, "role": "Team_Lead"},
+    {"id": 42, "project": 1, "user": 5, "role": "Developer"}
+  ],
+  ...
+}
+```
+
+```
+GET /ru/projects/
+→ 200
+[{"id": 1, "name": "Motion LMS Platform", "team": 6, "team_name": "тест", ...}]
+```
+
+Ошибка, если такой команды нет:
+
+```
+PATCH /ru/projects/1/ {"team": 999}
+→ 400 {"team": ["Недопустимый первичный ключ \"999\" - объект не существует."]}
+```
+
+### Пример реализации (Django + DRF)
+
+`models.py`:
+
+```python
+class Project(models.Model):
+    # ...существующие поля...
+    team = models.ForeignKey(
+        "Team",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,  # удалили команду — проект остаётся без неё
+        related_name="projects",
+    )
+```
+
+Миграция отдельным файлом: `python manage.py makemigrations motion_app && python manage.py migrate`.
+
+`serializers.py`:
+
+```python
+from django.db import transaction
+from rest_framework import serializers
+
+from .models import Project, ProjectMember, Team, TeamMember
+
+
+def copy_team_members(project: Project) -> None:
+    if project.team_id is None:
+        return
+    existing = set(
+        ProjectMember.objects.filter(project=project).values_list("user_id", flat=True)
+    )
+    ProjectMember.objects.bulk_create(
+        ProjectMember(project=project, user_id=member.user_id, role=member.role)
+        for member in TeamMember.objects.filter(team_id=project.team_id)
+        if member.user_id not in existing
+    )
+
+
+class ProjectDetailSerializer(serializers.ModelSerializer):
+    team = serializers.PrimaryKeyRelatedField(
+        queryset=Team.objects.all(), allow_null=True, required=False
+    )
+    team_name = serializers.CharField(source="team.team_name", read_only=True, default=None)
+
+    class Meta:
+        model = Project
+        fields = [
+            "id", "name", "description", "project_status", "category",
+            "preview_image", "demo_url", "github_url", "created_at",
+            "team", "team_name", "members",
+        ]
+
+    @transaction.atomic
+    def create(self, validated_data):
+        project = super().create(validated_data)
+        copy_team_members(project)
+        return project
+
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        previous_team_id = instance.team_id
+        project = super().update(instance, validated_data)
+        if project.team_id and project.team_id != previous_team_id:
+            copy_team_members(project)
+        return project
+```
+
+В `ProjectListSerializer` добавить те же `team` и `team_name` (только чтение),
+во вьюхе списка — `filterset_fields = [..., "team"]` и
+`select_related("team")`, чтобы не было N+1.
+
+### Как проверить
+
+```bash
+TOKEN=...  # access админа из POST /ru/auth/login/
+curl -X PATCH "$API_URL/projects/1/" -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" -d '{"team": 6}'
+# → в ответе team: 6, team_name, участники команды 6 среди members
+
+curl "$API_URL/projects/?team=6"
+# → в списке проект 1
+
+curl -X PATCH "$API_URL/projects/1/" -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" -d '{"team": null}'
+# → team: null, members не изменились
+```
+
+После этого на фронте: выбор команды в форме проекта в админке и строка
+«Команда: …» на странице проекта.
 
 ## Swagger не совпадает с реальными ответами
 
