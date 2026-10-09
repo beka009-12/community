@@ -10,7 +10,7 @@ export async function proxy(request: NextRequest) {
     request.cookies.get(SESSION_COOKIE)?.value,
     process.env.AUTH_SECRET ?? "",
   );
-  const isAdmin = session?.role === "ADMIN";
+  const isAdmin = session?.role === "Admin";
   const { pathname } = request.nextUrl;
 
   if (pathname.startsWith("/admin") && !isAdmin) {

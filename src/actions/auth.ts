@@ -1,8 +1,10 @@
 "use server";
 
-import { createHash, timingSafeEqual } from "node:crypto";
 import { redirect } from "next/navigation";
-import { createSession, deleteSession } from "@/src/server/auth/session";
+import { getAccountWithToken, loginWithPassword, logoutFromApi } from "@/src/server/api/auth";
+import { isApiError } from "@/src/server/api/errors";
+import { LOGIN_PATH, homeFor } from "@/src/server/auth/routes";
+import { endSession, readTokens, startSession } from "@/src/server/auth/session";
 
 export interface LoginFieldErrors {
   login?: string;
@@ -18,11 +20,6 @@ export interface LoginState {
 
 const MAX_LENGTH = 128;
 
-// Compare fixed-length digests so timing doesn't leak how much matched.
-const digest = (value: string) => createHash("sha256").update(value).digest();
-const safeEqual = (a: string, b: string) =>
-  timingSafeEqual(digest(a), digest(b));
-
 const validate = (login: string, password: string): LoginFieldErrors => {
   const errors: LoginFieldErrors = {};
   if (!login) errors.login = "Введите логин";
@@ -32,43 +29,49 @@ const validate = (login: string, password: string): LoginFieldErrors => {
   return errors;
 };
 
-export async function login(
-  _prev: LoginState,
-  formData: FormData,
-): Promise<LoginState> {
+export async function login(_prev: LoginState, formData: FormData): Promise<LoginState> {
   const rawLogin = formData.get("login");
   const rawPassword = formData.get("password");
-
   if (typeof rawLogin !== "string" || typeof rawPassword !== "string") {
     return { error: "Не удалось отправить форму. Обновите страницу и попробуйте снова." };
   }
 
   const loginValue = rawLogin.trim();
   const fieldErrors = validate(loginValue, rawPassword);
-  if (fieldErrors.login || fieldErrors.password) {
-    return { fieldErrors, login: loginValue };
-  }
+  if (fieldErrors.login || fieldErrors.password) return { fieldErrors, login: loginValue };
 
-  // Admin credentials come from .env; member accounts will be checked
-  // against the store once member dashboards exist.
-  const adminLogin = process.env.ADMIN_LOGIN;
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  if (!adminLogin || !adminPassword) {
-    console.error("ADMIN_LOGIN / ADMIN_PASSWORD are not set");
-    return { error: "Вход временно недоступен.", login: loginValue };
+  let home: string;
+  try {
+    const tokens = await loginWithPassword(loginValue, rawPassword);
+    const account = await getAccountWithToken(tokens.access);
+    if (account.status === "Inactive") {
+      return { error: "Аккаунт отключён. Обратитесь к администратору.", login: loginValue };
+    }
+    await startSession({
+      access: tokens.access,
+      refresh: tokens.refresh,
+      userId: account.id,
+      role: account.role,
+    });
+    home = homeFor(account.role);
+  } catch (error) {
+    if (isApiError(error, "unauthorized") || isApiError(error, "validation")) {
+      return { error: "Неверный логин или пароль.", login: loginValue };
+    }
+    console.error("Login failed", error);
+    return { error: "Сервер недоступен, попробуйте позже.", login: loginValue };
   }
-
-  const valid =
-    safeEqual(loginValue, adminLogin) && safeEqual(rawPassword, adminPassword);
-  if (!valid) {
-    return { error: "Неверный логин или пароль.", login: loginValue };
-  }
-
-  await createSession({ sub: "admin", role: "ADMIN" });
-  redirect("/admin");
+  redirect(home);
 }
 
 export async function logout(): Promise<void> {
-  await deleteSession();
-  redirect("/login");
+  const { access, refresh } = await readTokens();
+  try {
+    await logoutFromApi(access, refresh);
+  } catch (error) {
+    // The session ends here either way.
+    console.error("API logout failed", error);
+  }
+  await endSession();
+  redirect(LOGIN_PATH);
 }
