@@ -1,11 +1,13 @@
 import { z } from "zod";
 import {
+  LANGUAGE_LEVELS,
   MEMBERSHIP_ROLES,
   POSITIONS,
   PROJECT_STATUSES,
   REQUEST_STATUSES,
   USER_ROLES,
   USER_STATUSES,
+  WORKING_FORMATS,
 } from "@/src/lib/api-enums";
 import { toMediaPath } from "./media";
 
@@ -143,6 +145,60 @@ export const accountSchema = z.object({
   last_name: text,
 });
 
+// The rest of GET /personal-account/: the cabinet's own profile.
+export const myProfileSchema = accountSchema.extend({
+  created_at: z.string(),
+  avatar: media,
+  bio: text,
+  position,
+  skills: text,
+  github: url,
+  linkedin: url,
+  portfolio: url,
+  resume: media,
+});
+
+// Résumé rows under /personal-account/. Dates are "YYYY-MM-DD"; an enum
+// value the frontend doesn't know yet reads as "none" instead of dropping
+// the row.
+const optionalDate = z.string().nullish().transform((value) => value || null);
+
+export const workSchema = z.object({
+  id: z.number(),
+  company: z.string(),
+  position: z.string(),
+  start_time: z.string(),
+  end_time: optionalDate,
+  working_format: z.enum(WORKING_FORMATS).nullable().catch(null),
+  achievements: text,
+});
+
+export const educationSchema = z.object({
+  id: z.number(),
+  educational_institution: z.string(),
+  specialization: z.string(),
+  start_year: z.string(),
+  end_year: optionalDate,
+  studying_now: z.boolean().catch(false),
+  responsibilities: text,
+});
+
+export const languageSchema = z.object({
+  id: z.number(),
+  languages: z.string(),
+  // The API capitalises this one field.
+  Level: z.enum(LANGUAGE_LEVELS).nullable().catch(null),
+});
+
+export const certificateSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  organization: z.string(),
+  given_date: z.string(),
+  text,
+  certificate_image: media,
+});
+
 export const tokensSchema = z.object({
   access: z.string().min(1),
   refresh: z.string().min(1).optional(),
@@ -162,3 +218,8 @@ export type AdminMemberListItem = z.infer<typeof adminMemberListItemSchema>;
 export type AdminMemberDetail = z.infer<typeof adminMemberDetailSchema>;
 export type Account = z.infer<typeof accountSchema>;
 export type Tokens = z.infer<typeof tokensSchema>;
+export type MyProfile = z.infer<typeof myProfileSchema>;
+export type Work = z.infer<typeof workSchema>;
+export type Education = z.infer<typeof educationSchema>;
+export type Language = z.infer<typeof languageSchema>;
+export type Certificate = z.infer<typeof certificateSchema>;

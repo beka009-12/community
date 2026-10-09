@@ -5,6 +5,7 @@ import type {
   RequestStatus,
   UserRole,
   UserStatus,
+  WorkingFormat,
 } from "./api-enums";
 
 // Modifier suffixes shared by the public status pills (`status--<tone>`)
@@ -67,4 +68,16 @@ export const REQUEST_STATUS_LABELS: Record<RequestStatus, string> = {
 export const REQUEST_STATUS_TONE: Record<RequestStatus, Tone> = {
   New: "accent",
   Reviewing: "neutral",
+};
+
+export const WORKING_FORMAT_LABELS: Record<WorkingFormat, string> = {
+  office: "Офис",
+  remote: "Удалённо",
+  hybrid: "Гибрид",
+  freelance: "Фриланс",
+  part_time: "Частичная занятость",
+  full_time: "Полная занятость",
+  contract: "Контракт",
+  internship: "Стажировка",
+  flexible: "Гибкий график",
 };

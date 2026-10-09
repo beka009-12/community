@@ -25,3 +25,19 @@ export type UserStatus = (typeof USER_STATUSES)[number];
 
 export const REQUEST_STATUSES = ["New", "Reviewing"] as const;
 export type RequestStatus = (typeof REQUEST_STATUSES)[number];
+
+export const WORKING_FORMATS = [
+  "office",
+  "remote",
+  "hybrid",
+  "freelance",
+  "part_time",
+  "full_time",
+  "contract",
+  "internship",
+  "flexible",
+] as const;
+export type WorkingFormat = (typeof WORKING_FORMATS)[number];
+
+export const LANGUAGE_LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2", "Родной язык"] as const;
+export type LanguageLevel = (typeof LANGUAGE_LEVELS)[number];
