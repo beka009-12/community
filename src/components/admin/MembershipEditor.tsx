@@ -4,73 +4,37 @@ import Select from "@/src/ui/Select";
 import { FC, useActionState } from "react";
 import Link from "next/link";
 import ConfirmButton from "@/src/components/admin/ui/ConfirmButton";
+import StatusBadge from "@/src/components/admin/ui/StatusBadge";
 import scss from "@/src/components/admin/ui/admin-ui.module.scss";
-import { MEMBERSHIP_LABELS } from "@/src/components/admin/labels";
+import { MEMBERSHIP_ROLES, type MembershipRole } from "@/src/lib/api-enums";
+import { MEMBERSHIP_ROLE_LABELS } from "@/src/lib/api-labels";
 import type { ActionResult, FormState } from "@/src/actions/admin/form-state";
-import type { MembershipRole } from "@/src/server/db/types";
 
 export interface MembershipRow {
-  userId: string;
+  userId: number;
   name: string;
-  roleTitle: string;
-  active: boolean;
-  membershipRole: MembershipRole;
+  caption: string;
+  role: MembershipRole;
 }
 
 export interface Candidate {
-  userId: string;
+  userId: number;
   name: string;
 }
 
 interface MembershipEditorProps {
   rows: MembershipRow[];
   candidates: Candidate[];
-  upsertAction: (prev: FormState, formData: FormData) => Promise<FormState>;
-  removeAction: (userId: string) => Promise<ActionResult>;
+  addAction: (prev: FormState, formData: FormData) => Promise<FormState>;
+  removeAction: (userId: number) => Promise<ActionResult>;
 }
 
-const ROLE_OPTIONS = (Object.entries(MEMBERSHIP_LABELS) as [MembershipRole, string][]).map(
-  ([value, label]) => ({ value, label }),
-);
+const ROLE_OPTIONS = MEMBERSHIP_ROLES.map((value) => ({ value, label: MEMBERSHIP_ROLE_LABELS[value] }));
 
-// One row per person: changing the role select saves immediately (same
-// upsert action as "Добавить"), removal asks for confirmation.
-const RoleCell: FC<{
-  row: MembershipRow;
-  upsertAction: MembershipEditorProps["upsertAction"];
-}> = ({ row, upsertAction }) => {
-  const [state, formAction, pending] = useActionState(upsertAction, {});
-  const error = pending ? undefined : (state.error ?? state.fieldErrors?.role);
-  return (
-    <form action={formAction} className={scss.roleCell}>
-      <input type="hidden" name="userId" value={row.userId} />
-      {/* Remount after every response: on failure the select snaps back to
-          the saved role instead of showing an unsaved one. */}
-      <Select
-        key={JSON.stringify(state)}
-        name="role"
-        defaultValue={row.membershipRole}
-        ariaLabel={`Роль: ${row.name}`}
-        disabled={pending}
-        submitOnChange
-        options={ROLE_OPTIONS}
-      />
-      {error && (
-        <span role="alert" className={scss.field__error}>
-          {error}
-        </span>
-      )}
-    </form>
-  );
-};
-
-const MembershipEditor: FC<MembershipEditorProps> = ({
-  rows,
-  candidates,
-  upsertAction,
-  removeAction,
-}) => {
-  const [state, addAction, pending] = useActionState(upsertAction, {});
+// The API can add and remove people but can't change a role in place, so
+// the role is a badge: to change it, remove the person and add them again.
+const MembershipEditor: FC<MembershipEditorProps> = ({ rows, candidates, addAction, removeAction }) => {
+  const [state, formAction, pending] = useActionState(addAction, {});
   const errors = pending ? {} : (state.fieldErrors ?? {});
 
   return (
@@ -85,12 +49,11 @@ const MembershipEditor: FC<MembershipEditorProps> = ({
                 <Link href={`/admin/members/${row.userId}`} className={scss.table__link}>
                   {row.name}
                 </Link>
-                <p className={scss.field__hint}>
-                  {row.roleTitle}
-                  {!row.active && " · неактивен"}
-                </p>
+                {row.caption && <p className={scss.field__hint}>{row.caption}</p>}
               </div>
-              <RoleCell row={row} upsertAction={upsertAction} />
+              <StatusBadge tone={row.role === "Team_Lead" ? "accent" : "neutral"}>
+                {MEMBERSHIP_ROLE_LABELS[row.role]}
+              </StatusBadge>
               <ConfirmButton
                 label="Убрать"
                 confirmLabel="Да, убрать"
@@ -102,34 +65,38 @@ const MembershipEditor: FC<MembershipEditorProps> = ({
         </ul>
       )}
 
-      <form action={addAction} className={scss.membership__add} noValidate>
+      <form action={formAction} className={scss.membership__add} noValidate>
         <div className={scss.field}>
           <label htmlFor="membership-user">Участник</label>
           {/* Keyed by the last result so a successful add clears the choice. */}
           <Select
             key={JSON.stringify(state)}
             id="membership-user"
-            name="userId"
+            name="user"
             defaultValue=""
-            invalid={Boolean(errors.userId)}
-            describedBy={errors.userId ? "membership-user-error" : undefined}
+            invalid={Boolean(errors.user)}
+            describedBy={errors.user ? "membership-user-error" : undefined}
             block
             options={candidates.map((candidate) => ({
-              value: candidate.userId,
+              value: String(candidate.userId),
               label: candidate.name,
             }))}
           />
-          {errors.userId && (
+          {errors.user && (
             <p id="membership-user-error" className={scss.field__error}>
-              {errors.userId}
+              {errors.user}
             </p>
           )}
         </div>
         <div className={scss.field}>
           <label htmlFor="membership-role">Роль</label>
-          <Select id="membership-role" name="role" defaultValue="DEVELOPER" block options={ROLE_OPTIONS} />
+          <Select id="membership-role" name="role" defaultValue="Developer" block options={ROLE_OPTIONS} />
         </div>
-        <button type="submit" className={`${scss.smallButton} ${scss["smallButton--solid"]}`} disabled={pending}>
+        <button
+          type="submit"
+          className={`${scss.smallButton} ${scss["smallButton--solid"]}`}
+          disabled={pending}
+        >
           {pending ? "Добавляем…" : "Добавить"}
         </button>
         {state.error && !pending && (

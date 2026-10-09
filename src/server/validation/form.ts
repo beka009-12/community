@@ -49,3 +49,10 @@ export function parseForm<S extends z.ZodType>(
   }
   return { success: false, fieldErrors };
 }
+
+// Blank → null: the API clears a nullable URL only when it receives null.
+export const nullableUrl = (max = 200) =>
+  z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? null : value),
+    z.url("Введите ссылку целиком, с https://").max(max, `Не больше ${max} символов`).nullable(),
+  );

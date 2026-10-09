@@ -1,61 +1,44 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireAdmin } from "@/src/server/auth/dal";
 import {
+  addProjectMember,
   createProject,
+  deleteProject,
   removeProjectMember,
   updateProject,
-  upsertProjectMember,
-} from "@/src/server/repositories/projects";
-import {
-  parseProjectCreate,
-  parseProjectUpdate,
-} from "@/src/server/validation/project";
-import { parseMembership } from "@/src/server/validation/team";
-import {
-  echoValues,
-  SAVE_FAILED,
-  type ActionResult,
-  type FormState,
-} from "./form-state";
-import { toFormError } from "./handle-error";
+} from "@/src/server/api/projects";
+import { requireAdmin } from "@/src/server/auth/dal";
+import { parseMembership } from "@/src/server/validation/membership";
+import { parseProject } from "@/src/server/validation/project";
+import { echoValues, type ActionResult, type FormState } from "./form-state";
+import { toActionError, toFormError } from "./handle-error";
+import { refreshAfterAdminChange } from "./refresh";
 
-// Projects show up on the homepage, /projects, project pages and member
-// profiles — refresh all of them.
-const revalidateProject = (id: string) => {
-  revalidatePath("/admin/projects");
-  revalidatePath(`/admin/projects/${id}`);
-  revalidatePath("/", "layout");
-};
-
-export async function createProjectAction(
-  _prev: FormState,
-  formData: FormData,
-): Promise<FormState> {
+export async function createProjectAction(_prev: FormState, formData: FormData): Promise<FormState> {
   await requireAdmin();
   const values = echoValues(formData);
-  const parsed = parseProjectCreate(formData);
+  const parsed = parseProject(formData);
   if (!parsed.success) return { fieldErrors: parsed.fieldErrors, values };
 
+  let id: number;
   try {
-    await createProject(parsed.data);
+    id = await createProject(parsed.data);
   } catch (error) {
     return toFormError(error, values);
   }
-  revalidateProject(parsed.data.id);
-  redirect(`/admin/projects/${parsed.data.id}`);
+  refreshAfterAdminChange();
+  redirect(`/admin/projects/${id}`);
 }
 
 export async function updateProjectAction(
-  id: string,
+  id: number,
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
   await requireAdmin();
   const values = echoValues(formData);
-  const parsed = parseProjectUpdate(formData);
+  const parsed = parseProject(formData);
   if (!parsed.success) return { fieldErrors: parsed.fieldErrors, values };
 
   try {
@@ -63,12 +46,23 @@ export async function updateProjectAction(
   } catch (error) {
     return toFormError(error, values);
   }
-  revalidateProject(id);
+  refreshAfterAdminChange();
   return { ok: true, values };
 }
 
-export async function upsertProjectMemberAction(
-  projectId: string,
+export async function deleteProjectAction(id: number, _prev: ActionResult): Promise<ActionResult> {
+  await requireAdmin();
+  try {
+    await deleteProject(id);
+  } catch (error) {
+    return toActionError(error);
+  }
+  refreshAfterAdminChange();
+  redirect("/admin/projects");
+}
+
+export async function addProjectMemberAction(
+  projectId: number,
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
@@ -77,25 +71,21 @@ export async function upsertProjectMemberAction(
   if (!parsed.success) return { fieldErrors: parsed.fieldErrors };
 
   try {
-    await upsertProjectMember(projectId, parsed.data.userId, parsed.data.role);
+    await addProjectMember(projectId, parsed.data.user, parsed.data.role);
   } catch (error) {
     return toFormError(error, {});
   }
-  revalidateProject(projectId);
+  refreshAfterAdminChange();
   return { ok: true };
 }
 
-export async function removeProjectMemberAction(
-  projectId: string,
-  userId: string,
-): Promise<ActionResult> {
+export async function removeProjectMemberAction(projectId: number, userId: number): Promise<ActionResult> {
   await requireAdmin();
   try {
     await removeProjectMember(projectId, userId);
   } catch (error) {
-    console.error("Remove project member failed", error);
-    return { error: SAVE_FAILED };
+    return toActionError(error);
   }
-  revalidateProject(projectId);
+  refreshAfterAdminChange();
   return {};
 }

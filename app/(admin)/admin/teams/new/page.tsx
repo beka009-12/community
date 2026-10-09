@@ -10,7 +10,11 @@ const Page = async () => {
     <>
       <PageHeader title="Новая команда" back={{ href: "/admin/teams", label: "Команды" }} />
       <Panel>
-        <TeamForm action={createTeamAction} initial={{ name: "", description: "" }} submitLabel="Создать команду" />
+        <TeamForm
+          action={createTeamAction}
+          initial={{ team_name: "", description: "" }}
+          submitLabel="Создать команду"
+        />
       </Panel>
     </>
   );

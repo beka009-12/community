@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseProjectCreate, parseProjectUpdate } from "./project";
+import { parseProject } from "./project";
 
 const form = (fields: Record<string, string>) => {
   const data = new FormData();
@@ -8,46 +8,25 @@ const form = (fields: Record<string, string>) => {
 };
 
 const valid = {
-  name: "Склад",
-  description: "Система учёта остатков на складе.",
-  details: "",
-  status: "PLANNED",
-  category: "systems",
-  origin: "client",
-  year: "2026",
-  image: "https://example.com/preview.png",
-  stack: "React, NestJS",
-  demoUrl: "",
-  githubUrl: "",
+  name: "Motion CRM",
+  description: "Учёт клиентов и сделок для отдела продаж.",
+  project_status: "In_progress",
+  category: "Web",
+  demo_url: "",
+  github_url: "https://github.com/motion/crm",
 };
 
-describe("project validation", () => {
-  it("parses stack, unchecked featured and blank links", () => {
-    const result = parseProjectUpdate(form(valid));
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.stack).toEqual(["React", "NestJS"]);
-      expect(result.data.featured).toBe(false);
-      expect(result.data.demoUrl).toBeUndefined();
-    }
+describe("parseProject", () => {
+  it("accepts API field names and turns blank URLs into null", () => {
+    const result = parseProject(form(valid));
+    expect(result.success && result.data).toEqual({ ...valid, demo_url: null });
   });
 
-  it("treats a checked featured checkbox as true", () => {
-    const result = parseProjectUpdate(form({ ...valid, featured: "on" }));
-    expect(result.success && result.data.featured).toBe(true);
-  });
-
-  it("requires a url-safe slug on create", () => {
-    expect(parseProjectCreate(form({ ...valid, id: "Мой проект" })).success).toBe(false);
-    expect(parseProjectCreate(form({ ...valid, id: "sklad-2026" })).success).toBe(true);
-  });
-
-  it("rejects an unknown status and a bad year", () => {
-    const result = parseProjectUpdate(form({ ...valid, status: "DONE", year: "26" }));
+  it("rejects an unknown status, a blank category and a broken URL", () => {
+    const result = parseProject(form({ ...valid, project_status: "DONE", category: " ", demo_url: "demo" }));
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.fieldErrors.status).toBeDefined();
-      expect(result.fieldErrors.year).toBeDefined();
+      expect(Object.keys(result.fieldErrors).sort()).toEqual(["category", "demo_url", "project_status"]);
     }
   });
 });

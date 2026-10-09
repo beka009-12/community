@@ -1,21 +1,21 @@
 import { FC } from "react";
-import Image from "next/image";
+import Avatar from "@/src/ui/Avatar";
 import scss from "./ui/admin-ui.module.scss";
 
 interface PersonCellProps {
-  photo: string;
+  avatar: string | null;
   name: string;
-  caption: string;
+  caption?: string;
 }
 
-const PersonCell: FC<PersonCellProps> = ({ photo, name, caption }) => (
+const PersonCell: FC<PersonCellProps> = ({ avatar, name, caption }) => (
   <span className={scss.person}>
     <span className={scss.person__avatar}>
-      <Image src={photo} alt="" fill sizes="36px" className={scss.person__img} />
+      <Avatar src={avatar} name={name} imageClassName={scss.person__img} />
     </span>
     <span className={scss.person__text}>
       <span className={scss.person__name}>{name}</span>
-      <span className={scss.person__caption}>{caption}</span>
+      {caption && <span className={scss.person__caption}>{caption}</span>}
     </span>
   </span>
 );

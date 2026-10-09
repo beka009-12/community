@@ -4,68 +4,80 @@ import PageHeader from "@/src/components/admin/ui/PageHeader";
 import Panel from "@/src/components/admin/ui/Panel";
 import ProjectForm from "@/src/components/admin/projects/ProjectForm";
 import MembershipEditor from "@/src/components/admin/MembershipEditor";
-import {
-  toCandidates,
-  toMembershipRows,
-} from "@/src/components/admin/membership-rows";
+import DeleteButton from "@/src/components/admin/ui/DeleteButton";
+import { toCandidates, toMembershipRows } from "@/src/components/admin/membership-rows";
 import scss from "@/src/components/admin/ui/admin-ui.module.scss";
-import StatusBadge, { type BadgeTone } from "@/src/components/admin/ui/StatusBadge";
-import { CATEGORY_LABELS, STATUS_LABELS, STATUS_TONE } from "@/src/data/projects";
+import StatusBadge from "@/src/components/admin/ui/StatusBadge";
 import {
+  addProjectMemberAction,
+  deleteProjectAction,
   removeProjectMemberAction,
   updateProjectAction,
-  upsertProjectMemberAction,
 } from "@/src/actions/admin/projects";
+import { PROJECT_STATUS_LABELS, PROJECT_STATUS_TONE } from "@/src/lib/api-labels";
+import { parseId } from "@/src/lib/route-id";
+import { getMembers } from "@/src/server/api/members";
+import { getProject, getProjectMembers, getProjects } from "@/src/server/api/projects";
 import { requireAdmin } from "@/src/server/auth/dal";
-import { listMembers } from "@/src/server/repositories/members";
-import { getProject } from "@/src/server/repositories/projects";
 
 const Page = async ({ params }: PageProps<"/admin/projects/[id]">) => {
   await requireAdmin();
-  const { id } = await params;
-  const [data, allMembers] = await Promise.all([getProject(id), listMembers()]);
-  if (!data) notFound();
-  const { project } = data;
+  const id = parseId((await params).id);
+  const project = id === null ? null : await getProject(id, true);
+  if (!project) notFound();
+
+  const [memberships, roster, projects] = await Promise.all([
+    getProjectMembers(project.id),
+    getMembers(true),
+    getProjects(true),
+  ]);
 
   return (
     <>
       <PageHeader
         title={project.name}
         back={{ href: "/admin/projects", label: "Проекты" }}
-        description={`${CATEGORY_LABELS[project.category]} · ${project.year}`}
+        description={`${project.category} · ${project.created_at.slice(0, 4)}`}
         meta={
-          <StatusBadge tone={STATUS_TONE[project.status] as BadgeTone}>
-            {STATUS_LABELS[project.status]}
+          <StatusBadge tone={PROJECT_STATUS_TONE[project.project_status]}>
+            {PROJECT_STATUS_LABELS[project.project_status]}
           </StatusBadge>
         }
         action={
-          <Link
-            href={`/projects/${id}`}
-            target="_blank"
-            className={scss.smallButton}
-          >
+          <Link href={`/projects/${project.id}`} target="_blank" className={scss.smallButton}>
             Открыть на сайте ↗
           </Link>
         }
       />
       <Panel title="Проект">
         <ProjectForm
-          action={updateProjectAction.bind(null, id)}
+          action={updateProjectAction.bind(null, project.id)}
           submitLabel="Сохранить"
+          categories={[...new Set(projects.map((item) => item.category))]}
           initial={{
-            ...project,
-            stack: project.stack.join(", "),
-            demoUrl: project.demoUrl ?? "",
-            githubUrl: project.githubUrl ?? "",
+            name: project.name,
+            description: project.description,
+            project_status: project.project_status,
+            category: project.category,
+            demo_url: project.demo_url ?? "",
+            github_url: project.github_url ?? "",
           }}
         />
       </Panel>
       <Panel title="Участники проекта">
         <MembershipEditor
-          rows={toMembershipRows(data.members)}
-          candidates={toCandidates(allMembers, data.members)}
-          upsertAction={upsertProjectMemberAction.bind(null, id)}
-          removeAction={removeProjectMemberAction.bind(null, id)}
+          rows={toMembershipRows(memberships, roster)}
+          candidates={toCandidates(roster, memberships)}
+          addAction={addProjectMemberAction.bind(null, project.id)}
+          removeAction={removeProjectMemberAction.bind(null, project.id)}
+        />
+      </Panel>
+      <Panel title="Удаление">
+        <p className={scss.field__hint}>Проект исчезнет с сайта вместе с составом команды.</p>
+        <DeleteButton
+          label="Удалить проект"
+          confirmLabel="Да, удалить"
+          action={deleteProjectAction.bind(null, project.id)}
         />
       </Panel>
     </>

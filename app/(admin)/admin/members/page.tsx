@@ -103,7 +103,7 @@ const Page = async ({ searchParams }: PageProps<"/admin/members">) => {
             label: "Участник",
             render: ({ profile, user }) => (
               <PersonCell
-                photo={profile.photo}
+                avatar={profile.photo}
                 name={`${profile.firstName} ${profile.lastName}`}
                 caption={user.login}
               />
