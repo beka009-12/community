@@ -1,8 +1,9 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { getAccountWithToken, loginWithPassword, logoutFromApi } from "@/src/server/api/auth";
+import { getAccountWithToken, loginWithPassword, logoutFromApi, refreshTokens } from "@/src/server/api/auth";
 import { isApiError } from "@/src/server/api/errors";
+import { accessForLogout } from "@/src/server/auth/logout-token";
 import { LOGIN_PATH, homeFor } from "@/src/server/auth/routes";
 import { endSession, readTokens, startSession } from "@/src/server/auth/session";
 
@@ -65,9 +66,10 @@ export async function login(_prev: LoginState, formData: FormData): Promise<Logi
 }
 
 export async function logout(): Promise<void> {
-  const { access, refresh } = await readTokens();
+  const tokens = await readTokens();
   try {
-    await logoutFromApi(access, refresh);
+    const access = await accessForLogout(tokens, Date.now(), refreshTokens);
+    if (access) await logoutFromApi(access, tokens.refresh);
   } catch (error) {
     // The session ends here either way.
     console.error("API logout failed", error);

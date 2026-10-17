@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { redirect } from "next/navigation";
-import { getAccountWithToken, loginWithPassword } from "@/src/server/api/auth";
+import { getAccountWithToken, loginWithPassword, logoutFromApi, refreshTokens } from "@/src/server/api/auth";
 import { ApiError } from "@/src/server/api/errors";
-import { startSession } from "@/src/server/auth/session";
-import { login } from "./auth";
+import { endSession, readTokens, startSession } from "@/src/server/auth/session";
+import { login, logout } from "./auth";
 
 vi.mock("next/navigation", () => ({
   redirect: vi.fn((to: string) => {
@@ -14,6 +14,7 @@ vi.mock("@/src/server/api/auth", () => ({
   loginWithPassword: vi.fn(),
   getAccountWithToken: vi.fn(),
   logoutFromApi: vi.fn(),
+  refreshTokens: vi.fn(),
 }));
 vi.mock("@/src/server/auth/session", () => ({
   startSession: vi.fn(),
@@ -85,5 +86,29 @@ describe("login", () => {
     expect(loginWithPassword).toHaveBeenCalledWith("anvar", "pw");
     expect(startSession).toHaveBeenCalledWith({ access: "a", refresh: "r", userId: 7, role });
     expect(redirect).toHaveBeenCalledWith(home);
+  });
+});
+
+describe("logout", () => {
+  const expiredAccess = `eyJhbGciOiJIUzI1NiJ9.${Buffer.from(JSON.stringify({ exp: 1_000 })).toString("base64url")}.sig`;
+
+  it("revokes the session on the API with a refreshed token once access has expired", async () => {
+    vi.mocked(readTokens).mockResolvedValue({ access: expiredAccess, refresh: "r" });
+    vi.mocked(refreshTokens).mockResolvedValue({ access: "new-access" });
+
+    await expect(logout()).rejects.toThrow("NEXT_REDIRECT /login");
+    expect(logoutFromApi).toHaveBeenCalledWith("new-access", "r");
+    expect(endSession).toHaveBeenCalled();
+  });
+
+  it("skips the API quietly when the refresh token is dead too", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.mocked(readTokens).mockResolvedValue({ access: expiredAccess, refresh: "r" });
+    vi.mocked(refreshTokens).mockRejectedValue(new ApiError("unauthorized", 401, "expired"));
+
+    await expect(logout()).rejects.toThrow("NEXT_REDIRECT /login");
+    expect(logoutFromApi).not.toHaveBeenCalled();
+    expect(consoleError).not.toHaveBeenCalled();
+    expect(endSession).toHaveBeenCalled();
   });
 });
