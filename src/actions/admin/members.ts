@@ -2,16 +2,27 @@
 
 import { redirect } from "next/navigation";
 import { USER_STATUSES, type UserStatus } from "@/src/lib/api-enums";
-import { createAdminMember, deleteAdminMember, updateAdminMember } from "@/src/server/api/admin-members";
+import {
+  createAdminMember,
+  deleteAdminMember,
+  updateAdminMember,
+} from "@/src/server/api/admin-members";
 import { setMemberStatus } from "@/src/server/api/members";
 import { requireAdmin } from "@/src/server/auth/dal";
 import { generatePassword } from "@/src/server/auth/password";
-import { parseMemberCreate, parseMemberProfile, parseRole } from "@/src/server/validation/member";
+import {
+  parseMemberCreate,
+  parseMemberProfile,
+  parseRole,
+} from "@/src/server/validation/member";
 import { echoValues, type ActionResult, type FormState } from "../form-state";
 import { toActionError, toFormError } from "../handle-error";
 import { refreshAfterAdminChange } from "./refresh";
 
-export async function createMemberAction(_prev: FormState, formData: FormData): Promise<FormState> {
+export async function createMemberAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
   await requireAdmin();
   const values = echoValues(formData);
   // Never echo the password back to the browser.
@@ -29,7 +40,10 @@ export async function createMemberAction(_prev: FormState, formData: FormData): 
   redirect(`/admin/members/${id}?created=1`);
 }
 
-export async function setMemberStatusAction(id: number, status: UserStatus): Promise<ActionResult> {
+export async function setMemberStatusAction(
+  id: number,
+  status: UserStatus,
+): Promise<ActionResult> {
   await requireAdmin();
   if (!USER_STATUSES.includes(status)) return { error: "Неизвестный статус" };
   try {
@@ -42,7 +56,9 @@ export async function setMemberStatusAction(id: number, status: UserStatus): Pro
 }
 
 // Returns the new password once so the admin can hand it over.
-export async function resetPasswordAction(id: number): Promise<{ password?: string; error?: string }> {
+export async function resetPasswordAction(
+  id: number,
+): Promise<{ password?: string; error?: string }> {
   await requireAdmin();
   const password = generatePassword();
   try {
