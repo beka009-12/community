@@ -6,35 +6,12 @@ export type ParseResult<T> =
   | { success: true; data: T }
   | { success: false; fieldErrors: FieldErrors };
 
-// Blank optional inputs arrive as "" — treat them as absent.
-export const optionalText = (max: number) =>
-  z.preprocess(
-    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
-    z.string().trim().max(max, `Не больше ${max} символов`).optional(),
-  );
-
-export const optionalUrl = () =>
-  z.preprocess(
-    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
-    z.url("Введите ссылку целиком, с https://").optional(),
-  );
-
 export const requiredText = (min: number, max: number, label: string) =>
   z
     .string({ error: `Заполните поле «${label}»` })
     .trim()
     .min(min, min <= 1 ? `Заполните поле «${label}»` : `Минимум ${min} символа`)
     .max(max, `Не больше ${max} символов`);
-
-// Comma-separated input → trimmed, non-empty list.
-export const commaList = (maxItems: number) =>
-  z.preprocess(
-    (value) =>
-      typeof value === "string"
-        ? value.split(",").map((item) => item.trim()).filter(Boolean)
-        : [],
-    z.array(z.string().max(40)).max(maxItems, `Не больше ${maxItems} пунктов`),
-  );
 
 export function parseForm<S extends z.ZodType>(
   schema: S,
@@ -49,3 +26,10 @@ export function parseForm<S extends z.ZodType>(
   }
   return { success: false, fieldErrors };
 }
+
+// Blank → null: the API clears a nullable URL only when it receives null.
+export const nullableUrl = (max = 200) =>
+  z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? null : value),
+    z.url("Введите ссылку целиком, с https://").max(max, `Не больше ${max} символов`).nullable(),
+  );

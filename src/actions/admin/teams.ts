@@ -1,49 +1,38 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireAdmin } from "@/src/server/auth/dal";
 import {
+  addTeamMember,
   createTeam,
+  deleteTeam,
   removeTeamMember,
   updateTeam,
-  upsertTeamMember,
-} from "@/src/server/repositories/teams";
-import { parseMembership, parseTeam } from "@/src/server/validation/team";
-import {
-  echoValues,
-  SAVE_FAILED,
-  type ActionResult,
-  type FormState,
-} from "./form-state";
-import { toFormError } from "./handle-error";
+} from "@/src/server/api/teams";
+import { requireAdmin } from "@/src/server/auth/dal";
+import { parseMembership } from "@/src/server/validation/membership";
+import { parseTeam } from "@/src/server/validation/team";
+import { echoValues, type ActionResult, type FormState } from "../form-state";
+import { toActionError, toFormError } from "../handle-error";
+import { refreshAfterAdminChange } from "./refresh";
 
-const revalidateTeam = (id: string) => {
-  revalidatePath("/admin/teams");
-  revalidatePath(`/admin/teams/${id}`);
-};
-
-export async function createTeamAction(
-  _prev: FormState,
-  formData: FormData,
-): Promise<FormState> {
+export async function createTeamAction(_prev: FormState, formData: FormData): Promise<FormState> {
   await requireAdmin();
   const values = echoValues(formData);
   const parsed = parseTeam(formData);
   if (!parsed.success) return { fieldErrors: parsed.fieldErrors, values };
 
-  let id: string;
+  let id: number;
   try {
-    id = (await createTeam(parsed.data)).id;
+    id = await createTeam(parsed.data);
   } catch (error) {
     return toFormError(error, values);
   }
-  revalidateTeam(id);
+  refreshAfterAdminChange();
   redirect(`/admin/teams/${id}`);
 }
 
 export async function updateTeamAction(
-  id: string,
+  id: number,
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
@@ -57,12 +46,23 @@ export async function updateTeamAction(
   } catch (error) {
     return toFormError(error, values);
   }
-  revalidateTeam(id);
+  refreshAfterAdminChange();
   return { ok: true, values };
 }
 
-export async function upsertTeamMemberAction(
-  teamId: string,
+export async function deleteTeamAction(id: number): Promise<ActionResult> {
+  await requireAdmin();
+  try {
+    await deleteTeam(id);
+  } catch (error) {
+    return toActionError(error);
+  }
+  refreshAfterAdminChange();
+  redirect("/admin/teams");
+}
+
+export async function addTeamMemberAction(
+  teamId: number,
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
@@ -71,25 +71,21 @@ export async function upsertTeamMemberAction(
   if (!parsed.success) return { fieldErrors: parsed.fieldErrors };
 
   try {
-    await upsertTeamMember(teamId, parsed.data.userId, parsed.data.role);
+    await addTeamMember(teamId, parsed.data.user, parsed.data.role);
   } catch (error) {
     return toFormError(error, {});
   }
-  revalidateTeam(teamId);
+  refreshAfterAdminChange();
   return { ok: true };
 }
 
-export async function removeTeamMemberAction(
-  teamId: string,
-  userId: string,
-): Promise<ActionResult> {
+export async function removeTeamMemberAction(teamId: number, userId: number): Promise<ActionResult> {
   await requireAdmin();
   try {
     await removeTeamMember(teamId, userId);
   } catch (error) {
-    console.error("Remove team member failed", error);
-    return { error: SAVE_FAILED };
+    return toActionError(error);
   }
-  revalidateTeam(teamId);
+  refreshAfterAdminChange();
   return {};
 }

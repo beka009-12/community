@@ -4,12 +4,9 @@ import { FC } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { motionTokens, springs } from "@/src/lib/motion-tokens";
-import {
-  CATEGORY_LABELS,
-  STATUS_LABELS,
-  STATUS_TONE,
-  type Project,
-} from "@/src/data/projects";
+import ProjectCover from "@/src/ui/ProjectCover";
+import { PROJECT_STATUS_LABELS, PROJECT_STATUS_TONE } from "@/src/lib/api-labels";
+import type { ProjectListItem } from "@/src/server/api/schemas";
 import scss from "./Grid.module.scss";
 
 const cardVariants = {
@@ -22,7 +19,7 @@ const gridVariants = {
   visible: { transition: { staggerChildren: 0.08, delayChildren: 0.1 } },
 };
 
-const ProjectCard: FC<{ project: Project }> = ({ project }) => (
+const ProjectCard: FC<{ project: ProjectListItem }> = ({ project }) => (
   <motion.div
     layout
     variants={cardVariants}
@@ -33,40 +30,27 @@ const ProjectCard: FC<{ project: Project }> = ({ project }) => (
     }}
     className={scss.card}
   >
-    <Link href={`/projects/${project.slug}`} className={scss.card__link}>
+    <Link href={`/projects/${project.id}`} className={scss.card__link}>
       <div className={scss.card__photo}>
-        <img
-          src={project.image}
-          alt={`${project.name} preview`}
-          className={scss.card__image}
-        />
+        <ProjectCover src={project.preview_image} name={project.name} imageClassName={scss.card__image} />
         <span
-          className={`${scss.card__status} ${scss[`card__status--${STATUS_TONE[project.status]}`]}`}
+          className={`${scss.card__status} ${scss[`card__status--${PROJECT_STATUS_TONE[project.project_status]}`]}`}
         >
-          {STATUS_LABELS[project.status]}
+          {PROJECT_STATUS_LABELS[project.project_status]}
         </span>
       </div>
 
       <div className={scss.card__body}>
         <div className={scss.card__meta}>
-          <span>{CATEGORY_LABELS[project.category]}</span>
-          <span>{project.year}</span>
+          <span>{project.category}</span>
         </div>
-
         <h3 className={scss.card__name}>{project.name}</h3>
-        <p className={scss.card__description}>{project.description}</p>
-
-        <ul className={scss.card__stack}>
-          {project.stack.map((tech) => (
-            <li key={tech}>{tech}</li>
-          ))}
-        </ul>
       </div>
     </Link>
   </motion.div>
 );
 
-const Grid: FC<{ projects: Project[] }> = ({ projects }) => {
+const Grid: FC<{ projects: ProjectListItem[] }> = ({ projects }) => {
   const reduce = useReducedMotion();
 
   if (projects.length === 0) {
@@ -90,7 +74,7 @@ const Grid: FC<{ projects: Project[] }> = ({ projects }) => {
       >
         <AnimatePresence mode="popLayout">
           {projects.map((project) => (
-            <ProjectCard key={project.slug} project={project} />
+            <ProjectCard key={project.id} project={project} />
           ))}
         </AnimatePresence>
       </motion.div>

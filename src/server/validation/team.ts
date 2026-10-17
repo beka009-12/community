@@ -1,16 +1,12 @@
 import { z } from "zod";
 import { parseForm, requiredText } from "./form";
 
+// Field names and limits from the API's TeamDetail.
 const teamSchema = z.object({
-  name: requiredText(2, 60, "Название"),
-  description: z.string().trim().max(400, "Не больше 400 символов"),
+  team_name: requiredText(2, 255, "Название"),
+  description: z.string().trim().max(2000, "Не больше 2000 символов"),
 });
 
-// Shared by teams and projects: add/update a person with a role.
-const membershipSchema = z.object({
-  userId: z.string().trim().min(1, "Выберите участника"),
-  role: z.enum(["TEAM_LEAD", "DEVELOPER"], "Выберите роль"),
-});
+export type TeamFields = z.infer<typeof teamSchema>;
 
 export const parseTeam = (formData: FormData) => parseForm(teamSchema, formData);
-export const parseMembership = (formData: FormData) => parseForm(membershipSchema, formData);

@@ -4,41 +4,32 @@ import Select from "@/src/ui/Select";
 import { FC, useActionState, useState, useTransition } from "react";
 import Link from "next/link";
 import ConfirmButton from "@/src/components/admin/ui/ConfirmButton";
+import DeleteButton from "@/src/components/admin/ui/DeleteButton";
 import Panel from "@/src/components/admin/ui/Panel";
 import StatusBadge from "@/src/components/admin/ui/StatusBadge";
 import scss from "@/src/components/admin/ui/admin-ui.module.scss";
-import { resetPasswordAction, setMemberStatusAction } from "@/src/actions/admin/members";
-import { USER_STATUS_LABELS, USER_STATUS_TONE, formatDate } from "@/src/components/admin/labels";
-import type { FormState } from "@/src/actions/admin/form-state";
-import type { MembershipRole } from "@/src/server/db/types";
-import type { UserStatus } from "@/src/server/db/types";
+import { formatDate } from "@/src/components/admin/labels";
+import {
+  deleteMemberAction,
+  resetPasswordAction,
+  setMemberStatusAction,
+} from "@/src/actions/admin/members";
+import type { FormState } from "@/src/actions/form-state";
+import { USER_ROLES, type UserRole, type UserStatus } from "@/src/lib/api-enums";
+import { USER_ROLE_LABELS, USER_STATUS_LABELS, USER_STATUS_TONE } from "@/src/lib/api-labels";
 
 interface MemberSidebarProps {
-  id: string;
+  id: number;
   login: string;
   status: UserStatus;
-  role: MembershipRole;
+  role: UserRole;
+  createdAt: string;
   roleAction: (prev: FormState, formData: FormData) => Promise<FormState>;
-  lastEdit: { at: string; fields: string[] } | null;
 }
 
-const FIELD_LABELS: Record<string, string> = {
-  firstName: "Имя",
-  lastName: "Фамилия",
-  specializationId: "Направление",
-  roleTitle: "Должность",
-  stack: "Стек",
-  bio: "О себе",
-  skills: "Навыки",
-  github: "GitHub",
-  linkedin: "LinkedIn",
-  portfolio: "Портфолио",
-};
+const ROLE_OPTIONS = USER_ROLES.map((value) => ({ value, label: USER_ROLE_LABELS[value] }));
 
-const RoleForm: FC<{ role: MembershipRole; action: MemberSidebarProps["roleAction"] }> = ({
-  role,
-  action,
-}) => {
+const RoleForm: FC<{ role: UserRole; action: MemberSidebarProps["roleAction"] }> = ({ role, action }) => {
   const [state, formAction, pending] = useActionState(action, {});
   const error = pending ? undefined : (state.error ?? state.fieldErrors?.role);
   return (
@@ -53,10 +44,7 @@ const RoleForm: FC<{ role: MembershipRole; action: MemberSidebarProps["roleActio
           defaultValue={role}
           key={JSON.stringify(state)}
           block
-          options={[
-            { value: "DEVELOPER", label: "Разработчик" },
-            { value: "TEAM_LEAD", label: "Тимлид" },
-          ]}
+          options={ROLE_OPTIONS}
         />
       </div>
       <button type="submit" className={scss.smallButton} disabled={pending}>
@@ -72,11 +60,11 @@ const RoleForm: FC<{ role: MembershipRole; action: MemberSidebarProps["roleActio
   );
 };
 
-const MemberSidebar: FC<MemberSidebarProps> = ({ id, login, status, role, roleAction, lastEdit }) => {
+const MemberSidebar: FC<MemberSidebarProps> = ({ id, login, status, role, createdAt, roleAction }) => {
   const [password, setPassword] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const active = status === "ACTIVE";
+  const active = status === "Active";
 
   const reset = () =>
     startTransition(async () => {
@@ -99,7 +87,7 @@ const MemberSidebar: FC<MemberSidebarProps> = ({ id, login, status, role, roleAc
           label={active ? "Деактивировать" : "Активировать"}
           confirmLabel={active ? "Да, деактивировать" : "Да, активировать"}
           danger={active}
-          onConfirm={() => setMemberStatusAction(id, active ? "INACTIVE" : "ACTIVE")}
+          onConfirm={() => setMemberStatusAction(id, active ? "Inactive" : "Active")}
         />
         {active && (
           <p className={scss.field__hint} style={{ marginTop: 8 }}>
@@ -113,6 +101,10 @@ const MemberSidebar: FC<MemberSidebarProps> = ({ id, login, status, role, roleAc
           <div>
             <dt>Логин</dt>
             <dd>{login}</dd>
+          </div>
+          <div>
+            <dt>Создан</dt>
+            <dd>{formatDate(createdAt)}</dd>
           </div>
         </dl>
         <div style={{ marginTop: 12 }}>
@@ -134,15 +126,6 @@ const MemberSidebar: FC<MemberSidebarProps> = ({ id, login, status, role, roleAc
         )}
       </Panel>
 
-      {lastEdit && (
-        <Panel title="Правки админа">
-          <p className={scss.field__hint}>
-            {formatDate(lastEdit.at)}: {lastEdit.fields.map((field) => FIELD_LABELS[field] ?? field).join(", ")}.
-            Участнику отправлено уведомление.
-          </p>
-        </Panel>
-      )}
-
       {active && (
         <Panel>
           <Link href={`/team/${id}`} target="_blank" className={scss.table__link}>
@@ -150,6 +133,14 @@ const MemberSidebar: FC<MemberSidebarProps> = ({ id, login, status, role, roleAc
           </Link>
         </Panel>
       )}
+
+      <Panel title="Удаление">
+        <DeleteButton
+          label="Удалить участника"
+          confirmLabel="Да, удалить"
+          action={deleteMemberAction.bind(null, id)}
+        />
+      </Panel>
     </div>
   );
 };

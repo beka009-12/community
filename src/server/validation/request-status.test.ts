@@ -7,14 +7,14 @@ const form = (status: string) => {
   return data;
 };
 
-describe("request status validation", () => {
-  it("accepts a known status", () => {
-    expect(parseRequestStatus(form("ACCEPTED")).success).toBe(true);
+describe("parseRequestStatus", () => {
+  it("accepts the two API statuses", () => {
+    expect(parseRequestStatus(form("New")).success).toBe(true);
+    expect(parseRequestStatus(form("Reviewing")).success).toBe(true);
   });
 
-  it("rejects an unknown status", () => {
-    const result = parseRequestStatus(form("ARCHIVED"));
-    expect(result.success).toBe(false);
-    if (!result.success) expect(result.fieldErrors.status).toBeDefined();
+  it("rejects anything else, including the old pipeline statuses", () => {
+    expect(parseRequestStatus(form("ACCEPTED")).success).toBe(false);
+    expect(parseRequestStatus(form("")).success).toBe(false);
   });
 });

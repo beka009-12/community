@@ -1,8 +1,8 @@
-import type { Role } from "@/src/server/db/types";
+import type { UserRole } from "@/src/lib/api-enums";
 
 export interface SessionPayload {
   sub: string;
-  role: Role;
+  role: UserRole;
   exp: number;
 }
 

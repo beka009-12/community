@@ -2,11 +2,11 @@
 
 import { FC, useRef } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
+import ProjectCover from "@/src/ui/ProjectCover";
 import scss from "./HeroImage.module.scss";
 
-// The only client-side piece of the (otherwise static) detail page —
-// isolated here so the rest of ProjectDetail can stay a Server Component.
-const HeroImage: FC<{ src: string; alt: string }> = ({ src, alt }) => {
+// The only client-side piece of the otherwise static detail page.
+const HeroImage: FC<{ src: string | null; name: string }> = ({ src, name }) => {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -18,12 +18,9 @@ const HeroImage: FC<{ src: string; alt: string }> = ({ src, alt }) => {
 
   return (
     <div ref={ref} className={scss.frame}>
-      <motion.img
-        src={src}
-        alt={alt}
-        className={scss.image}
-        style={{ scale, y }}
-      />
+      <motion.div className={scss.image} style={{ scale, y }}>
+        <ProjectCover src={src} name={name} />
+      </motion.div>
     </div>
   );
 };

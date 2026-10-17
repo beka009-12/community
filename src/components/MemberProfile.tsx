@@ -3,31 +3,15 @@ import Link from "next/link";
 import ArrowIcon from "@/src/ui/ArrowIcon";
 import ProfileCard from "@/src/components/member-sections/ProfileCard";
 import ProjectPath from "@/src/components/member-sections/ProjectPath";
-import ResumeTimeline from "@/src/components/member-sections/ResumeTimeline";
-import type { Member } from "@/src/data/members";
-import type { MemberProject } from "@/src/data/teams";
+import { splitSkills } from "@/src/server/api/joins";
+import type { MemberDetail } from "@/src/server/api/schemas";
 import scss from "./MemberProfile.module.scss";
 
-// Scenario 4 in the platform plan: a client checks someone's résumé and
-// portfolio before sending a request. Only ProjectPath is a client
-// component (its one scroll-in moment).
-interface MemberProfileProps {
-  member: Member;
-  projects: MemberProject[];
-}
-
-const MemberProfile: FC<MemberProfileProps> = ({ member, projects }) => {
-  const experience = member.experience.map((item) => ({
-    title: item.company,
-    subtitle: item.role,
-    period: item.period,
-    description: item.description,
-  }));
-  const education = member.education.map((item) => ({
-    title: item.institution,
-    subtitle: item.program,
-    period: item.period,
-  }));
+// Scenario 4 in the platform plan: a client checks someone's profile and
+// projects before sending a request. The public API has no résumé
+// (docs/backend-issues.md), so experience and education aren't shown.
+const MemberProfile: FC<{ member: MemberDetail }> = ({ member }) => {
+  const skills = splitSkills(member.skills);
 
   return (
     <article className={`container ${scss.profile}`}>
@@ -38,41 +22,31 @@ const MemberProfile: FC<MemberProfileProps> = ({ member, projects }) => {
         </Link>
 
         <div className={scss.layout}>
-          <ProfileCard member={member} projects={projects} />
+          <ProfileCard member={member} />
 
           <div className={scss.content}>
             <section className={scss.section}>
               <h2 className={scss.section__label}>О себе</h2>
-              <p className={scss.bio}>{member.bio}</p>
+              <p className={scss.bio}>
+                {member.bio || "Участник пока ничего не рассказал о себе."}
+              </p>
             </section>
 
-            <section className={scss.section}>
-              <h2 className={scss.section__label}>Навыки</h2>
-              <ul className={scss.skills}>
-                {member.skills.map((skill) => (
-                  <li key={skill}>{skill}</li>
-                ))}
-              </ul>
-            </section>
-
-            {experience.length > 0 && (
+            {skills.length > 0 && (
               <section className={scss.section}>
-                <h2 className={scss.section__label}>Опыт</h2>
-                <ResumeTimeline entries={experience} />
+                <h2 className={scss.section__label}>Навыки</h2>
+                <ul className={scss.skills}>
+                  {skills.map((skill) => (
+                    <li key={skill}>{skill}</li>
+                  ))}
+                </ul>
               </section>
             )}
 
             <section className={scss.section}>
               <h2 className={scss.section__label}>Путь в проектах</h2>
-              <ProjectPath items={projects} />
+              <ProjectPath projects={member.projects} />
             </section>
-
-            {education.length > 0 && (
-              <section className={scss.section}>
-                <h2 className={scss.section__label}>Образование</h2>
-                <ResumeTimeline entries={education} />
-              </section>
-            )}
           </div>
         </div>
       </div>

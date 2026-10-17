@@ -1,11 +1,11 @@
 import PageHeader from "@/src/components/admin/ui/PageHeader";
 import RequestBoard from "@/src/components/admin/requests/RequestBoard";
+import { getClientRequests } from "@/src/server/api/client-requests";
 import { requireAdmin } from "@/src/server/auth/dal";
-import { listClientRequests } from "@/src/server/repositories/requests";
 
 const Page = async () => {
   await requireAdmin();
-  const requests = await listClientRequests();
+  const requests = await getClientRequests();
   return (
     <>
       <PageHeader title="Заявки" description="Заявки клиентов с формы на странице «Контакты»." />

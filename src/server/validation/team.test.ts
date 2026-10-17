@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseMembership, parseTeam } from "./team";
+import { parseTeam } from "./team";
 
 const form = (fields: Record<string, string>) => {
   const data = new FormData();
@@ -7,15 +7,9 @@ const form = (fields: Record<string, string>) => {
   return data;
 };
 
-describe("team validation", () => {
-  it("requires a 2+ char name", () => {
-    expect(parseTeam(form({ name: "A", description: "" })).success).toBe(false);
-    expect(parseTeam(form({ name: "Команда А", description: "" })).success).toBe(true);
-  });
-
-  it("requires a user and a known membership role", () => {
-    expect(parseMembership(form({ userId: "", role: "DEVELOPER" })).success).toBe(false);
-    expect(parseMembership(form({ userId: "qa-dev", role: "OWNER" })).success).toBe(false);
-    expect(parseMembership(form({ userId: "qa-dev", role: "TEAM_LEAD" })).success).toBe(true);
+describe("parseTeam", () => {
+  it("requires a team_name of 2+ characters", () => {
+    expect(parseTeam(form({ team_name: "A", description: "" })).success).toBe(false);
+    expect(parseTeam(form({ team_name: "Команда А", description: "" })).success).toBe(true);
   });
 });

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { signToken, verifyToken } from "./session-token";
 
 const secret = "test-secret-test-secret-test-secret";
-const payload = { sub: "admin", role: "ADMIN" as const, exp: 2_000 };
+const payload = { sub: "7", role: "Admin" as const, exp: 2_000 };
 
 describe("session token", () => {
   it("round-trips a valid token", async () => {

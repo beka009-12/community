@@ -1,36 +1,37 @@
 import { FC, ReactNode } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import type { DbProfile } from "@/src/server/db/types";
-import type { MemberWithRole } from "@/src/server/repositories/teams";
-import { SPECIALIZATIONS } from "@/src/data/specializations";
-import { MEMBERSHIP_LABELS } from "../labels";
+import Avatar from "@/src/ui/Avatar";
+import { PROJECT_STATUS_LABELS, positionLabel } from "@/src/lib/api-labels";
+import { fullName } from "@/src/lib/people";
+import { splitSkills } from "@/src/server/api/joins";
+import type { AdminMemberDetail, ProjectListItem } from "@/src/server/api/schemas";
 import scss from "./MemberProfileView.module.scss";
 
 interface MemberProfileViewProps {
-  login: string;
-  profile: DbProfile;
-  projects: Array<{ id: string; name: string; role: MemberWithRole["membershipRole"] }>;
+  member: AdminMemberDetail;
+  projects: ProjectListItem[];
 }
 
-// Read-only: the member owns these data (ТЗ — Developer edits their own
-// profile). The admin sees exactly what clients see, plus the login.
-const MemberProfileView: FC<MemberProfileViewProps> = ({ login, profile, projects }) => {
-  const position = SPECIALIZATIONS.find((spec) => spec.id === profile.specializationId)?.title;
+// Read-only: the member owns these data. The admin sees what clients see,
+// plus the login.
+const MemberProfileView: FC<MemberProfileViewProps> = ({ member, projects }) => {
+  const name = fullName(member, member.login);
+  const position = positionLabel(member.position);
+  const skills = splitSkills(member.skills);
   const links = [
-    { label: "GitHub", href: profile.github },
-    { label: "LinkedIn", href: profile.linkedin },
-    { label: "Портфолио", href: profile.portfolio },
-    { label: "Резюме (PDF)", href: profile.resume },
+    { label: "GitHub", href: member.github },
+    { label: "LinkedIn", href: member.linkedin },
+    { label: "Портфолио", href: member.portfolio },
+    { label: "Резюме (PDF)", href: member.resume },
   ].filter((link): link is { label: string; href: string } => Boolean(link.href));
 
   const rows: Array<{ label: string; value: ReactNode }> = [
-    { label: "О себе", value: profile.bio || <span className={scss.empty}>Не заполнено</span> },
+    { label: "О себе", value: member.bio || <span className={scss.empty}>Не заполнено</span> },
     {
       label: "Навыки",
-      value: profile.skills.length ? (
+      value: skills.length ? (
         <ul className={scss.chips}>
-          {profile.skills.map((skill) => (
+          {skills.map((skill) => (
             <li key={skill}>{skill}</li>
           ))}
         </ul>
@@ -38,7 +39,6 @@ const MemberProfileView: FC<MemberProfileViewProps> = ({ login, profile, project
         <span className={scss.empty}>Не указаны</span>
       ),
     },
-    { label: "Стек", value: profile.stack || <span className={scss.empty}>Не указан</span> },
     {
       label: "Ссылки",
       value: links.length ? (
@@ -54,41 +54,13 @@ const MemberProfileView: FC<MemberProfileViewProps> = ({ login, profile, project
       ),
     },
     {
-      label: "Опыт",
-      value: profile.experience.length ? (
-        <ul className={scss.list}>
-          {profile.experience.map((item) => (
-            <li key={`${item.company}-${item.period}`}>
-              <b>{item.company}</b> · {item.role} <span>{item.period}</span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <span className={scss.empty}>Нет записей</span>
-      ),
-    },
-    {
-      label: "Образование",
-      value: profile.education.length ? (
-        <ul className={scss.list}>
-          {profile.education.map((item) => (
-            <li key={`${item.institution}-${item.period}`}>
-              <b>{item.institution}</b> · {item.program} <span>{item.period}</span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <span className={scss.empty}>Нет записей</span>
-      ),
-    },
-    {
       label: "Проекты",
       value: projects.length ? (
         <ul className={scss.list}>
           {projects.map((project) => (
             <li key={project.id}>
               <Link href={`/admin/projects/${project.id}`}>{project.name}</Link>{" "}
-              <span>{MEMBERSHIP_LABELS[project.role]}</span>
+              <span>{PROJECT_STATUS_LABELS[project.project_status]}</span>
             </li>
           ))}
         </ul>
@@ -102,17 +74,12 @@ const MemberProfileView: FC<MemberProfileViewProps> = ({ login, profile, project
     <section className={scss.view} aria-label="Профиль участника">
       <div className={scss.head}>
         <span className={scss.photo}>
-          <Image src={profile.photo} alt="" fill sizes="88px" className={scss.photo__img} />
+          <Avatar src={member.avatar} name={name} imageClassName={scss.photo__img} />
         </span>
         <div>
-          <p className={scss.name}>
-            {profile.firstName} {profile.lastName}
-          </p>
-          <p className={scss.position}>
-            {profile.roleTitle}
-            {position && ` · ${position}`}
-          </p>
-          <p className={scss.login}>{login}</p>
+          <p className={scss.name}>{name}</p>
+          {position && <p className={scss.position}>{position}</p>}
+          <p className={scss.login}>{member.login}</p>
         </div>
       </div>
 

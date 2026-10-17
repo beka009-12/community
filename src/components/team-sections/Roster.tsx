@@ -1,27 +1,29 @@
 "use client";
 
 import { FC, useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { springs } from "@/src/lib/motion-tokens";
 import Button from "@/src/ui/Button";
 import Select from "@/src/ui/Select";
-import { SPECIALIZATIONS } from "@/src/data/specializations";
+import Avatar from "@/src/ui/Avatar";
+import { POSITIONS, type Position } from "@/src/lib/api-enums";
+import { POSITION_LABELS, positionLabel } from "@/src/lib/api-labels";
+import { fullName } from "@/src/lib/people";
+import type { MemberListItem } from "@/src/server/api/schemas";
 import { SPECIALIZATION_ICONS } from "./specialization-icons";
-import { getMemberName, type Member } from "@/src/data/members";
 import scss from "./Roster.module.scss";
 
-type FilterKey = "all" | (typeof SPECIALIZATIONS)[number]["id"];
+type FilterKey = "all" | Position;
 
 // This will grow to more than one filter, hence a row of selects
 // rather than a single pill-tab strip.
 const DIRECTION_OPTIONS = [
   { value: "all", label: "Все направления" },
-  ...SPECIALIZATIONS.map((spec) => ({
-    value: spec.id,
-    label: spec.title,
-    icon: SPECIALIZATION_ICONS[spec.id],
+  ...POSITIONS.map((position) => ({
+    value: position,
+    label: POSITION_LABELS[position],
+    icon: SPECIALIZATION_ICONS[position],
   })),
 ];
 
@@ -30,14 +32,14 @@ const DIRECTION_OPTIONS = [
 // radius/shadow), photos desaturated until hover/focus reveals color +
 // role/stack — a distinct visual moment for the one section on this
 // page that's actually about people, not another spotlight-card grid.
-const Roster: FC<{ members: Member[] }> = ({ members }) => {
+const Roster: FC<{ members: MemberListItem[] }> = ({ members }) => {
   const [filter, setFilter] = useState<FilterKey>("all");
 
   const visible = useMemo(
     () =>
       filter === "all"
         ? members
-        : members.filter((member) => member.specializationId === filter),
+        : members.filter((member) => member.position === filter),
     [filter, members],
   );
 
@@ -58,38 +60,36 @@ const Roster: FC<{ members: Member[] }> = ({ members }) => {
         <div className={scss.frame}>
           <div className={scss.frame__grid}>
             <AnimatePresence mode="popLayout">
-              {visible.map((member, index) => (
-                <motion.div
-                  key={member.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={springs.gentle}
-                  className={scss.cell}
-                >
-                  <Link
-                    href={`/team/${member.id}`}
-                    className={scss.cell__link}
-                    aria-label={`${getMemberName(member)}, ${member.role}`}
+              {visible.map((member, index) => {
+                const name = fullName(member);
+                const position = positionLabel(member.position);
+                return (
+                  <motion.div
+                    key={member.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={springs.gentle}
+                    className={scss.cell}
                   >
-                    <Image
-                      src={member.photo}
-                      alt=""
-                      fill
-                      sizes="(min-width: 960px) 200px, 33vw"
-                      className={scss.cell__img}
-                    />
-                    <span className={scss.cell__index}>
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <span className={scss.cell__scrim} aria-hidden="true" />
-                    <div className={scss.cell__caption}>
-                      <span className={scss.cell__role}>{member.role}</span>
-                      <span className={scss.cell__stack}>{member.stack}</span>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
+                    <Link
+                      href={`/team/${member.id}`}
+                      className={scss.cell__link}
+                      aria-label={position ? `${name}, ${position}` : name}
+                    >
+                      <Avatar src={member.avatar} name={name} imageClassName={scss.cell__img} />
+                      <span className={scss.cell__index}>
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <span className={scss.cell__scrim} aria-hidden="true" />
+                      <div className={scss.cell__caption}>
+                        <span className={scss.cell__role}>{name}</span>
+                        {position && <span className={scss.cell__stack}>{position}</span>}
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
           </div>
         </div>

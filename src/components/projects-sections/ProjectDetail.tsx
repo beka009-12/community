@@ -4,37 +4,25 @@ import Button from "@/src/ui/Button";
 import ArrowIcon from "@/src/ui/ArrowIcon";
 import HeroImage from "./HeroImage";
 import TeamSection from "./TeamSection";
-import {
-  CATEGORY_LABELS,
-  STATUS_LABELS,
-  STATUS_TONE,
-  type Project,
-} from "@/src/data/projects";
-import type { Member } from "@/src/data/members";
+import { PROJECT_STATUS_LABELS, PROJECT_STATUS_TONE } from "@/src/lib/api-labels";
+import type { TeamPerson } from "@/src/server/api/joins";
+import type {
+  ProjectDetail as ProjectDetailData,
+  ProjectListItem,
+} from "@/src/server/api/schemas";
 import scss from "./ProjectDetail.module.scss";
 
-const ORIGIN_LABELS: Record<Project["origin"], string> = {
-  community: "Проект сообщества",
-  client: "Проект на заказ",
-};
-
-// Server Component — the case-study write-up is static per project, no
-// client interactivity needed for most of it, so it costs nothing in JS
-// shipped to the browser (matches the project's Server-Components-first
-// convention). Only HeroImage and TeamSection carry their own small
-// client boundary, for the scroll-parallax and scroll-reveal respectively.
+// Server Component: only HeroImage and TeamSection carry a small client
+// boundary (scroll parallax and scroll reveal).
 interface ProjectDetailProps {
-  project: Project;
-  members: Member[];
-  adjacent: { prev: Project; next: Project };
+  project: ProjectDetailData;
+  team: TeamPerson[];
+  adjacent: { prev: ProjectListItem; next: ProjectListItem } | null;
 }
 
-const ProjectDetail: FC<ProjectDetailProps> = ({
-  project,
-  members,
-  adjacent,
-}) => {
-  const hasLinks = Boolean(project.demoUrl || project.githubUrl);
+const ProjectDetail: FC<ProjectDetailProps> = ({ project, team, adjacent }) => {
+  const hasLinks = Boolean(project.demo_url || project.github_url);
+  const tone = PROJECT_STATUS_TONE[project.project_status];
 
   return (
     <article className={scss.detail}>
@@ -46,52 +34,41 @@ const ProjectDetail: FC<ProjectDetailProps> = ({
 
         <div className={scss.detail__header}>
           <div className={scss.detail__meta}>
-            <span
-              className={`${scss.status} ${scss[`status--${STATUS_TONE[project.status]}`]}`}
-            >
-              {STATUS_LABELS[project.status]}
+            <span className={`${scss.status} ${scss[`status--${tone}`]}`}>
+              {PROJECT_STATUS_LABELS[project.project_status]}
             </span>
-            <span>{CATEGORY_LABELS[project.category]}</span>
-            <span>{project.year}</span>
-            <span>{ORIGIN_LABELS[project.origin]}</span>
+            <span>{project.category}</span>
+            <span>{project.created_at.slice(0, 4)}</span>
           </div>
 
           <h1 className={scss.detail__name}>
             <span className={scss.shine}>{project.name}</span>
           </h1>
-          <p className={scss.detail__description}>{project.description}</p>
+          {project.description && (
+            <p className={scss.detail__description}>{project.description}</p>
+          )}
         </div>
 
-        <HeroImage src={project.image} alt={`${project.name} preview`} />
-
-        <div className={scss.detail__section}>
-          <span className={scss.detail__sectionLabel}>Обзор</span>
-          <p className={scss.detail__details}>{project.details}</p>
-        </div>
-
-        <div className={scss.detail__section}>
-          <span className={scss.detail__sectionLabel}>Технологии</span>
-          <ul className={scss.detail__stack}>
-            {project.stack.map((tech) => (
-              <li key={tech}>{tech}</li>
-            ))}
-          </ul>
-        </div>
+        <HeroImage src={project.preview_image} name={project.name} />
 
         <div className={scss.detail__section}>
           <span className={scss.detail__sectionLabel}>Команда проекта</span>
-          <TeamSection members={members} />
+          {team.length > 0 ? (
+            <TeamSection people={team} />
+          ) : (
+            <p className={scss.detail__details}>Команда проекта ещё собирается.</p>
+          )}
         </div>
 
         {hasLinks && (
           <div className={scss.detail__links}>
-            {project.demoUrl && (
-              <Button href={project.demoUrl} variant="primary" external>
+            {project.demo_url && (
+              <Button href={project.demo_url} variant="primary" external>
                 Открыть демо
               </Button>
             )}
-            {project.githubUrl && (
-              <Button href={project.githubUrl} variant="ghost" external>
+            {project.github_url && (
+              <Button href={project.github_url} variant="ghost" external>
                 GitHub
               </Button>
             )}
@@ -99,15 +76,9 @@ const ProjectDetail: FC<ProjectDetailProps> = ({
         )}
       </div>
 
-      {adjacent.next.slug !== project.slug && (
-        <nav
-          className={`container ${scss.pager}`}
-          aria-label="Соседние проекты"
-        >
-          <Link
-            href={`/projects/${adjacent.prev.slug}`}
-            className={scss.pager__link}
-          >
+      {adjacent && (
+        <nav className={`container ${scss.pager}`} aria-label="Соседние проекты">
+          <Link href={`/projects/${adjacent.prev.id}`} className={scss.pager__link}>
             <span className={scss.pager__direction}>
               <ArrowIcon direction="left" />
               Предыдущий
@@ -116,7 +87,7 @@ const ProjectDetail: FC<ProjectDetailProps> = ({
           </Link>
 
           <Link
-            href={`/projects/${adjacent.next.slug}`}
+            href={`/projects/${adjacent.next.id}`}
             className={`${scss.pager__link} ${scss["pager__link--next"]}`}
           >
             <span className={scss.pager__direction}>

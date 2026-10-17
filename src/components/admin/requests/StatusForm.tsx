@@ -4,14 +4,16 @@ import Select from "@/src/ui/Select";
 import { FC, useActionState } from "react";
 import Field from "@/src/components/admin/ui/Field";
 import FormActions from "@/src/components/admin/ui/FormActions";
-import { REQUEST_STATUS_LABELS } from "@/src/components/admin/labels";
-import type { FormState } from "@/src/actions/admin/form-state";
-import type { RequestStatus } from "@/src/server/db/types";
+import type { FormState } from "@/src/actions/form-state";
+import { REQUEST_STATUSES, type RequestStatus } from "@/src/lib/api-enums";
+import { REQUEST_STATUS_LABELS } from "@/src/lib/api-labels";
 
 interface StatusFormProps {
   action: (prev: FormState, formData: FormData) => Promise<FormState>;
   status: RequestStatus;
 }
+
+const OPTIONS = REQUEST_STATUSES.map((value) => ({ value, label: REQUEST_STATUS_LABELS[value] }));
 
 const StatusForm: FC<StatusFormProps> = ({ action, status }) => {
   const [state, formAction, pending] = useActionState(action, {});
@@ -27,10 +29,7 @@ const StatusForm: FC<StatusFormProps> = ({ action, status }) => {
           invalid={Boolean(error)}
           describedBy={error ? "request-status-error" : undefined}
           block
-          options={Object.entries(REQUEST_STATUS_LABELS).map(([value, label]) => ({
-            value,
-            label,
-          }))}
+          options={OPTIONS}
         />
       </Field>
       <FormActions submitLabel="Сохранить статус" pending={pending} error={state.error} saved={state.ok} />

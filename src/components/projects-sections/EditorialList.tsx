@@ -11,20 +11,17 @@ import {
   useSpring,
 } from "motion/react";
 import ArrowIcon from "@/src/ui/ArrowIcon";
-import {
-  CATEGORY_LABELS,
-  STATUS_LABELS,
-  STATUS_TONE,
-  type Project,
-} from "@/src/data/projects";
+import ProjectCover from "@/src/ui/ProjectCover";
+import { PROJECT_STATUS_LABELS, PROJECT_STATUS_TONE } from "@/src/lib/api-labels";
+import type { ProjectListItem } from "@/src/server/api/schemas";
 import scss from "./EditorialList.module.scss";
 
 // Desktop-only (≥960px, toggled purely in CSS — see .list). Mobile/tablet
 // keep the plain card grid; a cursor-follow preview has no touch
 // equivalent, so it isn't worth forking the interaction for small screens.
-const EditorialList: FC<{ projects: Project[] }> = ({ projects }) => {
+const EditorialList: FC<{ projects: ProjectListItem[] }> = ({ projects }) => {
   const reduce = useReducedMotion();
-  const [hovered, setHovered] = useState<string | null>(null);
+  const [hovered, setHovered] = useState<number | null>(null);
 
   const mvX = useMotionValue(0);
   const mvY = useMotionValue(0);
@@ -38,7 +35,7 @@ const EditorialList: FC<{ projects: Project[] }> = ({ projects }) => {
     mvY.set(event.clientY - rect.top - 150);
   };
 
-  const hoveredProject = projects.find((project) => project.slug === hovered);
+  const hoveredProject = projects.find((project) => project.id === hovered);
 
   if (projects.length === 0) {
     return (
@@ -60,30 +57,29 @@ const EditorialList: FC<{ projects: Project[] }> = ({ projects }) => {
       >
         {projects.map((project, index) => (
           <Link
-            key={project.slug}
-            href={`/projects/${project.slug}`}
+            key={project.id}
+            href={`/projects/${project.id}`}
             className={scss.row}
-            data-dimmed={hovered !== null && hovered !== project.slug}
-            onMouseEnter={() => setHovered(project.slug)}
+            data-dimmed={hovered !== null && hovered !== project.id}
+            onMouseEnter={() => setHovered(project.id)}
           >
             <span className={scss.row__index}>
               {String(index + 1).padStart(2, "0")}
             </span>
 
             <span
-              className={`${scss.row__name} ${hovered === project.slug ? scss["row__name--active"] : ""}`}
+              className={`${scss.row__name} ${hovered === project.id ? scss["row__name--active"] : ""}`}
             >
               {project.name}
             </span>
 
             <span className={scss.row__meta}>
               <span
-                className={`${scss.status} ${scss[`status--${STATUS_TONE[project.status]}`]}`}
+                className={`${scss.status} ${scss[`status--${PROJECT_STATUS_TONE[project.project_status]}`]}`}
               >
-                {STATUS_LABELS[project.status]}
+                {PROJECT_STATUS_LABELS[project.project_status]}
               </span>
-              <span>{CATEGORY_LABELS[project.category]}</span>
-              <span>{project.year}</span>
+              <span>{project.category}</span>
             </span>
 
             <ArrowIcon direction="right" className={scss.row__arrow} />
@@ -94,7 +90,7 @@ const EditorialList: FC<{ projects: Project[] }> = ({ projects }) => {
           <AnimatePresence>
             {hoveredProject && (
               <motion.div
-                key={hoveredProject.slug}
+                key={hoveredProject.id}
                 className={scss.preview}
                 style={{ x: springX, y: springY }}
                 initial={{ opacity: 0, scale: 0.92 }}
@@ -102,10 +98,10 @@ const EditorialList: FC<{ projects: Project[] }> = ({ projects }) => {
                 exit={{ opacity: 0, scale: 0.92 }}
                 transition={{ duration: 0.2 }}
               >
-                <img
-                  src={hoveredProject.image}
-                  alt=""
-                  className={scss.preview__image}
+                <ProjectCover
+                  src={hoveredProject.preview_image}
+                  name={hoveredProject.name}
+                  imageClassName={scss.preview__image}
                 />
               </motion.div>
             )}

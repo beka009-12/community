@@ -66,7 +66,7 @@
 .funnel__flow {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   list-style: none;
 }
 
@@ -130,16 +130,6 @@
 .stage__label {
   font-size: 13px;
   color: var(--color-mist);
-}
-
-.funnel__rejected {
-  align-self: flex-end;
-  font-size: 13px;
-  color: var(--color-mist);
-
-  &:hover {
-    color: var(--color-danger);
-  }
 }
 
 @media (max-width: 639px) {

@@ -1,11 +1,13 @@
 "use client";
 
 import { FC } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
+import Avatar from "@/src/ui/Avatar";
 import { motionTokens, springs } from "@/src/lib/motion-tokens";
-import { getMemberName, type Member } from "@/src/data/members";
+import { MEMBERSHIP_ROLE_LABELS, positionLabel } from "@/src/lib/api-labels";
+import { fullName } from "@/src/lib/people";
+import type { TeamPerson } from "@/src/server/api/joins";
 import scss from "./TeamSection.module.scss";
 
 const containerVariants = {
@@ -18,7 +20,7 @@ const memberVariants = {
   visible: { opacity: 1, y: 0, transition: springs.gentle },
 };
 
-const TeamSection: FC<{ members: Member[] }> = ({ members }) => {
+const TeamSection: FC<{ people: TeamPerson[] }> = ({ people }) => {
   const reduce = useReducedMotion();
 
   return (
@@ -29,34 +31,34 @@ const TeamSection: FC<{ members: Member[] }> = ({ members }) => {
       whileInView={reduce ? undefined : "visible"}
       viewport={{ once: true, margin: "-60px" }}
     >
-      {members.map((member) => (
-        <motion.li
-          key={member.id}
-          className={scss.member}
-          variants={reduce ? undefined : memberVariants}
-        >
-          <Link
-            href={`/team/${member.id}`}
-            className={scss.member__link}
-            aria-label={`${getMemberName(member)}, ${member.role}`}
+      {people.map(({ member, role }) => {
+        const name = fullName(member);
+        const caption = [MEMBERSHIP_ROLE_LABELS[role], positionLabel(member.position)]
+          .filter(Boolean)
+          .join(" · ");
+        return (
+          <motion.li
+            key={member.id}
+            className={scss.member}
+            variants={reduce ? undefined : memberVariants}
           >
-            <span className={scss.member__avatar}>
-              <Image
-                src={member.photo}
-                alt=""
-                fill
-                sizes="48px"
-                className={scss.member__avatarImg}
-              />
-            </span>
+            <Link
+              href={`/team/${member.id}`}
+              className={scss.member__link}
+              aria-label={`${name}, ${caption}`}
+            >
+              <span className={scss.member__avatar}>
+                <Avatar src={member.avatar} name={name} imageClassName={scss.member__avatarImg} />
+              </span>
 
-            <span className={scss.member__info}>
-              <span className={scss.member__role}>{member.role}</span>
-              <span className={scss.member__stack}>{member.stack}</span>
-            </span>
-          </Link>
-        </motion.li>
-      ))}
+              <span className={scss.member__info}>
+                <span className={scss.member__role}>{name}</span>
+                <span className={scss.member__stack}>{caption}</span>
+              </span>
+            </Link>
+          </motion.li>
+        );
+      })}
     </motion.ul>
   );
 };

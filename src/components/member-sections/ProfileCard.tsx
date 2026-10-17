@@ -1,9 +1,10 @@
 import { FC } from "react";
-import Image from "next/image";
 import Button from "@/src/ui/Button";
-import { getMemberName, type Member } from "@/src/data/members";
-import { SPECIALIZATIONS } from "@/src/data/specializations";
-import type { MemberProject } from "@/src/data/teams";
+import Avatar from "@/src/ui/Avatar";
+import { positionLabel } from "@/src/lib/api-labels";
+import { fullName } from "@/src/lib/people";
+import { plural } from "@/src/lib/plural";
+import type { MemberDetail } from "@/src/server/api/schemas";
 import scss from "./ProfileCard.module.scss";
 
 interface ProfileLink {
@@ -11,27 +12,12 @@ interface ProfileLink {
   label: string;
 }
 
-interface ProfileCardProps {
-  member: Member;
-  projects: MemberProject[];
-}
-
-const pluralizeProjects = (count: number) => {
-  const mod10 = count % 10;
-  const mod100 = count % 100;
-  if (mod10 === 1 && mod100 !== 11) return "проект";
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return "проекта";
-  return "проектов";
-};
-
-// Sticky résumé header on desktop — keeps "Обсудить проект" in reach
-// while the client reads the rest of the profile.
-const ProfileCard: FC<ProfileCardProps> = ({ member, projects }) => {
-  const name = getMemberName(member);
-  const position = SPECIALIZATIONS.find(
-    (spec) => spec.id === member.specializationId,
-  )?.title;
-  const leadCount = projects.filter((item) => item.role === "TEAM_LEAD").length;
+// Sticky header on desktop — keeps «Обсудить проект» in reach while the
+// client reads the rest of the profile.
+const ProfileCard: FC<{ member: MemberDetail }> = ({ member }) => {
+  const name = fullName(member);
+  const position = positionLabel(member.position);
+  const projectCount = member.projects.length;
 
   // Only links the member actually filled in — no dead buttons.
   const links = [
@@ -46,35 +32,21 @@ const ProfileCard: FC<ProfileCardProps> = ({ member, projects }) => {
       {/* Same portrait + bottom scrim + caption language as the Roster
           cells on /team, at profile scale. */}
       <div className={scss.photo}>
-        <Image
-          src={member.photo}
-          alt={name}
-          fill
-          priority
-          sizes="(min-width: 960px) 320px, (min-width: 640px) 280px, 100vw"
-          className={scss.photo__img}
-        />
+        <Avatar src={member.avatar} name={name} imageClassName={scss.photo__img} eager />
         <span className={scss.photo__scrim} aria-hidden="true" />
         <div className={scss.caption}>
           <h1 className={scss.name}>{name}</h1>
-          <p className={scss.role}>{member.role}</p>
-          {position && <p className={scss.position}>{position}</p>}
+          {position && <p className={scss.role}>{position}</p>}
         </div>
       </div>
 
       <div className={scss.body}>
-        {projects.length > 0 && (
+        {projectCount > 0 && (
           <dl className={scss.facts}>
             <div>
-              <dt>{pluralizeProjects(projects.length)}</dt>
-              <dd>{projects.length}</dd>
+              <dt>{plural(projectCount, "проект", "проекта", "проектов")}</dt>
+              <dd>{projectCount}</dd>
             </div>
-            {leadCount > 0 && (
-              <div>
-                <dt>из них тимлидом</dt>
-                <dd>{leadCount}</dd>
-              </div>
-            )}
           </dl>
         )}
 

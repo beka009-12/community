@@ -1,7 +1,7 @@
-import type { ProjectCategory } from "./projects";
+export type ServiceCategory = "web" | "systems" | "bots" | "ai";
 
 export interface Service {
-  category: ProjectCategory;
+  category: ServiceCategory;
   // English label shown on the homepage cards; ServicesPreview's
   // [data-tag="..."] CSS variants key off it.
   tag: string;
@@ -11,9 +11,10 @@ export interface Service {
   team: string[];
 }
 
-// Single source for both the homepage teaser (ServicesPreview) and the
-// detailed About section (about-sections/Services). `category` matches
-// ProjectCategory so each service can list its real example projects.
+// Single source for the homepage teaser (ServicesPreview), the detailed
+// About section and the request form's project types. `category` is the
+// service's own id (CSS hooks, tab ids): API project categories are free
+// text and don't map onto services.
 export const SERVICES: Service[] = [
   {
     category: "web",
@@ -72,3 +73,8 @@ export const SERVICES: Service[] = [
     team: ["AI/ML-инженер", "Backend-разработчик"],
   },
 ];
+
+// Request form choices: the API takes any string ≤150 as project_type.
+export const PROJECT_TYPES = SERVICES.map((service) => service.title).concat(
+  "Другое",
+) as [string, ...string[]];

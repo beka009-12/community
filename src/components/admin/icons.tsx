@@ -58,14 +58,6 @@ export const RequestsIcon = () => (
   </Icon>
 );
 
-export const SettingsIcon = () => (
-  <Icon>
-    <path d="M4 7h10M18 7h2M4 17h4M12 17h8" />
-    <circle cx="16" cy="7" r="2" />
-    <circle cx="10" cy="17" r="2" />
-  </Icon>
-);
-
 export const LogoutIcon = () => (
   <Icon size={16}>
     <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3" />

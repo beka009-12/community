@@ -4,7 +4,7 @@ import { FC, ReactNode, useActionState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { motionTokens, springs } from "@/src/lib/motion-tokens";
 import Button from "@/src/ui/Button";
-import { CATEGORY_LABELS } from "@/src/data/projects";
+import { PROJECT_TYPES } from "@/src/data/services";
 import {
   submitClientRequest,
   type RequestFormState,
@@ -103,12 +103,13 @@ const RequestForm: FC = () => {
             )}
           </Field>
 
-          <Field name="company" label="Компания" error={errors.company}>
+          <Field name="company" label="Компания" required error={errors.company}>
             {(describedBy) => (
               <input
                 {...inputProps("company", describedBy)}
                 type="text"
                 autoComplete="organization"
+                required
               />
             )}
           </Field>
@@ -124,12 +125,13 @@ const RequestForm: FC = () => {
             )}
           </Field>
 
-          <Field name="phone" label="Телефон" error={errors.phone}>
+          <Field name="phone" label="Телефон" required error={errors.phone}>
             {(describedBy) => (
               <input
                 {...inputProps("phone", describedBy)}
                 type="tel"
                 autoComplete="tel"
+                required
               />
             )}
           </Field>
@@ -150,16 +152,17 @@ const RequestForm: FC = () => {
           </Field>
 
           <Field
-            name="projectType"
+            name="project_type"
             label="Тип проекта"
-            error={errors.projectType}
+            required
+            error={errors.project_type}
           >
             {(describedBy) => (
-              <select {...inputProps("projectType", describedBy)}>
+              <select {...inputProps("project_type", describedBy)} required>
                 <option value="">Выберите тип</option>
-                {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-                  <option key={key} value={key}>
-                    {label}
+                {PROJECT_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
                   </option>
                 ))}
               </select>
@@ -168,14 +171,15 @@ const RequestForm: FC = () => {
 
           <Field
             name="budget"
-            label="Бюджет (опционально)"
+            label="Бюджет, сом (опционально)"
             error={errors.budget}
           >
             {(describedBy) => (
               <input
                 {...inputProps("budget", describedBy)}
                 type="text"
-                placeholder="Например, 300 000 сом"
+                inputMode="numeric"
+                placeholder="Например, 300 000"
               />
             )}
           </Field>

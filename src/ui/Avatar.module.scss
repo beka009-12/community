@@ -1,0 +1,30 @@
+.image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+// container-type: size lets the initials scale with any box, from the
+// 28px admin avatar stack to the profile portrait.
+.fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  container-type: size;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-accent) 24%, var(--color-surface)),
+    var(--color-surface-2)
+  );
+  color: var(--color-accent-soft);
+}
+
+.fallback__text {
+  font-family: var(--font-display);
+  font-size: 36cqmin;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}

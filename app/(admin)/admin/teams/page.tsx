@@ -1,16 +1,14 @@
 import Button from "@/src/ui/Button";
 import DataTable from "@/src/components/admin/ui/DataTable";
 import PageHeader from "@/src/components/admin/ui/PageHeader";
-import { formatDate } from "@/src/components/admin/labels";
+import PersonCell from "@/src/components/admin/PersonCell";
+import { getTeams } from "@/src/server/api/teams";
+import type { TeamListItem } from "@/src/server/api/schemas";
 import { requireAdmin } from "@/src/server/auth/dal";
-import { listTeams } from "@/src/server/repositories/teams";
-import type { DbTeam } from "@/src/server/db/types";
-
-type Row = DbTeam & { memberCount: number };
 
 const Page = async () => {
   await requireAdmin();
-  const teams = await listTeams();
+  const teams = await getTeams();
   return (
     <>
       <PageHeader
@@ -22,15 +20,17 @@ const Page = async () => {
           </Button>
         }
       />
-      <DataTable<Row>
+      <DataTable<TeamListItem>
         rows={teams}
-        rowKey={(row) => row.id}
+        rowKey={(row) => String(row.id)}
         rowHref={(row) => `/admin/teams/${row.id}`}
         empty="Команд пока нет."
         columns={[
-          { key: "name", label: "Название", render: (row) => row.name },
-          { key: "count", label: "Участников", render: (row) => row.memberCount },
-          { key: "created", label: "Создана", render: (row) => formatDate(row.createdAt) },
+          {
+            key: "name",
+            label: "Команда",
+            render: (row) => <PersonCell avatar={row.team_image} name={row.team_name} />,
+          },
         ]}
       />
     </>

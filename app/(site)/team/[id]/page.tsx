@@ -1,39 +1,33 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import MemberProfile from "@/src/components/MemberProfile";
-import { getMemberName } from "@/src/data/members";
-import { SPECIALIZATIONS } from "@/src/data/specializations";
-import {
-  getMemberProjects,
-  getPublicMember,
-} from "@/src/server/queries/public";
+import { positionLabel } from "@/src/lib/api-labels";
+import { fullName } from "@/src/lib/people";
+import { parseId } from "@/src/lib/route-id";
+import { getMember } from "@/src/server/api/members";
+
+// Inactive members stay off the public site.
+const load = async (rawId: string) => {
+  const id = parseId(rawId);
+  const member = id === null ? null : await getMember(id);
+  return member?.status === "Active" ? member : null;
+};
 
 export async function generateMetadata({
   params,
 }: PageProps<"/team/[id]">): Promise<Metadata> {
-  const { id } = await params;
-  const member = await getPublicMember(id);
-
+  const member = await load((await params).id);
   if (!member) return {};
-
-  const position = SPECIALIZATIONS.find(
-    (spec) => spec.id === member.specializationId,
-  )?.title;
-
   return {
-    title: `${getMemberName(member)} — Motion Community`,
-    description: [position, member.bio].filter(Boolean).join(". "),
+    title: `${fullName(member)} — Motion Community`,
+    description: [positionLabel(member.position), member.bio].filter(Boolean).join(". "),
   };
 }
 
 const Page = async ({ params }: PageProps<"/team/[id]">) => {
-  const { id } = await params;
-  const member = await getPublicMember(id);
-
+  const member = await load((await params).id);
   if (!member) notFound();
-
-  const projects = await getMemberProjects(member.id);
-  return <MemberProfile member={member} projects={projects} />;
+  return <MemberProfile member={member} />;
 };
 
 export default Page;

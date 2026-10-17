@@ -1,17 +1,17 @@
 import { FC } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import type { ProjectTeam } from "@/src/server/queries/public";
+import Avatar from "@/src/ui/Avatar";
+import { MEMBERSHIP_ROLE_LABELS, positionLabel } from "@/src/lib/api-labels";
+import { fullName } from "@/src/lib/people";
+import type { ProjectTeam } from "@/src/server/api/joins";
 import scss from "./Teams.module.scss";
 
 const MAX_VISIBLE_AVATARS = 3;
 
 // One coordinated hover moment instead of another spotlight-card grid:
 // the overlapping avatar cluster spreads apart as the card lifts.
-// Avatars cap at 3 with a "+N" overflow badge for larger teams later.
-// Only the team lead's role/stack is shown below — the cluster itself
-// already communicates "this many people," a full roster duplicates
-// the Roster section above.
+// Avatars cap at 3 with a "+N" overflow badge. Only the lead is named
+// below — the Roster above already lists everyone.
 const Teams: FC<{ teams: ProjectTeam[] }> = ({ teams }) => (
   <section className={scss.teams}>
     <div className={`container ${scss.teams__inner}`}>
@@ -21,24 +21,18 @@ const Teams: FC<{ teams: ProjectTeam[] }> = ({ teams }) => (
       </p>
 
       <div className={scss.grid}>
-        {teams.map((team) => {
-          const { members } = team;
-          const visibleMembers = members.slice(0, MAX_VISIBLE_AVATARS);
-          const overflowCount = members.length - MAX_VISIBLE_AVATARS;
-          const lead = members.find((member) => member.role.startsWith("Тимлид")) ?? members[0];
+        {teams.map(({ project, people }) => {
+          const visible = people.slice(0, MAX_VISIBLE_AVATARS);
+          const overflowCount = people.length - MAX_VISIBLE_AVATARS;
+          // withPeople() sorts the lead first.
+          const lead = people[0];
 
           return (
-            <div key={team.id} className={scss.card}>
+            <div key={project.id} className={scss.card}>
               <div className={scss.avatars}>
-                {visibleMembers.map((member) => (
+                {visible.map(({ member }) => (
                   <span key={member.id} className={scss.avatar}>
-                    <Image
-                      src={member.photo}
-                      alt=""
-                      fill
-                      sizes="44px"
-                      className={scss.avatar__img}
-                    />
+                    <Avatar src={member.avatar} name={fullName(member)} imageClassName={scss.avatar__img} />
                   </span>
                 ))}
                 {overflowCount > 0 && (
@@ -48,8 +42,8 @@ const Teams: FC<{ teams: ProjectTeam[] }> = ({ teams }) => (
                 )}
               </div>
 
-              <Link href={`/projects/${team.projectSlug}`} className={scss.card__link}>
-                {team.projectName}
+              <Link href={`/projects/${project.id}`} className={scss.card__link}>
+                {project.name}
                 <span className={scss.card__arrow} aria-hidden="true">
                   →
                 </span>
@@ -57,8 +51,12 @@ const Teams: FC<{ teams: ProjectTeam[] }> = ({ teams }) => (
 
               {lead && (
                 <div className={scss.lead}>
-                  <span className={scss.lead__role}>{lead.role}</span>
-                  <span className={scss.lead__stack}>{lead.stack}</span>
+                  <span className={scss.lead__role}>{fullName(lead.member)}</span>
+                  <span className={scss.lead__stack}>
+                    {[MEMBERSHIP_ROLE_LABELS[lead.role], positionLabel(lead.member.position)]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </span>
                 </div>
               )}
             </div>
