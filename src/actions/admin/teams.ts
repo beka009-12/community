@@ -50,7 +50,7 @@ export async function updateTeamAction(
   return { ok: true, values };
 }
 
-export async function deleteTeamAction(id: number, _prev: ActionResult): Promise<ActionResult> {
+export async function deleteTeamAction(id: number): Promise<ActionResult> {
   await requireAdmin();
   try {
     await deleteTeam(id);

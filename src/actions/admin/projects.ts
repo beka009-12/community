@@ -50,7 +50,7 @@ export async function updateProjectAction(
   return { ok: true, values };
 }
 
-export async function deleteProjectAction(id: number, _prev: ActionResult): Promise<ActionResult> {
+export async function deleteProjectAction(id: number): Promise<ActionResult> {
   await requireAdmin();
   try {
     await deleteProject(id);

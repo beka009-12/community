@@ -95,7 +95,7 @@ export async function setMemberRoleAction(
   return { ok: true };
 }
 
-export async function deleteMemberAction(id: number, _prev: ActionResult): Promise<ActionResult> {
+export async function deleteMemberAction(id: number): Promise<ActionResult> {
   await requireAdmin();
   try {
     await deleteAdminMember(id);
