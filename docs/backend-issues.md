@@ -53,6 +53,31 @@ PATCH /ru/personal-account/  {"role": "Admin"}   (Bearer токен Developer)
 чтения — `read_only_fields = ["role", "status"]`. Менять роль может только
 админ через `/admin/members/{id}/`.
 
+### 5. Сертификат нельзя создать без картинки
+
+Проверено 2026-10-17 под Admin. По Swagger (схема `Certificates`)
+`certificate_image` только для чтения и в `required` не входит, но без файла
+сервер отклоняет создание:
+
+```
+POST /ru/personal-account/certificates/
+{"title": "x", "organization": "y", "given_date": "2026-05-20", "text": "z"}
+→ 400 {"certificate_image": ["Ни одного файла не было отправлено."]}
+```
+
+С тем же телом в `multipart/form-data` плюс файлом `certificate_image` → 201.
+`PATCH` и `DELETE` `/personal-account/certificates/{id}/` без файла работают.
+Из-за этого в кабинете кнопка «Добавить сертификат» всегда заканчивается
+ошибкой: формы с файлом у нас нет, потому что по Swagger поле не принимает
+запись.
+
+Исправление: сделать картинку необязательной — в модели
+`certificate_image = models.ImageField(..., blank=True, null=True)` и миграция
+отдельным файлом, либо `extra_kwargs = {"certificate_image": {"required": False}}`
+в сериализаторе. Если загрузка картинки нужна, опишите её в Swagger (поле
+не `readOnly`, запрос `multipart/form-data`) — тогда добавим выбор файла в
+форму.
+
 ## Доработка: команда у проекта
 
 Сейчас проект и команда никак не связаны: у `Project` нет поля команды ни в
@@ -243,6 +268,8 @@ curl -X PATCH "$API_URL/projects/1/" -H "Authorization: Bearer $TOKEN" \
   `/personal-account/` своему владельцу.
 - В `MemberProfileDetail.projects` нет роли участника в проекте.
 - Нет загрузки файлов: `avatar`, `preview_image`, `team_image`, `resume` и
-  `certificate_image` доступны только для чтения.
+  `certificate_image` доступны только для чтения. Исключение —
+  `certificate_image`: по факту сервер его принимает и даже требует (см.
+  блокер 5).
 - Мелочь: поле `Languages.Level` начинается с заглавной буквы, остальные поля в
   snake_case.
