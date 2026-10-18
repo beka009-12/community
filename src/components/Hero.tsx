@@ -1,26 +1,33 @@
 import Welcome from "./hero-sections/Welcome";
-import Stats from "./hero-sections/Stats";
-import ServicesPreview from "./hero-sections/ServicesPreview";
-import Portfolio from "./hero-sections/Portfolio";
-import Pillars from "./hero-sections/Pillars";
-import CommunityPreview from "./hero-sections/CommunityPreview";
+import Showcase from "./hero-sections/Showcase";
+import ServiceRows from "./hero-sections/ServiceRows";
+import Process from "./hero-sections/Process";
+import LeadsAndNumbers from "./hero-sections/LeadsAndNumbers";
+import JoinBand from "./hero-sections/JoinBand";
+import Closing from "./hero-sections/Closing";
 import { getProjects } from "@/src/server/api/projects";
 import { getStats } from "@/src/server/api/stats";
-import Faq from "./hero-sections/Faq";
-import FinalCta from "./hero-sections/FinalCta";
+import { getTeamLeads } from "@/src/server/api/home";
+
+// Keeps the company path to the services and «Заказать проект» short as
+// the catalogue grows; «Все проекты» carries the rest.
+const SHOWCASE_LIMIT = 6;
 
 const Home = async () => {
-  const [stats, projects] = await Promise.all([getStats(), getProjects()]);
+  const [stats, projects, leads] = await Promise.all([
+    getStats(),
+    getProjects(),
+    getTeamLeads(),
+  ]);
   return (
     <div>
       <Welcome />
-      <Stats stats={stats} />
-      <ServicesPreview />
-      {projects.length > 0 && <Portfolio projects={projects} />}
-      <Pillars />
-      <CommunityPreview />
-      <Faq />
-      <FinalCta />
+      {projects.length > 0 && <Showcase projects={projects.slice(0, SHOWCASE_LIMIT)} />}
+      <ServiceRows />
+      <Process />
+      <LeadsAndNumbers leads={leads} stats={stats} />
+      <JoinBand />
+      <Closing />
     </div>
   );
 };
