@@ -96,7 +96,9 @@
   align-items: center;
   height: 100vh;
   padding: 72px 0 32px;
-  overflow: hidden;
+  // Not `hidden`: that is still a scroll container, and focusing a plate
+  // that hasn't slid in yet would scroll the stage itself out of place.
+  overflow: clip;
 
   > :global(.container) {
     width: 100%;

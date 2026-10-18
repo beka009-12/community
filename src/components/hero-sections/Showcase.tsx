@@ -43,7 +43,10 @@ const Plate: FC<PlateProps> = ({ project, index, steps, progress, onFocus }) => 
         <Link
           href={`/projects/${project.id}`}
           className={scss.plate__link}
-          onFocus={() => onFocus(index)}
+          // Mouse presses focus links too; only keyboard focus should scroll.
+          onFocus={(event) => {
+            if (event.currentTarget.matches(":focus-visible")) onFocus(index);
+          }}
         >
           <ProjectCover src={project.preview_image} name={project.name} bare />
           <span className={scss.plate__shade} aria-hidden="true" />
