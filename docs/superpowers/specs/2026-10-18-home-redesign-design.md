@@ -80,10 +80,8 @@ renders, in order:
   radius):
   - project name, large, in the display font;
   - `category` (free text; all live projects have one today, e.g. Education,
-    Web) as a quiet label next to the status chip, omitted when empty;
-  - status chip using the existing labels (`PROJECT_STATUS_LABELS`) and a
-    colour per status (Completed → signal green, In progress → accent,
-    Planned / Paused → neutral);
+    Web) as a quiet label above the name, omitted when empty;
+  - status as the project's path (see 1a);
   - background: `preview_image` when present, otherwise the existing
     gradient fallback of `ProjectCover` (accent radial + surface gradient).
     Today no project has an image; when images arrive they must just work;
@@ -108,6 +106,24 @@ renders, in order:
   services section); they must be real links so focus works. That section
   always opens on its first tab — deep-linking each row to its own tab would
   mean changing the About page, which is out of scope (designer's call).
+
+### 1a. Showcase revision (2026-10-18): description, project path, slider
+
+- Every plate shows the project's `description` (from the project detail;
+  the showcase now reads `getProjectsWithMembers()`, the same cached
+  requests the team leads use) under the name, with the category above it.
+- **Status as the project's path** (user's pick over a stage meter and a
+  progress ring): «В планах — В разработке — Готово» with the current stage
+  lit (Planned → paper, In progress → accent, Completed → signal), earlier
+  stages softer, later ones mist; a paused project shows only «На паузе».
+  Screen readers get «Статус: …». Shared `src/ui/ProjectPath`, also used in
+  the team-leads section. Replaces the dot-and-pill status chip, which the
+  user found AI-generic.
+- **≤768px slider:** the deck becomes a horizontal scroll-snap row bleeding
+  to the screen edges, one plate per snap with the next peeking in; under it
+  «N / M», a progress line and 44×44 previous/next buttons (disabled at the
+  ends). On slides «Открыть проект» sits under the description.
+  769–1024px keeps the plain vertical list; above that, the pinned stack.
 
 ### 1b. Numbers as one sentence (revised 2026-10-18)
 
