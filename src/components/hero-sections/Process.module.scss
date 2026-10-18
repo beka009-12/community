@@ -74,69 +74,11 @@
 }
 
 .review {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 20px 32px;
+  max-width: 60ch;
   margin-top: 56px;
   padding-top: 32px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.review__text {
-  max-width: 30ch;
   font-size: 18px;
   font-weight: 500;
   line-height: 1.45;
-}
-
-.review__leads {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  list-style: none;
-}
-
-.lead {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 6px 18px 6px 6px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
-  transition:
-    border-color 0.2s ease,
-    background-color 0.2s ease;
-
-  &:hover,
-  &:focus-visible {
-    border-color: rgba(86, 187, 255, 0.4);
-    background: rgba(86, 187, 255, 0.08);
-  }
-}
-
-.lead__avatar {
-  position: relative;
-  flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-  overflow: hidden;
-  border-radius: 50%;
-  background: var(--color-surface-2);
-}
-
-.lead__text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.lead__name {
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.lead__role {
-  color: var(--color-mist);
-  font-size: 13px;
 }

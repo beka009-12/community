@@ -1,12 +1,7 @@
 "use client";
 
 import { FC, useRef } from "react";
-import Link from "next/link";
 import { motion, useScroll } from "motion/react";
-import Avatar from "@/src/ui/Avatar";
-import { positionLabel } from "@/src/lib/api-labels";
-import { fullName } from "@/src/lib/people";
-import type { MemberListItem } from "@/src/server/api/schemas";
 import scss from "./Process.module.scss";
 
 const STEPS = [
@@ -32,9 +27,7 @@ const STEPS = [
   },
 ];
 
-// The team leads sit under the steps because they are the review each
-// step goes through.
-const Process: FC<{ leads: MemberListItem[] }> = ({ leads }) => {
+const Process: FC = () => {
   const rowRef = useRef<HTMLOListElement>(null);
   // The accent line fills while the row travels up the viewport.
   const { scrollYProgress } = useScroll({
@@ -64,32 +57,9 @@ const Process: FC<{ leads: MemberListItem[] }> = ({ leads }) => {
           </ol>
         </div>
 
-        <div className={scss.review}>
-          <p className={scss.review__text}>Каждый этап проверяют тимлиды сообщества.</p>
-          {leads.length > 0 && (
-            <ul className={scss.review__leads}>
-              {leads.map((lead) => {
-                const name = fullName(lead);
-                const position = positionLabel(lead.position);
-                return (
-                  <li key={lead.id}>
-                    <Link href={`/team/${lead.id}`} className={scss.lead}>
-                      <span className={scss.lead__avatar}>
-                        <Avatar src={lead.avatar} name={name} />
-                      </span>
-                      <span className={scss.lead__text}>
-                        <span className={scss.lead__name}>{name}</span>
-                        <span className={scss.lead__role}>
-                          {position ? `Тимлид, ${position}` : "Тимлид"}
-                        </span>
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
+        <p className={scss.review}>
+          Каждый этап проверяют тимлиды сообщества.
+        </p>
       </div>
     </section>
   );

@@ -1,4 +1,4 @@
-import type { MembershipRole } from "@/src/lib/api-enums";
+import type { MembershipRole, ProjectStatus } from "@/src/lib/api-enums";
 import type { MemberListItem, Membership, ProjectDetail, TeamDetail } from "./schemas";
 
 export interface TeamPerson {
@@ -86,3 +86,28 @@ export const myTeams = (teams: TeamDetail[], userId: number): MyTeam[] =>
     const role = roleOf(team.members, userId);
     return role ? [{ team, role }] : [];
   });
+
+export interface LeadProject {
+  id: number;
+  name: string;
+  status: ProjectStatus;
+  role: MembershipRole;
+}
+
+export interface LeadProfile {
+  member: MemberListItem;
+  bio: string;
+  projects: LeadProject[];
+}
+
+// A slim, serialisable shape for the homepage's client-side leads section.
+export const leadProfile = (member: MemberListItem, bio: string, projects: ProjectDetail[]): LeadProfile => ({
+  member,
+  bio,
+  projects: myProjects(projects, member.id).map(({ project, role }) => ({
+    id: project.id,
+    name: project.name,
+    status: project.project_status,
+    role,
+  })),
+});

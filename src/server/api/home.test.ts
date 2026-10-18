@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getTeamLeads } from "./home";
-import { getPublicRoster } from "./members";
+import { getMember, getPublicRoster } from "./members";
 import { getProjectsWithMembers } from "./projects";
-import type { MemberListItem, ProjectDetail } from "./schemas";
+import type { MemberDetail, MemberListItem, ProjectDetail } from "./schemas";
 
-vi.mock("./members", () => ({ getPublicRoster: vi.fn() }));
+vi.mock("./members", () => ({ getPublicRoster: vi.fn(), getMember: vi.fn() }));
 vi.mock("./projects", () => ({ getProjectsWithMembers: vi.fn() }));
 
 afterEach(() => {
@@ -34,11 +34,37 @@ const project: ProjectDetail = {
   members: [{ id: 1, user: 7, role: "Team_Lead" }],
 };
 
+const detail: MemberDetail = {
+  ...lead,
+  bio: "Ведёт команду LMS.",
+  skills: "",
+  github: null,
+  linkedin: null,
+  portfolio: null,
+  resume: null,
+  projects: [],
+};
+
 describe("getTeamLeads", () => {
-  it("returns the leads joined from projects and the roster", async () => {
+  it("returns each lead with their bio and projects", async () => {
     vi.mocked(getPublicRoster).mockResolvedValue([lead]);
     vi.mocked(getProjectsWithMembers).mockResolvedValue([project]);
-    await expect(getTeamLeads()).resolves.toEqual([lead]);
+    vi.mocked(getMember).mockResolvedValue(detail);
+    await expect(getTeamLeads()).resolves.toEqual([
+      {
+        member: lead,
+        bio: "Ведёт команду LMS.",
+        projects: [{ id: 1, name: "Motion LMS Platform", status: "In_progress", role: "Team_Lead" }],
+      },
+    ]);
+  });
+
+  it("keeps a lead whose profile is gone, without a bio", async () => {
+    vi.mocked(getPublicRoster).mockResolvedValue([lead]);
+    vi.mocked(getProjectsWithMembers).mockResolvedValue([project]);
+    vi.mocked(getMember).mockResolvedValue(null);
+    const [profile] = await getTeamLeads();
+    expect(profile.bio).toBe("");
   });
 
   it("logs and returns no leads when the roster fails to load", async () => {

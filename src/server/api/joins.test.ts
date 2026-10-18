@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { idleMembers, projectTeams, projectsWithoutLead, splitSkills, teamLeads, withPeople } from "./joins";
+import { idleMembers, leadProfile, projectTeams, projectsWithoutLead, splitSkills, teamLeads, withPeople } from "./joins";
 import type { MemberListItem, ProjectDetail } from "./schemas";
 
 const person = (id: number, status: MemberListItem["status"] = "Active"): MemberListItem => ({
@@ -97,5 +97,23 @@ describe("teamLeads", () => {
   it("skips a lead missing from the roster", () => {
     const leads = teamLeads([project(1, [{ id: 1, user: 99, role: "Team_Lead" }])], roster);
     expect(leads).toEqual([]);
+  });
+});
+
+describe("leadProfile", () => {
+  it("lists the projects the person is in, with their role and status", () => {
+    const profile = leadProfile(person(2), "Ведёт два проекта.", [
+      project(1, [{ id: 1, user: 2, role: "Team_Lead" }], "Completed"),
+      project(2, [{ id: 2, user: 3, role: "Team_Lead" }]),
+      project(3, [{ id: 3, user: 2, role: "Developer" }], "Paused"),
+    ]);
+    expect(profile).toEqual({
+      member: person(2),
+      bio: "Ведёт два проекта.",
+      projects: [
+        { id: 1, name: "Проект 1", status: "Completed", role: "Team_Lead" },
+        { id: 3, name: "Проект 3", status: "Paused", role: "Developer" },
+      ],
+    });
   });
 });
