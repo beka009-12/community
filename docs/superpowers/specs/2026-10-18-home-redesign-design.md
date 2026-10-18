@@ -128,13 +128,27 @@ members. The section carries `id="community"`.
   shared hairline. Step numbers 1–4 are kept — this is a real sequence.
 - The hairline above the steps fills with the accent colour as the section
   scrolls through the viewport (scroll-linked).
-- **Team leads (revised 2026-10-18):** under the steps, «Каждый этап проверяют
-  тимлиды сообщества.» followed by the real team leads as pill links to
-  `/team/[id]` (avatar or initials, full name, «Тимлид, <position label>»).
-  They sit here because they are the review every step goes through — the
-  user found a separate leads tile unexplained. Leads are everyone holding
-  `Team_Lead` in any project (`getTeamLeads`, `src/server/api/home.ts`),
-  de-duplicated; without leads only the sentence shows.
+- Under the steps: «Каждый этап проверяют тимлиды сообщества.», leading into
+  the team-leads section below.
+
+### 3b. Team leads (revised 2026-10-18, user chose "names as a menu")
+
+The user asked for a dedicated section with more about each lead — who they
+are, with a photo, which projects and roles. Heading «Тимлиды, которые
+проверяют каждый этап», lead «Они принимают архитектурные решения, ведут
+команды и ревьюят код каждого участника.»
+
+- Left: the leads' names in the display font as a list of toggle buttons
+  (`aria-pressed`), each with its project count; an accent marker slides to
+  the chosen name (shared `layoutId`, like the header).
+- Right: the chosen lead — portrait (`avatar`, otherwise large initials; no
+  lead has a photo in the API yet), «Тимлид, <position>», name, bio from the
+  member detail (hidden when empty), every project they are in with their
+  role and status (rows link to `/projects/[id]`), «Открыть профиль» →
+  `/team/[id]`. Switching crossfades the panel (reduced motion: no slide).
+- Data: `getTeamLeads()` returns `LeadProfile` (`member`, `bio`, `projects`)
+  — one extra cached `getMember` request per lead for the bio. No leads → no
+  section. ≤1024px the list sits above the panel.
 
 ### 4. Closing doors (revised 2026-10-18)
 
