@@ -97,8 +97,9 @@ const Showcase: FC<{ projects: ShowcaseProject[] }> = ({ projects }) => {
     window.scrollTo({ top: top + (distance * index) / steps });
   };
 
-  // ≤768px the deck is a horizontal scroll-snap slider; one step is a plate
-  // plus the gap, measured from the first two plates.
+  // ≤768px the deck is a full-screen, one-at-a-time carousel (horizontal
+  // scroll-snap); one step is a plate plus any gap, measured from the first
+  // two plates.
   const slideStep = (deck: HTMLDivElement): number => {
     const [first, second] = Array.from(deck.children) as HTMLElement[];
     if (!first) return 0;
@@ -136,7 +137,7 @@ const Showcase: FC<{ projects: ShowcaseProject[] }> = ({ projects }) => {
         style={{ "--steps": steps } as CSSProperties}
       >
         <div ref={stageRef} className={scss.stage}>
-          <div className="container">
+          <div className={`container ${scss.carousel}`}>
             <div ref={deckRef} className={scss.deck} onScroll={syncSlide}>
               {projects.map((project, index) => (
                 <Plate

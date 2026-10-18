@@ -88,18 +88,16 @@
     @include flat;
   }
 
-  // Phones and small tablets: the flat list turns into a swipeable row,
-  // bleeding to the screen edges so the next plate peeks in.
+  // Phones and small tablets: one project fills the screen, story-style —
+  // edge to edge, no neighbour peeking in, one swipe moves one project.
   @media (max-width: 768px) {
     .deck {
       display: flex;
-      gap: 12px;
+      gap: 0;
       margin: 0 -20px;
-      padding: 0 20px;
       overflow-x: auto;
       overscroll-behavior-x: contain;
       scroll-snap-type: x mandatory;
-      scroll-padding: 0 20px;
       scroll-behavior: smooth;
       scrollbar-width: none;
 
@@ -109,9 +107,20 @@
     }
 
     .plate {
-      flex: 0 0 min(84vw, 420px);
-      height: clamp(380px, 110vw, 460px);
+      flex: 0 0 100%;
+      height: max(520px, calc(100svh - 88px));
       scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+
+    .plate__body {
+      border: none;
+      border-radius: 0;
+    }
+
+    // Room at the bottom for the counter and arrows laid over the slide.
+    .plate__link {
+      padding-bottom: 96px;
     }
   }
 }
@@ -267,14 +276,24 @@
   overflow-wrap: anywhere;
 }
 
+.carousel {
+  position: relative;
+}
+
+// Laid over the bottom of the current slide.
 .slider {
   display: none;
 
   @media (max-width: 768px) {
+    position: absolute;
+    right: 20px;
+    bottom: 24px;
+    left: 20px;
+    // Above the plates, which carry inline z-indexes for the desktop stack.
+    z-index: 20;
     display: flex;
     align-items: center;
     gap: 16px;
-    margin-top: 20px;
   }
 }
 
@@ -294,7 +313,7 @@
   height: 2px;
   overflow: hidden;
   border-radius: 2px;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .slider__fill {
@@ -315,9 +334,10 @@
   place-items: center;
   width: 44px;
   height: 44px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 50%;
-  background: transparent;
+  background: rgba(6, 6, 10, 0.45);
+  backdrop-filter: blur(8px);
   color: var(--color-paper);
   cursor: pointer;
   transition:
