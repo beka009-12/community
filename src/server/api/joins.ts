@@ -34,6 +34,17 @@ export function idleMembers(roster: MemberListItem[], projects: ProjectDetail[])
   return roster.filter((member) => member.status === "Active" && !busy.has(member.id));
 }
 
+// Everyone who leads at least one project, once, in order of first appearance.
+export function teamLeads(projects: ProjectDetail[], roster: MemberListItem[]): MemberListItem[] {
+  const leads = new Map<number, MemberListItem>();
+  for (const project of projects) {
+    for (const { member, role } of withPeople(project.members, roster)) {
+      if (role === "Team_Lead" && !leads.has(member.id)) leads.set(member.id, member);
+    }
+  }
+  return [...leads.values()];
+}
+
 export const projectTeams = (projects: ProjectDetail[], roster: MemberListItem[]): ProjectTeam[] =>
   projects
     .map((project) => ({ project, people: withPeople(project.members, roster) }))

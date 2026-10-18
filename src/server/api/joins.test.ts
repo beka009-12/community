@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { idleMembers, projectTeams, projectsWithoutLead, splitSkills, withPeople } from "./joins";
+import { idleMembers, projectTeams, projectsWithoutLead, splitSkills, teamLeads, withPeople } from "./joins";
 import type { MemberListItem, ProjectDetail } from "./schemas";
 
 const person = (id: number, status: MemberListItem["status"] = "Active"): MemberListItem => ({
@@ -71,5 +71,31 @@ describe("splitSkills", () => {
   it("splits on commas and newlines, trims and dedupes", () => {
     expect(splitSkills("React, TypeScript\nReact ,, Next.js ")).toEqual(["React", "TypeScript", "Next.js"]);
     expect(splitSkills("")).toEqual([]);
+  });
+});
+
+describe("teamLeads", () => {
+  it("lists a person who leads two projects once", () => {
+    const leads = teamLeads(
+      [
+        project(1, [{ id: 1, user: 2, role: "Team_Lead" }]),
+        project(2, [
+          { id: 2, user: 2, role: "Team_Lead" },
+          { id: 3, user: 1, role: "Team_Lead" },
+        ]),
+      ],
+      roster,
+    );
+    expect(leads.map((member) => member.id)).toEqual([2, 1]);
+  });
+
+  it("skips developers", () => {
+    const leads = teamLeads([project(1, [{ id: 1, user: 3, role: "Developer" }])], roster);
+    expect(leads).toEqual([]);
+  });
+
+  it("skips a lead missing from the roster", () => {
+    const leads = teamLeads([project(1, [{ id: 1, user: 99, role: "Team_Lead" }])], roster);
+    expect(leads).toEqual([]);
   });
 });
