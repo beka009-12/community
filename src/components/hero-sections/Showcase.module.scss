@@ -1,0 +1,249 @@
+.showcase {
+  padding-top: clamp(96px, 12vw, 160px);
+}
+
+.showcase__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 48px;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+}
+
+.showcase__title {
+  max-width: 16ch;
+  font-family: var(--font-display);
+  font-size: clamp(32px, 4.6vw, 64px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.showcase__lead {
+  max-width: 52ch;
+  margin-top: 20px;
+  color: var(--color-mist);
+  font-size: 18px;
+  line-height: 1.55;
+
+  @media (max-width: 640px) {
+    font-size: 16px;
+  }
+}
+
+// Desktop: the stage stays pinned while the track scrolls past it, one
+// 75vh stretch per plate transition. Below 1024px, with reduced motion or
+// a single project it is a plain list — `!important` beats the inline
+// transforms motion writes, so nothing is left translated off-screen.
+@mixin flat {
+  height: auto;
+
+  .stage {
+    position: static;
+    height: auto;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .deck {
+    display: grid;
+    gap: 16px;
+    height: auto;
+    clip-path: none;
+  }
+
+  .plate {
+    position: relative;
+    inset: auto;
+    height: clamp(300px, 62vw, 520px);
+    transform: none !important;
+  }
+
+  .plate__body {
+    transform: none !important;
+    opacity: 1 !important;
+    box-shadow: none;
+  }
+}
+
+.track {
+  position: relative;
+  height: calc(100vh + var(--steps) * 75vh);
+
+  @media (max-width: 1024px), (prefers-reduced-motion: reduce) {
+    @include flat;
+  }
+
+  &.track--static {
+    @include flat;
+  }
+}
+
+.stage {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  height: 100vh;
+  padding: 72px 0 32px;
+  overflow: hidden;
+
+  > :global(.container) {
+    width: 100%;
+  }
+}
+
+// Clipped at the bottom so waiting plates rise out of the deck's edge;
+// open at the top so a covered plate can peek out above the next one.
+.deck {
+  position: relative;
+  height: min(calc(100vh - 140px), 720px);
+  clip-path: inset(-80px -80px 0 -80px);
+}
+
+.plate {
+  position: absolute;
+  inset: 0;
+}
+
+.plate__body {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 28px;
+  background: var(--color-surface);
+  box-shadow: 0 -24px 48px rgba(0, 0, 0, 0.45);
+  transform-origin: top center;
+
+  @media (max-width: 640px) {
+    border-radius: 20px;
+  }
+}
+
+.plate__link {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: clamp(24px, 3.4vw, 48px);
+  color: var(--color-paper);
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -4px;
+    border-radius: inherit;
+  }
+}
+
+// Keeps the name readable once real preview images replace the gradient.
+.plate__shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(6, 6, 10, 0.72), transparent 55%);
+  pointer-events: none;
+}
+
+.plate__top {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.plate__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.plate__category {
+  color: rgba(245, 245, 247, 0.72);
+  font-size: 14px;
+}
+
+.plate__open {
+  flex-shrink: 0;
+  padding: 10px 18px;
+  border: 1px solid rgba(245, 245, 247, 0.24);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+
+  .plate__link:hover &,
+  .plate__link:focus-visible & {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-ink);
+  }
+
+  @media (max-width: 640px) {
+    display: none;
+  }
+}
+
+.plate__name {
+  position: relative;
+  max-width: 14ch;
+  font-family: var(--font-display);
+  font-size: clamp(32px, 6vw, 104px);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+
+// Status color carries meaning, but the label text is what's read.
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: rgba(6, 6, 10, 0.55);
+  backdrop-filter: blur(8px);
+  font-size: 13px;
+  font-weight: 500;
+
+  &::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+}
+
+.status--positive {
+  color: var(--color-signal);
+}
+
+.status--accent {
+  color: var(--color-accent);
+}
+
+.status--neutral {
+  color: var(--color-paper);
+}
+
+.status--muted {
+  color: rgba(245, 245, 247, 0.6);
+}
+
+.status--danger {
+  color: var(--color-danger);
+}
