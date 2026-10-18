@@ -1,0 +1,127 @@
+.doors {
+  padding: clamp(112px, 14vw, 200px) 0 clamp(80px, 10vw, 140px);
+}
+
+.doors__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.door {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  // Outer edges align with the page's content edge; the space sits on the
+  // side of the dividing line.
+  padding: clamp(40px, 5vw, 72px) clamp(24px, 4vw, 56px) clamp(40px, 5vw, 72px) 0;
+
+  & + & {
+    padding-right: 0;
+    padding-left: clamp(24px, 4vw, 56px);
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  @media (max-width: 1024px) {
+    &,
+    & + & {
+      padding-right: 0;
+      padding-left: 0;
+    }
+
+    & + & {
+      border-left: none;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+  }
+
+  // The light that comes on when this door is the one being considered.
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(80% 70% at 30% 0%, rgba(86, 187, 255, 0.14), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  &:hover::before,
+  &:focus-within::before {
+    opacity: 1;
+  }
+
+  > * {
+    position: relative;
+  }
+}
+
+.door__who {
+  margin-bottom: 20px;
+  color: var(--color-accent);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.door__title {
+  max-width: 14ch;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.4vw, 48px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+
+.door__text {
+  max-width: 40ch;
+  margin-top: 16px;
+  color: var(--color-mist);
+  font-size: 17px;
+  line-height: 1.55;
+
+  @media (max-width: 640px) {
+    font-size: 16px;
+  }
+}
+
+.door__points {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+  list-style: none;
+
+  li {
+    position: relative;
+    max-width: 44ch;
+    padding-left: 18px;
+    color: #c9ccd6;
+    font-size: 16px;
+    line-height: 1.5;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 9px;
+      left: 0;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-accent);
+    }
+  }
+}
+
+// Pushed to the bottom so both buttons share a line when the halves sit
+// side by side; the element above keeps a minimum gap.
+.door__cta {
+  margin-top: auto;
+}
+
+.door > :nth-last-child(2) {
+  margin-bottom: 32px;
+}

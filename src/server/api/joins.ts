@@ -1,4 +1,4 @@
-import type { MembershipRole } from "@/src/lib/api-enums";
+import type { MembershipRole, ProjectStatus } from "@/src/lib/api-enums";
 import type { MemberListItem, Membership, ProjectDetail, TeamDetail } from "./schemas";
 
 export interface TeamPerson {
@@ -32,6 +32,17 @@ export const projectsWithoutLead = (projects: ProjectDetail[]): ProjectDetail[] 
 export function idleMembers(roster: MemberListItem[], projects: ProjectDetail[]): MemberListItem[] {
   const busy = new Set(projects.flatMap((project) => project.members.map((row) => row.user)));
   return roster.filter((member) => member.status === "Active" && !busy.has(member.id));
+}
+
+// Everyone who leads at least one project, once, in order of first appearance.
+export function teamLeads(projects: ProjectDetail[], roster: MemberListItem[]): MemberListItem[] {
+  const leads = new Map<number, MemberListItem>();
+  for (const project of projects) {
+    for (const { member, role } of withPeople(project.members, roster)) {
+      if (role === "Team_Lead" && !leads.has(member.id)) leads.set(member.id, member);
+    }
+  }
+  return [...leads.values()];
 }
 
 export const projectTeams = (projects: ProjectDetail[], roster: MemberListItem[]): ProjectTeam[] =>
@@ -75,3 +86,28 @@ export const myTeams = (teams: TeamDetail[], userId: number): MyTeam[] =>
     const role = roleOf(team.members, userId);
     return role ? [{ team, role }] : [];
   });
+
+export interface LeadProject {
+  id: number;
+  name: string;
+  status: ProjectStatus;
+  role: MembershipRole;
+}
+
+export interface LeadProfile {
+  member: MemberListItem;
+  bio: string;
+  projects: LeadProject[];
+}
+
+// A slim, serialisable shape for the homepage's client-side leads section.
+export const leadProfile = (member: MemberListItem, bio: string, projects: ProjectDetail[]): LeadProfile => ({
+  member,
+  bio,
+  projects: myProjects(projects, member.id).map(({ project, role }) => ({
+    id: project.id,
+    name: project.name,
+    status: project.project_status,
+    role,
+  })),
+});

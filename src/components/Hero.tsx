@@ -1,26 +1,47 @@
 import Welcome from "./hero-sections/Welcome";
-import Stats from "./hero-sections/Stats";
-import ServicesPreview from "./hero-sections/ServicesPreview";
-import Portfolio from "./hero-sections/Portfolio";
-import Pillars from "./hero-sections/Pillars";
-import CommunityPreview from "./hero-sections/CommunityPreview";
-import { getProjects } from "@/src/server/api/projects";
+import Showcase from "./hero-sections/Showcase";
+import ServiceRows from "./hero-sections/ServiceRows";
+import Process from "./hero-sections/Process";
+import StatsStatement from "./hero-sections/StatsStatement";
+import Leads from "./hero-sections/Leads";
+import Doors from "./hero-sections/Doors";
+import { getProjectsWithMembers } from "@/src/server/api/projects";
 import { getStats } from "@/src/server/api/stats";
-import Faq from "./hero-sections/Faq";
-import FinalCta from "./hero-sections/FinalCta";
+import { getTeamLeads } from "@/src/server/api/home";
+
+// Keeps the company path to the services and «Заказать проект» short as
+// the catalogue grows; «Все проекты» carries the rest.
+const SHOWCASE_LIMIT = 6;
 
 const Home = async () => {
-  const [stats, projects] = await Promise.all([getStats(), getProjects()]);
+  const [stats, projects, leads] = await Promise.all([
+    getStats(),
+    // Details carry the description; the leads reuse the same cached requests.
+    getProjectsWithMembers(),
+    getTeamLeads(),
+  ]);
   return (
     <div>
       <Welcome />
-      <Stats stats={stats} />
-      <ServicesPreview />
-      {projects.length > 0 && <Portfolio projects={projects} />}
-      <Pillars />
-      <CommunityPreview />
-      <Faq />
-      <FinalCta />
+      {projects.length > 0 && (
+        <Showcase
+          projects={projects
+            .slice(0, SHOWCASE_LIMIT)
+            .map(({ id, name, category, project_status, preview_image, description }) => ({
+              id,
+              name,
+              category,
+              project_status,
+              preview_image,
+              description,
+            }))}
+        />
+      )}
+      <StatsStatement stats={stats} />
+      <ServiceRows />
+      <Process />
+      {leads.length > 0 && <Leads leads={leads} />}
+      <Doors />
     </div>
   );
 };
