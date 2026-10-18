@@ -68,8 +68,11 @@
 
   .plate__body {
     transform: none !important;
-    opacity: 1 !important;
     box-shadow: none;
+  }
+
+  .plate__dim {
+    opacity: 0 !important;
   }
 }
 
@@ -142,6 +145,14 @@
     outline-offset: -4px;
     border-radius: inherit;
   }
+}
+
+.plate__dim {
+  position: absolute;
+  inset: 0;
+  background: var(--color-ink);
+  opacity: 0;
+  pointer-events: none;
 }
 
 // Keeps the name readable once real preview images replace the gradient.

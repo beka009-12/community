@@ -7,11 +7,13 @@ import Button from "@/src/ui/Button";
 import ProjectCover from "@/src/ui/ProjectCover";
 import { PROJECT_STATUS_LABELS, PROJECT_STATUS_TONE } from "@/src/lib/api-labels";
 import type { ProjectListItem } from "@/src/server/api/schemas";
+import { plateRanges, type Range } from "./showcase-ranges";
 import scss from "./Showcase.module.scss";
 
-// How far a covered plate shrinks, fades and lifts so its top edge peeks
-// out above the plate that covers it.
-const COVERED = { scale: 0.94, opacity: 0.5, lift: -28 };
+// How far a covered plate shrinks, darkens and lifts so its top edge peeks
+// out above the plate that covers it. Darkening is an overlay, not opacity:
+// a translucent plate would let the plates stacked under it show through.
+const COVERED = { scale: 0.94, dim: 0.5, lift: -28 };
 
 interface PlateProps {
   project: ProjectListItem;
@@ -21,23 +23,23 @@ interface PlateProps {
   onFocus: (index: number) => void;
 }
 
-// Plate `index` slides in over segment index-1 and gets covered over
-// segment index; with one segment per transition, `steps` = plates - 1.
-const Plate: FC<PlateProps> = ({ project, index, steps, progress, onFocus }) => {
-  const segment = 1 / Math.max(steps, 1);
-  const enter = [(index - 1) * segment, index * segment];
-  const cover = [index * segment, (index + 1) * segment];
+// Hooks can't be skipped, so a plate without a range maps the whole
+// progress onto one constant value.
+const STILL: Range = [0, 1];
 
-  const y = useTransform(progress, enter, ["100%", "0%"]);
-  const scale = useTransform(progress, cover, [1, COVERED.scale]);
-  const opacity = useTransform(progress, cover, [1, COVERED.opacity]);
-  const lift = useTransform(progress, cover, [0, COVERED.lift]);
+const Plate: FC<PlateProps> = ({ project, index, steps, progress, onFocus }) => {
+  const { enter, cover } = plateRanges(index, steps);
+
+  const y = useTransform(progress, enter ?? STILL, enter ? ["100%", "0%"] : ["0%", "0%"]);
+  const scale = useTransform(progress, cover ?? STILL, cover ? [1, COVERED.scale] : [1, 1]);
+  const dim = useTransform(progress, cover ?? STILL, cover ? [0, COVERED.dim] : [0, 0]);
+  const lift = useTransform(progress, cover ?? STILL, cover ? [0, COVERED.lift] : [0, 0]);
 
   const tone = PROJECT_STATUS_TONE[project.project_status];
 
   return (
     <motion.div className={scss.plate} style={{ y, zIndex: index + 1 }}>
-      <motion.div className={scss.plate__body} style={{ scale, opacity, y: lift }}>
+      <motion.div className={scss.plate__body} style={{ scale, y: lift }}>
         <Link
           href={`/projects/${project.id}`}
           className={scss.plate__link}
@@ -60,6 +62,7 @@ const Plate: FC<PlateProps> = ({ project, index, steps, progress, onFocus }) => 
 
           <h3 className={scss.plate__name}>{project.name}</h3>
         </Link>
+        <motion.span className={scss.plate__dim} style={{ opacity: dim }} aria-hidden="true" />
       </motion.div>
     </motion.div>
   );
