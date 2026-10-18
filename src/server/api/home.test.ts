@@ -48,4 +48,15 @@ describe("getTeamLeads", () => {
     await expect(getTeamLeads()).resolves.toEqual([]);
     expect(log).toHaveBeenCalled();
   });
+
+  it("lets Next's dynamic-rendering signal through instead of logging it", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const dynamicUsage = Object.assign(new Error("Dynamic server usage"), {
+      digest: "DYNAMIC_SERVER_USAGE",
+    });
+    vi.mocked(getPublicRoster).mockRejectedValue(dynamicUsage);
+    vi.mocked(getProjectsWithMembers).mockResolvedValue([project]);
+    await expect(getTeamLeads()).rejects.toBe(dynamicUsage);
+    expect(log).not.toHaveBeenCalled();
+  });
 });

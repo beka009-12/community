@@ -1,4 +1,5 @@
 import "server-only";
+import { unstable_rethrow } from "next/navigation";
 import { teamLeads } from "./joins";
 import { getPublicRoster } from "./members";
 import { getProjectsWithMembers } from "./projects";
@@ -11,6 +12,8 @@ export async function getTeamLeads(): Promise<MemberListItem[]> {
     const [roster, projects] = await Promise.all([getPublicRoster(), getProjectsWithMembers()]);
     return teamLeads(projects, roster);
   } catch (error) {
+    // Next signals dynamic rendering, redirects etc. by throwing: not a failure.
+    unstable_rethrow(error);
     console.error("Failed to load team leads for the homepage", error);
     return [];
   }
