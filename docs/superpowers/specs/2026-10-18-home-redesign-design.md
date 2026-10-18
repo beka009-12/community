@@ -41,7 +41,7 @@ click on a first visit. So: Apple-like restraint, explicit calls to action.
 
 - The hero (`src/components/hero-sections/Welcome.tsx` and its SCSS): untouched,
   including its copy (which talks about hiring — the user chose to keep it)
-  and its hardcoded «120+ специалистов». The numbers tile below still shows
+  and its hardcoded «120+ специалистов». The numbers sentence below still shows
   the live API values (12 members today): the user chose real data over
   matching the hero, knowing the two numbers differ.
 - Header, footer, other pages, the admin and the cabinet.
@@ -109,6 +109,17 @@ renders, in order:
   always opens on its first tab — deep-linking each row to its own tab would
   mean changing the About page, which is out of scope (designer's call).
 
+### 1b. Numbers as one sentence (revised 2026-10-18)
+
+Right after the showcase, as its conclusion — who builds all this. One large
+sentence in the display font, words in `--color-mist`, the live numbers from
+`getStats()` in `--color-paper` and counting up (`useCountUp`):
+«**12** участников строят **5** собственных продуктов. **4** компании уже
+работают с нами.» Nouns and verbs agree with each count (`statsSentence` in
+`src/lib/stats-sentence.ts`); the companies sentence is dropped at 0, the
+products clause becomes «в сообществе» at 0 products, nothing renders at 0
+members. The section carries `id="community"`.
+
 ### 3. Process — «Как мы работаем»
 
 - Heading «Как мы работаем»; the four steps from today's `Pillars`
@@ -117,53 +128,37 @@ renders, in order:
   shared hairline. Step numbers 1–4 are kept — this is a real sequence.
 - The hairline above the steps fills with the accent colour as the section
   scrolls through the viewport (scroll-linked).
-- The quality note from `Pillars` («Каждый этап проходит через код-ревью…»)
-  may stay as one line under the row — builder's call.
+- **Team leads (revised 2026-10-18):** under the steps, «Каждый этап проверяют
+  тимлиды сообщества.» followed by the real team leads as pill links to
+  `/team/[id]` (avatar or initials, full name, «Тимлид, <position label>»).
+  They sit here because they are the review every step goes through — the
+  user found a separate leads tile unexplained. Leads are everyone holding
+  `Team_Lead` in any project (`getTeamLeads`, `src/server/api/home.ts`),
+  de-duplicated; without leads only the sentence shows.
 
-### 4. Team leads + numbers
+### 4. Closing doors (revised 2026-10-18)
 
-Two tiles side by side (lead tile wider):
+The light student band and the separate final call were merged: the user
+found the band a repeat of the final call and the white background jarring
+against the black/dark-blue palette. One dark full-width band, split by a
+hairline into two halves (stacked ≤1024px), no cards:
 
-- **«Кто ведёт проекты»** — lead: «Тимлиды принимают архитектурные решения и
-  проверяют код каждого участника.» Below it, the real team leads:
-  everyone who holds the `Team_Lead` membership role in any project
-  (`getProjectsWithMembers()` + `getPublicRoster()`, same join the `/team` page
-  uses — `withPeople` / `projectTeams` in `src/server/api/joins.ts`),
-  de-duplicated by member id. Each row: avatar (photo if `avatar`, otherwise
-  initials), full name, «Тимлид, <position label>»; the row links to
-  `/team/[id]`. No tabs, no placeholder photo.
-- **Numbers** — the three values from `getStats()` (members, projects,
-  companies) with correctly pluralised labels (`plural()`), counting up when
-  they enter the viewport (`useCountUp`).
-- If there are no team leads, the numbers tile takes the full width.
-
-### 5. For students — light band, «Хочешь в команду?»
-
-- The only light section on the page: `--color-paper` background, ink text,
-  full bleed. This contrast is what separates the student path from the
-  company path.
-- Heading «Хочешь в команду?». Lead: «Для студентов и начинающих
-  разработчиков, которые хотят опыт на настоящих проектах.»
-- Three points (title + one line):
-  - «Сразу в работу» — «Начинаешь с задачи в одном из наших продуктов, а не с
-    тестового задания в стол.»
-  - «Тимлид рядом» — «Код проходит ревью, решения объясняют.»
-  - «Путь к найму» — «Компании, которые приходят к нам, видят твою работу.»
-- Button «Подать заявку в Telegram» (dark on light), external link to the
-  Telegram entry of `SOCIAL_LINKS` in `src/data/socials.ts` (currently the
-  placeholder `https://t.me/`; the user will replace it there).
-
-### 6. Final call — «Есть задача или хочешь в команду?»
-
-- Heading «Есть задача или хочешь в команду?». Line: «Компаниям: заявка на
-  проект. Студентам: заявка в сообщество.»
-- Two buttons: primary «Заказать проект» → `/contact`; ghost
-  «Вступить в сообщество» → the same Telegram link.
+- **Компаниям** — «Есть задача — соберём под неё команду», «Сайт, веб-система,
+  бот или AI-интеграция. Расскажите о задаче, и мы предложим следующий шаг.»,
+  primary «Заказать проект» → `/contact`.
+- **Студентам** — «Хочешь в команду?», «Для студентов и начинающих
+  разработчиков, которые хотят опыт на настоящих проектах.», three dotted
+  points (без тестового в стол / тимлид проверяет код / компании видят твою
+  работу), ghost «Подать заявку в Telegram» → the Telegram entry of
+  `SOCIAL_LINKS` (`TELEGRAM_URL`).
+- The half under the pointer or keyboard focus lights up with a soft accent
+  glow. Outer edges align with the page's content edge.
 
 ### Removed from the homepage
 
 Stats (as a separate section), ServicesPreview, Portfolio (card deck),
-Pillars, CommunityPreview, Faq, FinalCta. Their files in
+Pillars, CommunityPreview, Faq, FinalCta — and, after the 2026-10-18
+revision, the team-leads/numbers tiles and the light student band. Their files in
 `src/components/hero-sections/` are deleted if nothing else imports them
 (currently only `Hero.tsx` does). `src/animation/MagicBento.*` stays — the
 About page still uses it.
@@ -172,17 +167,16 @@ About page still uses it.
 
 - Palette: existing tokens in `app/globals.scss` only — `--color-ink`
   background, `--color-surface` / `--color-surface-2` tiles, `--color-paper`
-  text and the student band, `--color-mist` secondary text, `--color-accent`,
-  `--color-signal` for "Completed".
+  text, `--color-mist` secondary text, `--color-accent`, `--color-signal` for
+  "Completed". No light sections.
 - Type: `--font-display` (Unbounded) for section headings, plate names and
   service titles; `--font-body` (Inter) for everything else. Headings are large
   and left-aligned (consistent with the hero). No all-caps eyebrows above
   headings, no middle-dot meta strings, no arrows appended to button text.
 - Rhythm: generous vertical space between sections; hairline dividers instead
-  of boxes for services and process; rounded tiles only for the showcase
-  plates and the team-leads/numbers pair.
-- Buttons: the existing `src/ui/Button` (primary / ghost). The dark-on-light
-  button in the student band may need a variant or a local override.
+  of boxes for services, process and the closing doors; rounded tiles only
+  for the showcase plates.
+- Buttons: the existing `src/ui/Button` (primary / ghost).
 
 ## Motion
 
@@ -205,8 +199,8 @@ conventions already in the repo.
 
 - ≤ 1024px (same breakpoint the hero uses): the showcase is a plain vertical
   list of plates, no pinning; services rows stack title over description;
-  process steps go to one column (2×2 is acceptable on tablet); the two
-  team-lead/number tiles stack; student points stack.
+  process steps go to one column (2×2 is acceptable on tablet); the closing
+  doors stack.
 - No horizontal scroll at 375px.
 
 ## Data and failure behaviour
@@ -216,20 +210,21 @@ conventions already in the repo.
   `getPublicRoster()` for the team leads. `getProjectsWithMembers` costs one
   request per project (documented backend limitation) and is already cached by
   `react` `cache` / the public fetch cache shared with `/team`.
-- No projects → no showcase. No team leads → numbers tile only.
+- No projects → no showcase. No team leads → the process review line
+  without people.
 - Stats and the project list are required, as today: if they fail, the
   `(site)` error boundary shows.
 - The team-leads data is secondary (members + one request per project): if
-  it fails, the error is logged and the tile falls back to the "no team leads"
-  state, so a secondary tile never takes the hero and the rest of the page
-  down (designer's call). Covered by a test.
+  it fails, the error is logged and the page falls back to the "no team
+  leads" state, so secondary data never takes the hero and the rest of the
+  page down (designer's call). Covered by a test.
 
 ## Anchors kept for the footer
 
 `src/layout/footer/Footer.tsx` links to `/#portfolio`, `/#pillars` and
 `/#community`, which today live on sections this redesign removes. To keep
 the footer working without editing it, the new sections carry those ids:
-showcase → `id="portfolio"`, process → `id="pillars"`, team-leads tile →
+showcase → `id="portfolio"`, process → `id="pillars"`, numbers sentence →
 `id="community"` (designer's call).
 
 ## Constraints
@@ -243,8 +238,8 @@ showcase → `id="portfolio"`, process → `id="pillars"`, team-leads tile →
   the repo: components `PascalCase.tsx`, other modules `kebab-case.ts`.
 - TypeScript strict, no `any`; typed props.
 - Accessibility: visible focus on every link/button, headings in order
-  (`h2` per section, `h3` inside), images with alt text, AA contrast on both
-  the dark sections and the light student band.
+  (`h2` per section, `h3` inside), images with alt text, AA contrast on
+  the dark sections.
 
 ## Left to the builder
 
