@@ -119,10 +119,13 @@ renders, in order:
   Screen readers get «Статус: …». Shared `src/ui/ProjectPath`, also used in
   the team-leads section. Replaces the dot-and-pill status chip, which the
   user found AI-generic.
-- **≤768px slider:** the deck becomes a horizontal scroll-snap row bleeding
-  to the screen edges, one plate per snap with the next peeking in; under it
-  «N / M», a progress line and 44×44 previous/next buttons (disabled at the
-  ends). On slides «Открыть проект» sits under the description.
+- **≤768px full-screen slides** (user: "на весь экран, не слайд со
+  скролом", then "свайп вбок, как сторис"): one project fills the screen edge
+  to edge (about the viewport height, no neighbour peeking in); a swipe or
+  the 44×44 previous/next buttons move exactly one project (scroll-snap with
+  `scroll-snap-stop: always`). «N / M», a progress line and the buttons are
+  laid over the bottom of the slide; «Открыть проект» sits under the
+  description.
   769–1024px keeps the plain vertical list; above that, the pinned stack.
 
 ### 1b. Numbers as one sentence (revised 2026-10-18)
