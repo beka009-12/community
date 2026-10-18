@@ -2,9 +2,8 @@ import Welcome from "./hero-sections/Welcome";
 import Showcase from "./hero-sections/Showcase";
 import ServiceRows from "./hero-sections/ServiceRows";
 import Process from "./hero-sections/Process";
-import LeadsAndNumbers from "./hero-sections/LeadsAndNumbers";
-import JoinBand from "./hero-sections/JoinBand";
-import Closing from "./hero-sections/Closing";
+import StatsStatement from "./hero-sections/StatsStatement";
+import Doors from "./hero-sections/Doors";
 import { getProjects } from "@/src/server/api/projects";
 import { getStats } from "@/src/server/api/stats";
 import { getTeamLeads } from "@/src/server/api/home";
@@ -23,11 +22,10 @@ const Home = async () => {
     <div>
       <Welcome />
       {projects.length > 0 && <Showcase projects={projects.slice(0, SHOWCASE_LIMIT)} />}
+      <StatsStatement stats={stats} />
       <ServiceRows />
-      <Process />
-      <LeadsAndNumbers leads={leads} stats={stats} />
-      <JoinBand />
-      <Closing />
+      <Process leads={leads} />
+      <Doors />
     </div>
   );
 };
