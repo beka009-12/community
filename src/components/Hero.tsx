@@ -5,7 +5,7 @@ import Process from "./hero-sections/Process";
 import StatsStatement from "./hero-sections/StatsStatement";
 import Leads from "./hero-sections/Leads";
 import Doors from "./hero-sections/Doors";
-import { getProjects } from "@/src/server/api/projects";
+import { getProjectsWithMembers } from "@/src/server/api/projects";
 import { getStats } from "@/src/server/api/stats";
 import { getTeamLeads } from "@/src/server/api/home";
 
@@ -16,13 +16,27 @@ const SHOWCASE_LIMIT = 6;
 const Home = async () => {
   const [stats, projects, leads] = await Promise.all([
     getStats(),
-    getProjects(),
+    // Details carry the description; the leads reuse the same cached requests.
+    getProjectsWithMembers(),
     getTeamLeads(),
   ]);
   return (
     <div>
       <Welcome />
-      {projects.length > 0 && <Showcase projects={projects.slice(0, SHOWCASE_LIMIT)} />}
+      {projects.length > 0 && (
+        <Showcase
+          projects={projects
+            .slice(0, SHOWCASE_LIMIT)
+            .map(({ id, name, category, project_status, preview_image, description }) => ({
+              id,
+              name,
+              category,
+              project_status,
+              preview_image,
+              description,
+            }))}
+        />
+      )}
       <StatsStatement stats={stats} />
       <ServiceRows />
       <Process />

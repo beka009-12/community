@@ -87,6 +87,33 @@
   &.track--static {
     @include flat;
   }
+
+  // Phones and small tablets: the flat list turns into a swipeable row,
+  // bleeding to the screen edges so the next plate peeks in.
+  @media (max-width: 768px) {
+    .deck {
+      display: flex;
+      gap: 12px;
+      margin: 0 -20px;
+      padding: 0 20px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scroll-padding: 0 20px;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+
+    .plate {
+      flex: 0 0 min(84vw, 420px);
+      height: clamp(380px, 110vw, 460px);
+      scroll-snap-align: start;
+    }
+  }
 }
 
 .stage {
@@ -135,12 +162,27 @@
 
 .plate__link {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  display: grid;
+  grid-template-areas:
+    "path open"
+    "bottom bottom";
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
   height: 100%;
   padding: clamp(24px, 3.4vw, 48px);
   color: var(--color-paper);
+
+  // Slides are too narrow for the path and the button on one line.
+  @media (max-width: 768px) {
+    grid-template-areas:
+      "path"
+      "bottom"
+      "open";
+    grid-template-rows: auto 1fr auto;
+    grid-template-columns: 1fr;
+    padding: 22px;
+  }
 
   &:focus-visible {
     outline: 2px solid var(--color-accent);
@@ -165,19 +207,20 @@
   pointer-events: none;
 }
 
-.plate__top {
+.plate__path {
   position: relative;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
+  grid-area: path;
+  align-self: center;
+  overflow: hidden;
 }
 
-.plate__meta {
+.plate__bottom {
+  position: relative;
+  grid-area: bottom;
+  align-self: end;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 16px;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .plate__category {
@@ -185,8 +228,17 @@
   font-size: 14px;
 }
 
+.plate__description {
+  max-width: 48ch;
+  color: rgba(245, 245, 247, 0.8);
+  font-size: clamp(15px, 1.3vw, 18px);
+  line-height: 1.5;
+}
+
 .plate__open {
-  flex-shrink: 0;
+  position: relative;
+  grid-area: open;
+  justify-self: start;
   padding: 10px 18px;
   border: 1px solid rgba(245, 245, 247, 0.24);
   border-radius: 999px;
@@ -203,14 +255,9 @@
     background: var(--color-accent);
     color: var(--color-ink);
   }
-
-  @media (max-width: 640px) {
-    display: none;
-  }
 }
 
 .plate__name {
-  position: relative;
   max-width: 14ch;
   font-family: var(--font-display);
   font-size: clamp(32px, 6vw, 104px);
@@ -220,43 +267,79 @@
   overflow-wrap: anywhere;
 }
 
-// Status color carries meaning, but the label text is what's read.
-.status {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 14px;
-  border-radius: 999px;
-  background: rgba(6, 6, 10, 0.55);
-  backdrop-filter: blur(8px);
-  font-size: 13px;
-  font-weight: 500;
+.slider {
+  display: none;
 
-  &::before {
-    content: "";
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: currentColor;
+  @media (max-width: 768px) {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 20px;
   }
 }
 
-.status--positive {
-  color: var(--color-signal);
+.slider__count {
+  color: var(--color-mist);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+
+  b {
+    color: var(--color-paper);
+    font-weight: 600;
+  }
 }
 
-.status--accent {
-  color: var(--color-accent);
+.slider__bar {
+  flex: 1;
+  height: 2px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.12);
 }
 
-.status--neutral {
+.slider__fill {
+  display: block;
+  height: 100%;
+  background: var(--color-accent);
+  transform-origin: left center;
+  transition: transform 0.3s ease;
+}
+
+.slider__arrows {
+  display: flex;
+  gap: 8px;
+}
+
+.slider__arrow {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  background: transparent;
   color: var(--color-paper);
-}
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    opacity 0.2s ease;
 
-.status--muted {
-  color: rgba(245, 245, 247, 0.6);
-}
+  svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
 
-.status--danger {
-  color: var(--color-danger);
+  &:hover:not(:disabled) {
+    border-color: var(--color-accent);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
 }

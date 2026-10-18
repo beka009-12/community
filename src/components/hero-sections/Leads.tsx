@@ -5,14 +5,10 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import Avatar from "@/src/ui/Avatar";
 import Button from "@/src/ui/Button";
+import ProjectPath from "@/src/ui/ProjectPath";
 import { useSafeMotion } from "@/src/hooks/use-safe-motion";
 import { springs } from "@/src/lib/motion-tokens";
-import {
-  MEMBERSHIP_ROLE_LABELS,
-  PROJECT_STATUS_LABELS,
-  PROJECT_STATUS_TONE,
-  positionLabel,
-} from "@/src/lib/api-labels";
+import { MEMBERSHIP_ROLE_LABELS, positionLabel } from "@/src/lib/api-labels";
 import { fullName } from "@/src/lib/people";
 import { plural } from "@/src/lib/plural";
 import type { LeadProfile } from "@/src/server/api/joins";
@@ -97,11 +93,7 @@ const Leads: FC<{ leads: LeadProfile[] }> = ({ leads }) => {
                             <span className={scss.project__role}>
                               {MEMBERSHIP_ROLE_LABELS[project.role]}
                             </span>
-                            <span
-                              className={`${scss.status} ${scss[`status--${PROJECT_STATUS_TONE[project.status]}`]}`}
-                            >
-                              {PROJECT_STATUS_LABELS[project.status]}
-                            </span>
+                            <ProjectPath status={project.status} className={scss.project__path} />
                           </Link>
                         </li>
                       ))}

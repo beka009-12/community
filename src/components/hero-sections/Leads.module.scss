@@ -158,12 +158,13 @@
   list-style: none;
 }
 
+// Name and role on the first line, the project's path under them.
 .project {
   display: grid;
-  grid-template-columns: 1fr auto auto;
-  align-items: center;
-  gap: 16px;
-  padding: 12px 0;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 6px 16px;
+  padding: 14px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 15px;
 
@@ -171,14 +172,12 @@
   &:focus-visible .project__name {
     color: var(--color-accent);
   }
+}
 
-  @media (max-width: 640px) {
-    grid-template-columns: 1fr auto;
-
-    .project__role {
-      display: none;
-    }
-  }
+.project__path {
+  grid-column: 1 / -1;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .project__name {
@@ -193,44 +192,4 @@
 
 .info__cta {
   margin-top: 28px;
-}
-
-// Status color carries meaning, but the label text is what's read.
-.status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  font-size: 13px;
-  white-space: nowrap;
-
-  &::before {
-    content: "";
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: currentColor;
-  }
-}
-
-.status--positive {
-  color: var(--color-signal);
-}
-
-.status--accent {
-  color: var(--color-accent);
-}
-
-.status--neutral {
-  color: var(--color-paper);
-}
-
-.status--muted {
-  color: rgba(245, 245, 247, 0.6);
-}
-
-.status--danger {
-  color: var(--color-danger);
 }
