@@ -3,10 +3,8 @@ import Image from "next/image";
 import { COMMUNITY_PHOTO } from "@/src/data/community-photo";
 import scss from "./CommunityPhoto.module.scss";
 
-// Same "browser chrome" card look as the homepage's flagship-projects
-// stack (hero-sections/Portfolio) — traffic-light dots + a mono filename
-// title bar — applied to one big community photo instead of a stacked
-// carousel. Static image, so this stays a Server Component; the hover
+// A "browser chrome" card look — traffic-light dots + a mono filename
+// title bar — around one big community photo. Static image, so this stays a Server Component; the hover
 // lift is plain CSS.
 const CommunityPhoto: FC = () => (
   <div className={scss.card} aria-hidden="true">
